@@ -39,27 +39,12 @@ export interface Initiative {
   keyRisks?: string[];
   dependencies?: number[];
   linkedProjects?: string[];
-  linkedKpis?: number[];
   createdAt: string;
   updatedAt: string;
   completedAt?: string | null;
 }
 
-export interface KPI {
-  id: number;
-  name: string;
-  description: string;
-  target: string;
-  unit: string;
-  frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
-  owner?: string;
-  status: 'active' | 'inactive' | 'archived';
-  currentValue: string;
-  targetValue: string;
-  lastUpdated: string;
-  nextReview?: string;
-  tags?: string[];
-}
+// KPI feature removed
 
 export interface Changelog {
   version: string;

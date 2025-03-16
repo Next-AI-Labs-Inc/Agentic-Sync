@@ -21,11 +21,10 @@ export default function HomePage() {
   } = useTasks();
   
   const { initiatives, loading: initiativesLoading } = useInitiatives();
-  const { kpis, loading: kpisLoading } = useKpis();
   const { projects, loading: projectsLoading } = useProjects();
   
   // Combine loading states for UI
-  const loading = tasksLoading || projectsLoading || initiativesLoading || kpisLoading;
+  const loading = tasksLoading || projectsLoading || initiativesLoading;
   const error = tasksError;
   
   // Get recent tasks (last 5 updated tasks)
