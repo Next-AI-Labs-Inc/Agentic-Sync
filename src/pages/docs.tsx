@@ -17,11 +17,13 @@ export default function DocsPage() {
   const [currentDoc, setCurrentDoc] = useState<string>('');
   const [docs, setDocs] = useState<DocFile[]>([
     { name: 'index', title: 'Documentation Home', path: '/docs' },
-    { name: 'ENHANCED_UI_GUIDE', title: 'Enhanced UI Guide', path: '/docs/enhanced-ui' },
-    { name: 'SOCIAL_MEDIA_LIKE_EXPERIENCE', title: 'Social Media-Like UX', path: '/docs/social-ux' },
-    { name: 'using-tasks', title: 'Using Tasks', path: '/docs/using-tasks' },
-    { name: 'initiatives-guide', title: 'Working with Initiatives', path: '/docs/initiatives' },
-    { name: 'kpi-tracking', title: 'KPI Tracking', path: '/docs/kpis' },
+    // Temporarily disabled sub-docs due to routing issues
+    // TODO: Fix sub-document routing before re-enabling
+    // { name: 'ENHANCED_UI_GUIDE', title: 'Enhanced UI Guide', path: '/docs/enhanced-ui' },
+    // { name: 'SOCIAL_MEDIA_LIKE_EXPERIENCE', title: 'Social Media-Like UX', path: '/docs/social-ux' },
+    // { name: 'using-tasks', title: 'Using Tasks', path: '/docs/using-tasks' },
+    // { name: 'initiatives-guide', title: 'Working with Initiatives', path: '/docs/initiatives' },
+    // { name: 'kpi-tracking', title: 'KPI Tracking', path: '/docs/kpis' },
   ]);
 
   // Function to map routes to doc files

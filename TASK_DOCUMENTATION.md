@@ -1,5 +1,31 @@
 # Task System Enhancements - Detailed Task Documentation
 
+## User Experience Focus
+
+When creating or updating tasks and initiatives, always focus on user impact and business value first, with technical details secondary. This helps ensure that the task management system serves as an effective communication tool for both technical and non-technical stakeholders.
+
+### Content Guidelines
+
+1. **User Impact Field**: Always populate this field with a clear explanation of how a task benefits users or the business
+   - Focus on outcomes, not implementation details
+   - Use conversational, accessible language
+   - Avoid technical jargon in this field
+
+2. **Description Field**: Use this for technical implementation details
+   - Include technical specifications, architecture considerations, and implementation notes
+   - This information helps AI agents or developers continue work on the task
+
+3. **Initiative Titles**: Should clearly communicate strategic purpose
+   - Initiatives group related tasks toward a particular aim
+   - Titles should reflect the business outcome, not technical implementation
+
+## Interface Patterns
+
+- **Tasks and Initiatives**: Both use collapsible cards that show essential information when collapsed
+- **Collapsed View**: Shows title, user impact (for tasks), and status indicators
+- **Expanded View**: Shows full details including technical implementation information
+- **Inline Editing**: All text fields are directly editable by clicking on them
+
 ## Task 1: Fix UI Flashing on Dashboard Updates
 **Status**: Todo
 **Priority**: High

@@ -98,12 +98,12 @@ export function KpiProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    // Initial load of KPIs
     refreshKpis();
     
-    // Set up polling to periodically re-fetch KPIs
-    const interval = setInterval(refreshKpis, 60000); // Try every minute
-    
-    return () => clearInterval(interval);
+    // No polling to avoid performance issues
+    // const interval = setInterval(refreshKpis, 60000); 
+    // return () => clearInterval(interval);
   }, []);
 
   return (

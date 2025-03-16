@@ -2,12 +2,19 @@
 
 A comprehensive task management system with MongoDB integration, featuring an instant, social media-like UI experience.
 
+## Project Status
+
+- **Active Development**: This project is currently under active development
+- **Tasks View**: Fully functional with inline editing and optimistic updates
+- **Initiatives View**: Functional but being updated to match Tasks UI pattern
+- **Documentation**: Home page available, but subpages temporarily disabled due to routing issues
+- **KPI Feature**: Currently being optimized for performance
+
 ## Features
 
 - **Instant UI Feedback**: All operations feel immediate with optimistic updates
 - **Task Management**: Create, update, and track tasks across projects
 - **Initiative Tracking**: Organize work under strategic initiatives
-- **KPI Monitoring**: Track progress on key metrics
 - **MongoDB Integration**: Seamless synchronization with the database
 
 ## Recent Enhancements

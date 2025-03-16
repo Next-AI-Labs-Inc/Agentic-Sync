@@ -118,6 +118,7 @@ export default function InitiativeCard({
   onUpdateStatus,
   onUpdatePriority
 }: InitiativeCardProps) {
+  // Start collapsed by default
   const [expanded, setExpanded] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isNew, setIsNew] = useState(false);
