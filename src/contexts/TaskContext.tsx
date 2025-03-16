@@ -307,10 +307,17 @@ export function TaskProvider({
     initialCache || new Map()
   );
 
-  // Update local cache when tasks change
+  // Update local cache when tasks change - optimized to only update if we have tasks
   useEffect(() => {
+    // Skip if tasks array is empty
+    if (tasks.length === 0) return;
+    
     const newCache = new Map<string, Task>();
-    tasks.forEach((task) => newCache.set(task.id, task));
+    tasks.forEach((task) => {
+      if (task && task.id) { // Validate task objects
+        newCache.set(task.id, task);
+      }
+    });
     setLocalTaskCache(newCache);
   }, [tasks]);
 

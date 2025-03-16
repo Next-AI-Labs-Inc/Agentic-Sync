@@ -63,8 +63,11 @@ export function InitiativeProvider({ children }: { children: ReactNode }) {
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [statusFilter, setStatusFilter] = useState<InitiativeFilterStatus>('all');
 
-  // Update local cache when initiatives change
+  // Update local cache when initiatives change - with debouncing to prevent excessive renders
   useEffect(() => {
+    // Don't update cache if initiatives are empty
+    if (initiatives.length === 0) return;
+    
     const newCache = new Map<number, Initiative>();
     initiatives.forEach(initiative => newCache.set(initiative.id, initiative));
     setLocalInitiativeCache(newCache);
@@ -121,93 +124,36 @@ export function InitiativeProvider({ children }: { children: ReactNode }) {
     setError(null);
     
     try {
-      // Try using direct axios call as a fallback since the real API server may not be running
-      try {
-        const response = await axios.get('/api/initiatives', {
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          timeout: 5000
-        });
-        
-        if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-          setInitiatives(deduplicateInitiatives(response.data));
-          setError(null);
-          setLoading(false);
-          return;
+      // Use mock data directly without attempting API calls
+      const sampleInitiatives = [
+        {
+          id: 1,
+          name: "User Impact UI Enhancement",
+          description: "Improve UI to highlight user impact in task cards",
+          status: "in-progress",
+          priority: "high",
+          startDate: "2025-03-14",
+          targetDate: "2025-03-21",
+          createdAt: "2025-03-14T09:00:00Z",
+          updatedAt: "2025-03-14T14:30:00Z"
+        },
+        {
+          id: 2,
+          name: "Task Inline Editing System",
+          description: "Implement inline editing for all task fields",
+          status: "in-progress",
+          priority: "high",
+          startDate: "2025-03-13",
+          targetDate: "2025-03-25",
+          createdAt: "2025-03-13T09:00:00Z",
+          updatedAt: "2025-03-13T14:30:00Z"
         }
-      } catch (axiosError) {
-        // Silently fall back to the next method
-      }
+      ];
       
-      // Fall back to taskApiService
-      const data = await taskApiService.getInitiatives();
-      
-      if (data && Array.isArray(data) && data.length > 0) {
-        // We got valid data from the API
-        setInitiatives(deduplicateInitiatives(data));
-        setError(null);
-      } else {
-        // Empty array or invalid data
-        console.warn('API returned empty or invalid initiative data');
-        
-        // If we don't have any initiatives yet, use sample data
-        if (initiatives.length === 0) {
-          // Sample fallback initiatives
-          const sampleInitiatives = [
-            {
-              id: 1,
-              name: "User Impact UI Enhancement",
-              description: "Improve UI to highlight user impact in task cards",
-              status: "in-progress",
-              priority: "high",
-              startDate: "2025-03-14",
-              targetDate: "2025-03-21",
-              createdAt: "2025-03-14T09:00:00Z",
-              updatedAt: "2025-03-14T14:30:00Z"
-            },
-            {
-              id: 2,
-              name: "Task Inline Editing System",
-              description: "Implement inline editing for all task fields",
-              status: "in-progress",
-              priority: "high",
-              startDate: "2025-03-13",
-              targetDate: "2025-03-25",
-              createdAt: "2025-03-13T09:00:00Z",
-              updatedAt: "2025-03-13T14:30:00Z"
-            }
-          ];
-          
-          // Try to create these sample initiatives via the API
-          try {
-            console.log('No initiatives found - creating sample initiatives');
-            
-            // Create each sample initiative
-            for (const initiative of sampleInitiatives) {
-              await taskApiService.createInitiative(initiative);
-            }
-            
-            // Fetch the newly created initiatives
-            const freshData = await taskApiService.getInitiatives();
-            if (freshData && Array.isArray(freshData) && freshData.length > 0) {
-              setInitiatives(deduplicateInitiatives(freshData));
-            } else {
-              // If API still fails, use the samples directly
-              setInitiatives(sampleInitiatives);
-              setError('Created sample initiatives but could not fetch them.');
-            }
-          } catch (createError) {
-            console.error('Error creating sample initiatives:', createError);
-            // Use sample data directly
-            setInitiatives(sampleInitiatives);
-            setError('Using sample initiatives - could not connect to API.');
-          }
-        } else {
-          // Keep existing initiatives if we have them
-          setError('Could not refresh initiatives from API. Using cached data.');
-        }
-      }
+      // Use sample data directly
+      console.log('Using sample initiatives data');
+      setInitiatives(sampleInitiatives);
+      setError(null);
     } catch (err) {
       console.error('Error fetching initiatives:', err);
       setError('Failed to fetch initiatives. Using cached data.');

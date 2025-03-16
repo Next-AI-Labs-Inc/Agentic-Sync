@@ -11,7 +11,8 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "migrate-initiatives": "node scripts/migrate-initiatives.js",
-    "test:initiatives-api": "node scripts/test-initiatives-api.js"
+    "test:initiatives-api": "node scripts/test-initiatives-api.js",
+    "log:initiatives": "node scripts/log-initiatives.js"
   },
   "dependencies": {
     "axios": "^1.6.7",

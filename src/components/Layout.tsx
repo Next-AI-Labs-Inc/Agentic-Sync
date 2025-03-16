@@ -1,6 +1,35 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+
+// Custom navigation wrapper to prevent double-click issues
+const SafeLink = ({ href, className, children }: { href: string, className?: string, children: ReactNode }) => {
+  const router = useRouter();
+  const [isNavigating, setIsNavigating] = useState(false);
+  
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    if (isNavigating || router.pathname === href) return;
+    
+    setIsNavigating(true);
+    router.push(href).finally(() => {
+      // Reset after a delay to prevent multiple rapid clicks
+      setTimeout(() => setIsNavigating(false), 500);
+    });
+  }, [href, router, isNavigating]);
+  
+  return (
+    <a 
+      href={href} 
+      onClick={handleClick} 
+      className={className}
+      style={{ pointerEvents: isNavigating ? 'none' : 'auto' }}
+    >
+      {children}
+    </a>
+  );
+};
 import UserTaskTracker from './UserTaskTracker';
 
 interface LayoutProps {
@@ -21,7 +50,7 @@ export default function Layout({ children }: LayoutProps) {
             <nav className="mt-2 md:mt-0">
               <ul className="flex space-x-4">
                 <li>
-                  <Link 
+                  <SafeLink 
                     href="/" 
                     className={`${
                       router.pathname === '/' 
@@ -30,10 +59,10 @@ export default function Layout({ children }: LayoutProps) {
                     } hover:text-primary-600 hover:underline`}
                   >
                     Dashboard
-                  </Link>
+                  </SafeLink>
                 </li>
                 <li>
-                  <Link 
+                  <SafeLink 
                     href="/initiatives" 
                     className={`${
                       router.pathname === '/initiatives' 
@@ -42,10 +71,10 @@ export default function Layout({ children }: LayoutProps) {
                     } hover:text-primary-600 hover:underline`}
                   >
                     Initiatives
-                  </Link>
+                  </SafeLink>
                 </li>
                 <li>
-                  <Link 
+                  <SafeLink 
                     href="/tasks" 
                     className={`${
                       router.pathname === '/tasks' 
@@ -54,11 +83,11 @@ export default function Layout({ children }: LayoutProps) {
                     } hover:text-primary-600 hover:underline`}
                   >
                     Tasks
-                  </Link>
+                  </SafeLink>
                 </li>
                 {/* KPI feature removed */}
                 <li>
-                  <Link 
+                  <SafeLink 
                     href="/docs" 
                     className={`${
                       router.pathname === '/docs' || router.pathname.startsWith('/docs/') 
@@ -67,7 +96,7 @@ export default function Layout({ children }: LayoutProps) {
                     } hover:text-primary-600 hover:underline`}
                   >
                     Docs
-                  </Link>
+                  </SafeLink>
                 </li>
               </ul>
             </nav>
