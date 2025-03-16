@@ -628,7 +628,12 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
       ${isDeleting ? 'fade-out pointer-events-none' : ''}
       rounded-lg shadow-sm border border-gray-200 transition-all duration-200`}
     >
-      <div className="p-4 cursor-pointer" onClick={handleCardClick}>
+      <div className="p-4 cursor-pointer" onClick={(e) => {
+          // Only trigger handleCardClick if the card is not already expanded
+          if (!expanded) {
+            handleCardClick(e);
+          }
+        }}>
         {/* Close button (top right) */}
         <div className="flex justify-end mb-1">
           <button
@@ -652,7 +657,7 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
           <div className="flex items-start justify-between">
             <div className="flex items-center">
               <h3
-                className={`text-lg font-medium ${
+                className={`text-xl font-medium ${
                   task.status === 'reviewed' ? 'text-gray-500' : ''
                 }`}
               >
@@ -664,13 +669,13 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
                     <h4 className="font-medium text-gray-900 mb-1">Task Details</h4>
                     <div className="text-gray-600 mb-2">
                       <p className="mb-1">{task.description || 'No description provided'}</p>
-                      <p className="text-xs mt-2 font-medium">Created {formatTimeAgo(task.createdAt)}</p>
-                      <p className="text-xs">Updated {formatTimeAgo(task.updatedAt)}</p>
+                      <p className="text-sm mt-2 font-medium">Created {formatTimeAgo(task.createdAt)}</p>
+                      <p className="text-sm">Updated {formatTimeAgo(task.updatedAt)}</p>
                       {task.completedAt && (
-                        <p className="text-xs">Completed {formatTimeAgo(task.completedAt)}</p>
+                        <p className="text-sm">Completed {formatTimeAgo(task.completedAt)}</p>
                       )}
                       {task.initiative && (
-                        <p className="text-xs mt-1">Initiative: {task.initiative}</p>
+                        <p className="text-sm mt-1">{task.initiative}</p>
                       )}
                     </div>
                   </div>
@@ -682,41 +687,13 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
             </div>
 
             <div className="flex items-center space-x-1">
-              {/* Priority badge with popover */}
-              <Popover
-                content={
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-1">Priority: {task.priority}</h4>
-                    <p className="text-xs text-gray-600">
-                      {task.priority === 'high'
-                        ? 'High priority tasks need immediate attention'
-                        : task.priority === 'medium'
-                        ? 'Medium priority tasks should be completed soon'
-                        : 'Low priority tasks can be addressed when time permits'}
-                    </p>
-                  </div>
-                }
-                position="top"
-              >
-                <span
-                  className={`badge ${
-                    task.priority === 'high'
-                      ? 'bg-red-100 text-red-800'
-                      : task.priority === 'medium'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-blue-100 text-blue-800'
-                  }`}
-                >
-                  {task.priority}
-                </span>
-              </Popover>
 
               {/* Status badge with popover */}
               <Popover
                 content={
                   <div>
                     <h4 className="font-medium text-gray-900 mb-1">Status: {task.status}</h4>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-sm text-gray-600">
                       {task.status === 'proposed' && 'Task has been proposed but not started yet'}
                       {task.status === 'todo' && 'Task is ready to be worked on'}
                       {task.status === 'in-progress' && 'Task is currently being worked on'}
@@ -736,7 +713,7 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
                   content={
                     <div>
                       <h4 className="font-medium text-gray-900 mb-1">Tested</h4>
-                      <p className="text-xs text-gray-600">
+                      <p className="text-sm text-gray-600">
                         This task has been tested and verified to work correctly
                       </p>
                     </div>
@@ -751,20 +728,20 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
 
           {/* Description (always visible) */}
           {task.description && (
-            <div className={`text-sm text-gray-600 ${expanded ? '' : 'line-clamp-2'}`}>
+            <div className={`text-base text-gray-600 ${expanded ? '' : 'line-clamp-2'}`}>
               {task.description}
             </div>
           )}
           
           {/* Initiative (if exists) */}
           {task.initiative && (
-            <div className="mt-1 text-sm text-blue-600">
-              Initiative: {task.initiative}
+            <div className="mt-1 text-sm text-gray-600">
+              {task.initiative}
             </div>
           )}
 
           {/* Created date with edit button */}
-          <div className="mt-1 text-sm text-gray-500">
+          <div className="mt-1 text-base text-gray-500">
             {isEditingDate ? (
               <div onClick={(e) => e.stopPropagation()}>
                 <form onSubmit={handleDateSubmit} className="inline-flex items-center">
@@ -834,6 +811,36 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
             )}
           </div>
 
+          {expanded && (
+            <div className="flex items-center justify-between mt-3">
+              <div className="flex items-center space-x-2">
+                {/* Priority badge */}
+                <span
+                  className={`badge ${
+                    task.priority === 'high'
+                      ? 'bg-red-100 text-red-800'
+                      : task.priority === 'medium'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-blue-100 text-blue-800'
+                  }`}
+                >
+                  {task.priority}
+                </span>
+              </div>
+              
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setExpanded(false);
+                }}
+                className="text-gray-500 hover:text-gray-700 text-sm font-medium"
+              >
+                Collapse ↑
+              </button>
+            </div>
+          )}
+          
           {/* Stage-appropriate action buttons (always visible) */}
           {renderStageActions()}
         </div>
@@ -846,13 +853,13 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
 
           {/* Tags */}
           {task.tags && task.tags.length > 0 && (
-            <div className="mt-4 text-sm">
+            <div className="mt-4 text-base">
               <h4 className="font-medium text-gray-700 mb-1">Tags</h4>
               <div className="flex flex-wrap gap-1">
                 {task.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="px-2 py-1 rounded-full bg-gray-100 text-gray-600 text-xs"
+                    className="px-2 py-1 rounded-full bg-gray-100 text-gray-600 text-sm"
                   >
                     {tag}
                   </span>
@@ -863,7 +870,7 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
 
           {/* Verification steps */}
           {task.verificationSteps && task.verificationSteps.length > 0 && (
-            <div className="mt-4 text-sm">
+            <div className="mt-4 text-base">
               <h4 className="font-medium text-gray-700 mb-1">Verification Steps</h4>
               <ul className="list-disc pl-5 text-gray-600">
                 {task.verificationSteps.map((step, index) => (
@@ -875,7 +882,7 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
 
           {/* Next steps */}
           {task.nextSteps && task.nextSteps.length > 0 && (
-            <div className="mt-4 text-sm">
+            <div className="mt-4 text-base">
               <h4 className="font-medium text-gray-700 mb-1">Next Steps</h4>
               <ul className="list-disc pl-5 text-gray-600">
                 {task.nextSteps.map((step, index) => (
@@ -887,7 +894,7 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
 
           {/* Files */}
           {task.files && task.files.length > 0 && (
-            <div className="mt-4 text-sm">
+            <div className="mt-4 text-base">
               <h4 className="font-medium text-gray-700 mb-1">Files</h4>
               <ul className="list-disc pl-5 text-gray-600">
                 {task.files.map((file, index) => (
