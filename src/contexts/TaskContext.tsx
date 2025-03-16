@@ -576,30 +576,35 @@ export function TaskProvider({
     };
   }, [projectFilter]); // Remove refreshTasks from dependencies to prevent loops
 
-  // Filter tasks by status
+  // Filter tasks by status with optimized memoization
   const filteredTasks = React.useMemo(() => {
-    let filtered = [...tasks];
-
-    // Filter by status
+    // Quick return for empty tasks array
+    if (!tasks.length) return [];
+    
+    // Skip filtering if 'all' is selected
+    if (completedFilter === 'all') return tasks;
+    
+    // Apply appropriate filter based on completedFilter
     if (completedFilter === 'pending') {
-      filtered = filtered.filter((task) => task.status !== 'done' && task.status !== 'reviewed');
-    } else if (completedFilter === 'recent-completed') {
+      return tasks.filter((task) => task.status !== 'done' && task.status !== 'reviewed');
+    } 
+    
+    if (completedFilter === 'recent-completed') {
       const twoDaysAgo = new Date();
       twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+      const twoDaysAgoTime = twoDaysAgo.getTime();
 
-      filtered = filtered.filter((task) => {
+      return tasks.filter((task) => {
         return (
           (task.status === 'done' || task.status === 'reviewed') &&
           task.completedAt &&
-          new Date(task.completedAt) > twoDaysAgo
+          new Date(task.completedAt).getTime() > twoDaysAgoTime
         );
       });
-    } else if (completedFilter !== 'all') {
-      // Filter by specific status (proposed, todo, in-progress, done, reviewed)
-      filtered = filtered.filter((task) => task.status === completedFilter);
-    }
-
-    return filtered;
+    } 
+    
+    // Filter by specific status (proposed, todo, in-progress, done, reviewed)
+    return tasks.filter((task) => task.status === completedFilter);
   }, [tasks, completedFilter]);
 
   // Task operations with optimistic updates
