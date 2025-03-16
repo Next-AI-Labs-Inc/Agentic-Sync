@@ -12,7 +12,9 @@
     "test:coverage": "jest --coverage",
     "migrate-initiatives": "node scripts/migrate-initiatives.js",
     "test:initiatives-api": "node scripts/test-initiatives-api.js",
-    "log:initiatives": "node scripts/log-initiatives.js"
+    "log:initiatives": "node scripts/log-initiatives.js",
+    "dev:optimized": "NODE_ENV=production NEXT_PUBLIC_OPTIMIZE_CPU=true next dev -p 3045",
+    "start:all": "node scripts/start-all.js"
   },
   "dependencies": {
     "axios": "^1.6.7",

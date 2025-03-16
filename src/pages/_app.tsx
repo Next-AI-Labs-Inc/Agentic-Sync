@@ -9,6 +9,13 @@ import Layout from '@/components/Layout';
 import { TaskTrackerProvider, useTaskTracker } from '@/components/TaskTracker';
 import RouteTransition from '@/components/RouteTransition';
 
+// Disable all console.log statements in production or when optimization flag is set
+if (process.env.NODE_ENV === 'production' || process.env.NEXT_PUBLIC_OPTIMIZE_CPU === 'true') {
+  console.log = () => {};
+  console.debug = () => {};
+  console.info = () => {};
+}
+
 // Component to expose global functions
 function GlobalFunctionsExposer() {
   const { trackTask, updateTaskStatus } = useTaskTracker();
