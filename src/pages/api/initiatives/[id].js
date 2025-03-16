@@ -1,3 +1,14 @@
+/**
+ * Initiative API - Individual Initiative Operations
+ * 
+ * Endpoints for operations on a specific initiative:
+ * - GET /api/initiatives/:id - Get initiative by ID
+ * - PUT /api/initiatives/:id - Update initiative
+ * - DELETE /api/initiatives/:id - Delete initiative
+ * 
+ * See documentation at /docs/initiatives-guide.md for detailed information.
+ */
+
 import { MongoClient, ObjectId } from 'mongodb';
 
 // MongoDB connection parameters

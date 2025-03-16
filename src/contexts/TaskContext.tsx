@@ -323,6 +323,10 @@ export function TaskProvider({
 
   // Refresh tasks from the MongoDB API
   const refreshTasks = useCallback(async () => {
+    // Track current API request with an AbortController
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+    
     // Set loading state without clearing current tasks
     setLoading(true);
 
@@ -346,14 +350,16 @@ export function TaskProvider({
       // Add timestamp to prevent caching
       filters._t = Date.now().toString();
 
-      // Clear tasks first to avoid duplicates
-      setTasks([]);
+      // Fetch tasks from the MongoDB API with the abort signal
+      const tasksData = await taskApiService.getTasks(filters, signal);
 
-      // Fetch tasks from the MongoDB API
-      const tasksData = await taskApiService.getTasks(filters);
+      // If request was aborted, exit early
+      if (signal.aborted) {
+        return [];
+      }
 
       // Only update tasks if we got valid data back
-      if (tasksData.length > 0) {
+      if (tasksData && tasksData.length > 0) {
         console.log(`Loaded ${tasksData.length} tasks from API`);
 
         // Process tasks to match our Task interface
@@ -369,62 +375,101 @@ export function TaskProvider({
         // Always sort by newest first
         const sortedTasks = sortByNewestFirst(deDupedTasks);
 
-        // Verify sort order for first few tasks
-        if (sortedTasks.length >= 2) {
+        // Only do verification in development mode
+        if (process.env.NODE_ENV === 'development' && sortedTasks.length >= 2) {
           const first = sortedTasks[0];
           const second = sortedTasks[1];
           const firstDate = new Date(first.createdAt).getTime();
           const secondDate = new Date(second.createdAt).getTime();
 
-          console.log(`First task timestamp: ${firstDate}, Second task timestamp: ${secondDate}`);
-
           if (firstDate <= secondDate) {
             console.error('ERROR: Sorting is incorrect - first task is not newer than second task');
-          } else {
-            console.log('Sorting is correct - newest tasks appear first');
           }
         }
 
+        // Batch our state updates to reduce renders
         setTasks(sortedTasks);
         setError(null); // Clear any previous errors on success
-
-        // Calculate counts by status
         setTaskCountsByStatus(calculateStatusCounts(sortedTasks));
 
         return sortedTasks;
       } else {
         // No tasks found, set empty array
-        setTasks([]);
-        setTaskCountsByStatus({
+        const emptyState = {
           proposed: 0,
           todo: 0,
           'in-progress': 0,
           done: 0,
           reviewed: 0
-        });
+        };
+        
+        // Batch state updates
+        setTasks([]);
+        setTaskCountsByStatus(emptyState);
 
         return [];
       }
     } catch (error) {
-      console.error('Error fetching tasks from API:', error);
-      setError('Failed to load tasks from the server. Please try again later.');
+      // Only report error if not aborted
+      if (!signal.aborted) {
+        console.error('Error fetching tasks from API:', error);
+        setError('Failed to load tasks from the server. Please try again later.');
+      }
       // Don't clear existing tasks on error to maintain UI stability
       throw error;
     } finally {
-      setLoading(false);
+      if (!signal.aborted) {
+        setLoading(false);
+      }
     }
+    
+    // Return a cleanup function to abort any in-flight requests
+    return () => {
+      abortController.abort();
+    };
   }, [projectFilter]);
 
   // Subscribe to real-time task updates
   useEffect(() => {
-    // Reference to unsubscribe functions
+    // Reference to unsubscribe functions and abort controllers
     const unsubscribes: (() => void)[] = [];
+    let abortController: AbortController | null = null;
 
-    // Initial load
-    refreshTasks().catch((error) => {
-      console.error('Failed to fetch initial tasks:', error);
-      setLoading(false);
-    });
+    // Create a memoized shouldIncludeTask function to avoid recreating it on each render
+    const shouldIncludeTask = (task: Task, filter: ProjectFilterType): boolean => {
+      if (filter === 'all') {
+        return true;
+      } else if (filter === 'none') {
+        return !task.project;
+      } else if (Array.isArray(filter)) {
+        return filter.includes(task.project);
+      } else {
+        return task.project === filter;
+      }
+    };
+
+    // Initial load with abortion capability
+    const loadInitialTasks = async () => {
+      // Cancel any previous request
+      if (abortController) {
+        abortController.abort();
+      }
+      
+      // Create new abort controller for this request
+      abortController = new AbortController();
+      
+      try {
+        await refreshTasks();
+      } catch (error) {
+        if (!abortController.signal.aborted) {
+          console.error('Failed to fetch initial tasks:', error);
+          setLoading(false);
+        }
+      }
+    };
+    
+    // Load tasks immediately
+    loadInitialTasks();
 
     // Subscribe to task created events
     unsubscribes.push(
@@ -433,10 +478,10 @@ export function TaskProvider({
         const newTask = event.payload as Task;
 
         // Check if task should be included based on current filters
-        const shouldInclude = shouldIncludeTask(newTask, projectFilter);
+        const shouldIncludeThisTask = shouldIncludeTask(newTask, projectFilter);
 
-        if (shouldInclude) {
-          // Add new task to existing tasks with animation flag
+        if (shouldIncludeThisTask) {
+          // Use a functional update to avoid dependency on tasks state
           setTasks((currentTasks) => {
             // Add _isNew flag for animation and ensure createdAt is valid
             const taskWithAnimation = {
@@ -449,17 +494,13 @@ export function TaskProvider({
             const updatedTasks = [...currentTasks, taskWithAnimation];
             const dedupedTasks = deduplicateTasks(updatedTasks);
             const sortedTasks = sortByNewestFirst(dedupedTasks);
+            
+            // Also update task counts in a separate call to avoid render loops
+            setTimeout(() => {
+              setTaskCountsByStatus(calculateStatusCounts(sortedTasks));
+            }, 0);
 
             return sortedTasks;
-          });
-
-          // Update counters
-          setTaskCountsByStatus((currentCounts) => {
-            const newCounts = { ...currentCounts };
-            if (newCounts[newTask.status] !== undefined) {
-              newCounts[newTask.status]++;
-            }
-            return newCounts;
           });
         }
       })
@@ -471,6 +512,7 @@ export function TaskProvider({
         console.log('Real-time task updated:', event.payload);
         const updatedTask = event.payload as Task;
 
+        // Use a functional update to avoid dependency on tasks state
         setTasks((currentTasks) => {
           // Replace the task if it exists
           const taskExists = currentTasks.some((t) => t.id === updatedTask.id);
@@ -482,8 +524,8 @@ export function TaskProvider({
             updatedTasks = currentTasks.map((t) => (t.id === updatedTask.id ? updatedTask : t));
           } else {
             // If task doesn't exist but should be included in this view, add it
-            const shouldInclude = shouldIncludeTask(updatedTask, projectFilter);
-            if (shouldInclude) {
+            const shouldIncludeThisTask = shouldIncludeTask(updatedTask, projectFilter);
+            if (shouldIncludeThisTask) {
               updatedTasks = [...currentTasks, updatedTask];
             } else {
               return currentTasks;
@@ -492,11 +534,16 @@ export function TaskProvider({
 
           // Always deduplicate and sort by newest first
           const dedupedTasks = deduplicateTasks(updatedTasks);
-          return sortByNewestFirst(dedupedTasks);
+          const sortedTasks = sortByNewestFirst(dedupedTasks);
+          
+          // Update task counts from the new task list in next tick
+          // This avoids multiple renders in a single update cycle
+          setTimeout(() => {
+            setTaskCountsByStatus(calculateStatusCounts(sortedTasks));
+          }, 0);
+          
+          return sortedTasks;
         });
-
-        // Update task counts
-        setTaskCountsByStatus(calculateStatusCounts(tasks));
       })
     );
 
@@ -506,33 +553,28 @@ export function TaskProvider({
         console.log('Real-time task deleted:', event.payload);
         const { id } = event.payload;
 
+        // Use a functional update to avoid dependency on tasks state
         setTasks((currentTasks) => {
-          return currentTasks.filter((t) => t.id !== id);
+          const filteredTasks = currentTasks.filter((t) => t.id !== id);
+          
+          // Update counters in next tick
+          setTimeout(() => {
+            setTaskCountsByStatus(calculateStatusCounts(filteredTasks));
+          }, 0);
+          
+          return filteredTasks;
         });
-
-        // Update counters
-        setTaskCountsByStatus(calculateStatusCounts(tasks.filter((t) => t.id !== id)));
       })
     );
 
-    // Helper function to determine if a task should be included based on filters
-    function shouldIncludeTask(task: Task, projectFilter: ProjectFilterType): boolean {
-      if (projectFilter === 'all') {
-        return true;
-      } else if (projectFilter === 'none') {
-        return !task.project;
-      } else if (Array.isArray(projectFilter)) {
-        return projectFilter.includes(task.project);
-      } else {
-        return task.project === projectFilter;
-      }
-    }
-
-    // Clean up subscriptions on unmount
+    // Clean up subscriptions and abort any in-flight requests on unmount
     return () => {
       unsubscribes.forEach((unsubscribe) => unsubscribe());
+      if (abortController) {
+        abortController.abort();
+      }
     };
-  }, [refreshTasks, projectFilter]);
+  }, [projectFilter]); // Remove refreshTasks from dependencies to prevent loops
 
   // Filter tasks by status
   const filteredTasks = React.useMemo(() => {
@@ -800,7 +842,9 @@ export function TaskProvider({
       _isNew: true // Flag to identify newly created tasks for animation
     };
 
-    console.log('Creating optimistic task:', tempTask);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Creating optimistic task:', tempTask);
+    }
 
     // Add to the local cache immediately
     const newCache = new Map(localTaskCache);
@@ -815,51 +859,51 @@ export function TaskProvider({
     setTasks(sortedOptimisticTasks);
     setTaskCountsByStatus(calculateStatusCounts(sortedOptimisticTasks));
 
-    // Launch API call in the background without blocking UI
-    setTimeout(() => {
-      taskApiService
-        .createTask(taskData)
-        .then((createdTask) => {
-          if (createdTask) {
-            // Make sure createdAt is a valid date string
-            const createdAt = createdTask.createdAt || now;
+    try {
+      // Immediately create task in API without setTimeout
+      const createdTask = await taskApiService.createTask(taskData);
+      
+      if (createdTask) {
+        // Make sure createdAt is a valid date string
+        const createdAt = createdTask.createdAt || now;
 
-            const realTask = {
-              ...createdTask,
-              id: createdTask._id || createdTask.id,
-              createdAt: createdAt,
-              _isNew: false // Remove animation flag
-            };
+        const realTask = {
+          ...createdTask,
+          id: createdTask._id || createdTask.id,
+          createdAt: createdAt,
+          _isNew: false // Remove animation flag
+        };
 
-            console.log('Task created successfully:', realTask);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Task created successfully:', realTask);
+        }
 
-            // Update local cache
-            const updatedCache = new Map(localTaskCache);
-            updatedCache.delete(tempId);
-            updatedCache.set(realTask.id, realTask);
-            setLocalTaskCache(updatedCache);
+        // Update local cache
+        const updatedCache = new Map(localTaskCache);
+        updatedCache.delete(tempId);
+        updatedCache.set(realTask.id, realTask);
+        setLocalTaskCache(updatedCache);
 
-            // Replace temp task with real one from server and maintain sort order
-            setTasks((currentTasks) => {
-              // Replace the temp task with the real one
-              let updatedTasks = currentTasks.map((task) => (task.id === tempId ? realTask : task));
+        // Replace temp task with real one from server and maintain sort order
+        setTasks((currentTasks) => {
+          // Replace the temp task with the real one
+          let updatedTasks = currentTasks.map((task) => (task.id === tempId ? realTask : task));
 
-              // Apply deduplication and sorting
-              const dedupedTasks = deduplicateTasks(updatedTasks);
-              const sortedTasks = sortByNewestFirst(dedupedTasks);
+          // Apply deduplication and sorting
+          const dedupedTasks = deduplicateTasks(updatedTasks);
+          const sortedTasks = sortByNewestFirst(dedupedTasks);
 
-              return sortedTasks;
-            });
-
-            // Emit event to sync service for real-time updates to other clients
-            taskSyncService.emitTaskCreated(realTask);
-          }
-        })
-        .catch((error) => {
-          console.error('Error finalizing task creation:', error);
-          // Silent failure - keep the optimistic task in UI to prevent disruption
+          return sortedTasks;
         });
-    }, 0);
+
+        // Emit event to sync service for real-time updates to other clients
+        taskSyncService.emitTaskCreated(realTask);
+      }
+    } catch (error) {
+      console.error('Error finalizing task creation:', error);
+      // Silent failure - keep the optimistic task in UI to prevent disruption
+      // We could add a toast notification here in the future
+    }
 
     // Return immediately to ensure form closes right away
     return Promise.resolve();

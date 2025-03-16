@@ -1,3 +1,16 @@
+/**
+ * Initiatives API
+ * 
+ * This API provides endpoints for managing strategic initiatives.
+ * Initiatives represent high-level objectives that may contain multiple tasks.
+ * 
+ * Endpoints:
+ * - GET /api/initiatives - Get all initiatives
+ * - POST /api/initiatives - Create a new initiative
+ * 
+ * See documentation at /docs/initiatives-guide.md for detailed information.
+ */
+
 import { MongoClient } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 

@@ -15,9 +15,9 @@ const apiClient = axios.create({
 });
 
 /**
- * Get all tasks with optional filtering
+ * Get all tasks with optional filtering and cancellation support
  */
-export async function getTasks(filters?: Record<string, string | string[]>) {
+export async function getTasks(filters?: Record<string, string | string[]>, signal?: AbortSignal) {
   try {
     // Build query string from filters
     const queryParams = new URLSearchParams();
@@ -43,7 +43,15 @@ export async function getTasks(filters?: Record<string, string | string[]>) {
     const url = `/api/developer/tasks?${queryParams.toString()}`;
     console.log(`Fetching tasks from: ${url}`);
     
-    const response = await apiClient.get(url);
+    // Add AbortSignal to request config if provided
+    const requestConfig = signal ? { signal } : undefined;
+    const response = await apiClient.get(url, requestConfig);
+    
+    // Early exit if request was aborted
+    if (signal?.aborted) {
+      console.log('Task fetch request was aborted');
+      return [];
+    }
     
     // Check for and log duplicates before returning
     const tasks = response.data.data;
@@ -57,6 +65,11 @@ export async function getTasks(filters?: Record<string, string | string[]>) {
       const duplicatesByTitleProject = [];
       
       for (const task of tasks) {
+        // Skip if request was aborted
+        if (signal?.aborted) {
+          return [];
+        }
+        
         // ID-based duplicate check
         const id = task._id || task.id;
         if (idMap.has(id)) {
@@ -86,22 +99,34 @@ export async function getTasks(filters?: Record<string, string | string[]>) {
         }
       }
       
-      // Log duplicate details
-      if (duplicatesById.length > 0) {
-        console.warn(`API returned ${duplicatesById.length} duplicate task IDs. Examples:`);
-        duplicatesById.slice(0, 5).forEach(dup => {
-          console.warn(`- ID: ${dup.id}, Title: "${dup.title}", Project: ${dup.project}`);
-        });
+      // Check for abort again
+      if (signal?.aborted) {
+        return [];
       }
       
-      if (duplicatesByTitleProject.length > 0) {
-        console.warn(`API returned ${duplicatesByTitleProject.length} tasks with duplicate title+project but different IDs. Examples:`);
-        duplicatesByTitleProject.slice(0, 5).forEach(dup => {
-          console.warn(`- "${dup.title}" (Project: ${dup.project}) has IDs: ${dup.id} and ${dup.existingId}`);
-        });
+      // Log duplicate details only in development
+      if (process.env.NODE_ENV === 'development') {
+        if (duplicatesById.length > 0) {
+          console.warn(`API returned ${duplicatesById.length} duplicate task IDs. Examples:`);
+          duplicatesById.slice(0, 5).forEach(dup => {
+            console.warn(`- ID: ${dup.id}, Title: "${dup.title}", Project: ${dup.project}`);
+          });
+        }
+        
+        if (duplicatesByTitleProject.length > 0) {
+          console.warn(`API returned ${duplicatesByTitleProject.length} tasks with duplicate title+project but different IDs. Examples:`);
+          duplicatesByTitleProject.slice(0, 5).forEach(dup => {
+            console.warn(`- "${dup.title}" (Project: ${dup.project}) has IDs: ${dup.id} and ${dup.existingId}`);
+          });
+        }
+        
+        console.log(`API returned ${tasks.length} tasks (${idMap.size} unique by ID, ${titleProjectMap.size} unique by title+project)`);
       }
       
-      console.log(`API returned ${tasks.length} tasks (${idMap.size} unique by ID, ${titleProjectMap.size} unique by title+project)`);
+      // Skip deduplication process if request was aborted
+      if (signal?.aborted) {
+        return [];
+      }
       
       // First deduplicate by ID
       const uniqueTasksById = [];
@@ -114,11 +139,21 @@ export async function getTasks(filters?: Record<string, string | string[]>) {
         }
       }
       
+      // Skip further processing if request was aborted
+      if (signal?.aborted) {
+        return [];
+      }
+      
       // Then deduplicate by title+project
       const uniqueTasks: any[] = [];
       const seenTitleProjects = new Map<string, any>(); // Map from title+project to task
       
       for (const task of uniqueTasksById) {
+        // Skip if request was aborted
+        if (signal?.aborted) {
+          return [];
+        }
+        
         const titleProjectKey = `${task.title}:::${task.project}`;
         const id = task._id || task.id;
         
@@ -141,20 +176,36 @@ export async function getTasks(filters?: Record<string, string | string[]>) {
             if (indexToReplace !== -1) {
               uniqueTasks[indexToReplace] = task;
               seenTitleProjects.set(titleProjectKey, task);
-              console.log(`Replaced older task "${existingTask.title}" (${existingTask._id || existingTask.id}) with newer version (${id})`);
+              if (process.env.NODE_ENV === 'development') {
+                console.log(`Replaced older task "${existingTask.title}" (${existingTask._id || existingTask.id}) with newer version (${id})`);
+              }
             }
-          } else {
+          } else if (process.env.NODE_ENV === 'development') {
             console.log(`Skipped newer task ID ${id} with duplicate title+project but older date`);
           }
         }
       }
       
-      console.log(`Deduplicated ${tasks.length} → ${uniqueTasksById.length} → ${uniqueTasks.length} tasks`);
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Deduplicated ${tasks.length} → ${uniqueTasksById.length} → ${uniqueTasks.length} tasks`);
+      }
+      
+      // Final abort check
+      if (signal?.aborted) {
+        return [];
+      }
+      
       return uniqueTasks;
     }
     
     return response.data.data;
   } catch (error) {
+    // Handle aborted requests separately
+    if (error.name === 'AbortError' || signal?.aborted) {
+      console.log('Task fetch request was aborted');
+      return [];
+    }
+    
     console.error('Error fetching tasks:', error);
     throw error;
   }
@@ -220,82 +271,117 @@ export async function createTask(taskData: TaskFormData) {
 
 /**
  * Create a new initiative
+ * 
+ * Creates a new initiative in the database
+ * 
+ * @param initiativeData - Initiative data to create
+ * @returns The created initiative object
  */
 export async function createInitiative(initiativeData: Partial<Initiative>) {
-  // TEMPORARY: Return mock success response instead of making API calls
-  console.log('Mock creating initiative:', initiativeData);
-  const now = new Date().toISOString();
-  
-  // Generate a mock response with an ID
-  return {
-    ...initiativeData,
-    id: Date.now(), // Use timestamp as temporary ID
-    createdAt: now,
-    updatedAt: now
-  };
+  try {
+    console.log('Creating initiative:', initiativeData);
+    
+    // Send the initiative data to the API
+    const response = await axios.post('/api/initiatives', initiativeData);
+    
+    // Return the created initiative
+    return response.data;
+  } catch (error) {
+    console.error('Error creating initiative:', error);
+    throw error;
+  }
 }
 
 /**
  * Get all initiatives
+ * 
+ * Retrieves all initiatives from the database
+ * 
+ * @returns Array of initiatives
  */
 export async function getInitiatives() {
-  // TEMPORARY: Return mock data instead of making API calls
-  console.log('Using mock initiative data');
-  return [
-    {
-      id: 1,
-      name: "User Impact UI Enhancement",
-      description: "Improve UI to highlight user impact in task cards",
-      status: "in-progress",
-      priority: "high",
-      startDate: "2025-03-14",
-      targetDate: "2025-03-21",
-      createdAt: "2025-03-14T09:00:00Z",
-      updatedAt: "2025-03-14T14:30:00Z"
-    },
-    {
-      id: 2,
-      name: "Task Inline Editing System",
-      description: "Implement inline editing for all task fields",
-      status: "in-progress",
-      priority: "high",
-      startDate: "2025-03-13",
-      targetDate: "2025-03-25",
-      createdAt: "2025-03-13T09:00:00Z",
-      updatedAt: "2025-03-13T14:30:00Z"
-    }
-  ];
+  try {
+    console.log('Fetching initiatives');
+    
+    // Use the dedicated initiatives API
+    const response = await axios.get('/api/initiatives');
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching initiatives:', error);
+    
+    // Return fallback data in case of error
+    console.log('Using fallback initiative data');
+    return [
+      {
+        id: 1,
+        name: "User Impact UI Enhancement",
+        description: "Improve UI to highlight user impact in task cards",
+        status: "in-progress",
+        priority: "high",
+        startDate: "2025-03-14",
+        targetDate: "2025-03-21",
+        createdAt: "2025-03-14T09:00:00Z",
+        updatedAt: "2025-03-14T14:30:00Z"
+      },
+      {
+        id: 2,
+        name: "Task Inline Editing System",
+        description: "Implement inline editing for all task fields",
+        status: "in-progress",
+        priority: "high",
+        startDate: "2025-03-13",
+        targetDate: "2025-03-25",
+        createdAt: "2025-03-13T09:00:00Z",
+        updatedAt: "2025-03-13T14:30:00Z"
+      }
+    ];
+  }
 }
 
 /**
  * Delete an initiative
+ * 
+ * Deletes an initiative from the database
+ * 
+ * @param id - Initiative ID to delete
+ * @returns Result of the delete operation
  */
 export async function deleteInitiative(id: number) {
-  // TEMPORARY: Return mock success response instead of making API calls
-  console.log('Mock deleting initiative:', id);
-  return { success: true, id };
+  try {
+    console.log('Deleting initiative:', id);
+    
+    // Send delete request to the API
+    const response = await axios.delete(`/api/initiatives/${id}`);
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting initiative:', error);
+    throw error;
+  }
 }
 
 /**
  * Update an initiative
+ * 
+ * Updates an existing initiative in the database
+ * 
+ * @param id - Initiative ID to update
+ * @param updateData - Data to update
+ * @returns The updated initiative
  */
 export async function updateInitiative(id: number, updateData: Partial<Initiative>) {
-  // TEMPORARY: Return mock success response instead of making API calls
-  console.log('Mock updating initiative:', id, updateData);
-  
-  // Generate updated data with timestamp
-  const dataWithTimestamp = {
-    ...updateData,
-    id,
-    updatedAt: new Date().toISOString()
-  };
-  
-  // Set completedAt if status is changed to completed
-  if (updateData.status === 'completed' && !updateData.completedAt) {
-    dataWithTimestamp.completedAt = new Date().toISOString();
+  try {
+    console.log('Updating initiative:', id, updateData);
+    
+    // Send the update data to the API
+    const response = await axios.put(`/api/initiatives/${id}`, updateData);
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error updating initiative:', error);
+    throw error;
   }
-  
-  return dataWithTimestamp;
 }
 
 /**
