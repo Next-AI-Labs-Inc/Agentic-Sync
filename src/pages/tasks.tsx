@@ -25,6 +25,7 @@ export default function TasksPage() {
     markTaskTested,
     deleteTask,
     addTask,
+    updateTaskDate,
     refreshTasks,
     taskCountsByStatus
   } = useTasks();
@@ -155,6 +156,7 @@ export default function TasksPage() {
                     onStatusChange={updateTaskStatus}
                     onMarkTested={markTaskTested}
                     onDelete={deleteTask}
+                    onUpdateDate={updateTaskDate}
                   />
                 </div>
               ))}
