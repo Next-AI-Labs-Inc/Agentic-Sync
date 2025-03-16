@@ -341,9 +341,13 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
 
   // Handle card click for expansion
   const handleCardClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+    // Only prevent default if it's a button or form element
+    if (e.target instanceof HTMLButtonElement || 
+        e.target instanceof HTMLInputElement || 
+        e.target instanceof HTMLFormElement) {
+      return; // Let buttons and form inputs handle their own clicks
+    }
     setExpanded(!expanded);
-    console.log("Card clicked, expanded:", !expanded);
   };
 
   // Status change handlers with transition effects
@@ -624,16 +628,12 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
       ${isDeleting ? 'fade-out pointer-events-none' : ''}
       rounded-lg shadow-sm border border-gray-200 transition-all duration-200`}
     >
-      <div className="p-4">
+      <div className="p-4 cursor-pointer" onClick={handleCardClick}>
         {/* Close button (top right) */}
-        <div className="flex justify-between items-center mb-1">
-          {!expanded && (
-            <div className="text-xs text-gray-400 italic">
-              Click on title to expand
-            </div>
-          )}
+        <div className="flex justify-end mb-1">
           <button
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               setExpanded(false);
             }}
@@ -650,10 +650,7 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
         {/* Header row with title, badges */}
         <div className="flex flex-col gap-1">
           <div className="flex items-start justify-between">
-            <div 
-              className="flex items-center cursor-pointer hover:bg-gray-50 px-2 py-1 rounded" 
-              onClick={handleCardClick}
-            >
+            <div className="flex items-center">
               <h3
                 className={`text-lg font-medium ${
                   task.status === 'reviewed' ? 'text-gray-500' : ''
@@ -798,17 +795,17 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
             ) : (
               <div className="flex items-center">
                 <span>Created {formatTimeAgo(task.createdAt)}</span>
-                {onUpdateDate && (
+                {expanded && onUpdateDate && (
                   <button
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       setIsEditingDate(true);
                     }}
-                    className="ml-2 text-blue-500 hover:text-blue-700 px-2 py-0.5 bg-blue-50 rounded text-xs"
+                    className="ml-2 text-blue-500 hover:text-blue-700 text-xs"
                     title="Edit creation date"
                   >
-                    Edit date
+                    edit
                   </button>
                 )}
               </div>
