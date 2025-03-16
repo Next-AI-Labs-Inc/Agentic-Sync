@@ -242,12 +242,11 @@ export default function TaskFilters({
           </button>
           <h2 className="text-lg font-semibold">Task Filters</h2>
         </div>
-        <div className="flex gap-2 mt-2 md:mt-0">
+        <div className="flex items-center gap-2 mt-2 md:mt-0">
           <DropdownMenu 
             trigger={
-              <button className="btn-outline-secondary">
-                <FaCog className="mr-1" size={14} />
-                Actions
+              <button className="btn-icon">
+                <FaCog size={14} />
               </button>
             }
             items={getMenuItems()}

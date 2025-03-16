@@ -8,10 +8,12 @@ import {
   FaArrowRight,
   FaArrowLeft,
   FaEye,
-  FaInfoCircle
+  FaInfoCircle,
+  FaCog
 } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import { Task } from '@/types';
+import DropdownMenu from './DropdownMenu';
 
 interface TaskCardProps {
   task: Task;
@@ -647,24 +649,92 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
           </button>
         </div>
         
-        {/* Header row with title, badges */}
+        {/* Header row with initiative, title, badges */}
         <div className="flex flex-col gap-1">
-          <div className="flex items-start justify-between">
+          {/* Initiative at the top (if exists) */}
+          {task.initiative && (
+            <div className="flex items-start justify-between mb-1">
+              <h2 className="text-lg font-semibold text-gray-800 font-anthropic">
+                {task.initiative}
+              </h2>
+              
+              <div className="flex items-center space-x-1">
+                <DropdownMenu 
+                  trigger={
+                    <button className="btn-icon">
+                      <FaCog size={14} />
+                    </button>
+                  }
+                  items={[
+                    {
+                      id: 'delete-task',
+                      label: 'Delete Task',
+                      icon: <FaTrash size={14} />,
+                      onClick: handleDelete,
+                      description: 'Permanently remove this task'
+                    }
+                  ]}
+                  label="Task actions"
+                />
+              </div>
+            </div>
+          )}
+          
+          {/* Title row */}
+          <div className={`flex items-start justify-between ${!task.initiative ? 'mb-1' : ''}`}>
             <div className="flex items-center">
               <h3
-                className={`text-xl font-medium ${
-                  task.status === 'reviewed' ? 'text-gray-500' : ''
+                className={`text-lg font-normal font-anthropic ${
+                  task.status === 'reviewed' ? 'text-gray-500' : 'text-gray-800'
                 }`}
               >
-                {task.project ? <><span className="text-gray-600">{formatProjectName(task.project)}:</span> </> : ''}{task.title}
+                {task.title}
               </h3>
             </div>
+            
+            {/* Only show gear if no initiative */}
+            {!task.initiative && (
+              <div className="flex items-center space-x-1">
+                <DropdownMenu 
+                  trigger={
+                    <button className="btn-icon">
+                      <FaCog size={14} />
+                    </button>
+                  }
+                  items={[
+                    {
+                      id: 'delete-task',
+                      label: 'Delete Task',
+                      icon: <FaTrash size={14} />,
+                      onClick: handleDelete,
+                      description: 'Permanently remove this task'
+                    }
+                  ]}
+                  label="Task actions"
+                />
+              </div>
+            )}
+          </div>
 
+          {/* Description (always visible) */}
+          {task.description && (
+            <div className={`text-base text-gray-600 ${expanded ? '' : 'line-clamp-2'}`}>
+              {task.description}
+            </div>
+          )}
+          
+          {/* Project name and status badges */}
+          <div className="flex items-center justify-between mt-1">
+            {task.project && (
+              <div className="text-xs text-gray-500 font-medium">
+                {formatProjectName(task.project)}
+              </div>
+            )}
+            
             <div className="flex items-center space-x-1">
-
               {/* Status badge */}
               <span className={`badge ${getStatusColor(task.status)}`}>{task.status}</span>
-
+              
               {/* Tested badge with popover */}
               {task.tested && (
                 <Popover
@@ -683,20 +753,6 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
               )}
             </div>
           </div>
-
-          {/* Description (always visible) */}
-          {task.description && (
-            <div className={`text-base text-gray-600 ${expanded ? '' : 'line-clamp-2'}`}>
-              {task.description}
-            </div>
-          )}
-          
-          {/* Initiative (if exists) */}
-          {task.initiative && (
-            <div className="mt-1 text-sm text-gray-600">
-              {task.initiative}
-            </div>
-          )}
 
           {/* Created date with edit button */}
           <div className="mt-1 text-sm text-gray-500">
