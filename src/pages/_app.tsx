@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { ProjectProvider } from '@/contexts/ProjectContext';
 import { TaskProvider } from '@/contexts/TaskContext';
 import { InitiativeProvider } from '@/contexts/InitiativeContext';
-import { KpiProvider } from '@/contexts/KpiContext';
+// KPI feature removed
 import Layout from '@/components/Layout';
 import { TaskTrackerProvider, useTaskTracker } from '@/components/TaskTracker';
 import RouteTransition from '@/components/RouteTransition';
@@ -43,8 +43,7 @@ export default function App({ Component, pageProps }: AppProps) {
     <ProjectProvider>
       <TaskProvider>
         <InitiativeProvider>
-          <KpiProvider>
-            <TaskTrackerProvider>
+          <TaskTrackerProvider>
               <GlobalFunctionsExposer />
               <Layout>
                 <RouteTransition>
@@ -61,7 +60,6 @@ export default function App({ Component, pageProps }: AppProps) {
                 </RouteTransition>
               </Layout>
             </TaskTrackerProvider>
-          </KpiProvider>
         </InitiativeProvider>
       </TaskProvider>
     </ProjectProvider>

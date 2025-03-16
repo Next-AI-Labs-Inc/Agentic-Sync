@@ -56,18 +56,7 @@ export default function Layout({ children }: LayoutProps) {
                     Tasks
                   </Link>
                 </li>
-                <li>
-                  <Link 
-                    href="/kpis" 
-                    className={`${
-                      router.pathname === '/kpis' 
-                        ? 'text-primary-600 font-bold' 
-                        : 'text-gray-600'
-                    } hover:text-primary-600 hover:underline`}
-                  >
-                    KPIs
-                  </Link>
-                </li>
+                {/* KPI feature removed */}
                 <li>
                   <Link 
                     href="/docs" 

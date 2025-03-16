@@ -4,11 +4,11 @@ import Link from 'next/link';
 import { useTasks } from '@/contexts/TaskContext';
 import { useProjects } from '@/contexts/ProjectContext';
 import { useInitiatives } from '@/contexts/InitiativeContext';
-import { useKpis } from '@/contexts/KpiContext';
+// KPI feature removed
 import LoadingSpinner from '@/components/LoadingSpinner';
 import TaskCard from '@/components/TaskCard';
 import InitiativeCard from '@/components/InitiativeCard';
-import KpiCard from '@/components/KpiCard';
+// KPI feature removed
 
 export default function HomePage() {
   const { 
@@ -43,8 +43,7 @@ export default function HomePage() {
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     .slice(0, 2);
   
-  // Get top KPIs (up to 2)
-  const topKpis = [...kpis].slice(0, 2);
+  // KPI feature removed
   
   return (
     <>
@@ -217,34 +216,7 @@ export default function HomePage() {
           )}
         </div>
         
-        {/* KPIs */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-800">Key Performance Indicators</h2>
-            <Link href="/kpis" className="text-primary-600 text-sm hover:underline">
-              View All
-            </Link>
-          </div>
-          
-          {kpisLoading ? (
-            <div className="text-center py-4">
-              <LoadingSpinner />
-            </div>
-          ) : topKpis.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              No KPIs found
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {topKpis.map(kpi => (
-                <KpiCard
-                  key={kpi.id}
-                  kpi={kpi}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        {/* KPIs section removed */}
       </div>
     </>
   );

@@ -196,6 +196,11 @@ export default function InitiativesPage() {
                     onUpdatePriority={handleUpdateInitiativePriority}
                   />
                 ))}
+                {filteredInitiatives.length === 0 && (
+                  <div className="col-span-2 bg-gray-50 p-6 rounded-md text-center">
+                    <p className="text-gray-500">No initiatives match the current filter criteria</p>
+                  </div>
+                )}
               </div>
             </div>
           )}

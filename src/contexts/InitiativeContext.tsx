@@ -103,25 +103,8 @@ export function InitiativeProvider({ children }: { children: ReactNode }) {
     };
     localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(preferences));
     
-    // Update URL with filter params
-    const query: Record<string, string> = {};
-    
-    if (statusFilter !== 'all') {
-      query.filter = statusFilter;
-    }
-    
-    if (sortBy !== 'updated') {
-      query.sort = sortBy;
-    }
-    
-    if (sortDirection !== 'desc') {
-      query.direction = sortDirection;
-    }
-    
-    router.replace({
-      pathname: router.pathname,
-      query
-    }, undefined, { shallow: true });
+    // Store filter preferences in localStorage only, don't update URL to avoid navigation issues
+    // This removes the URL-based approach that was causing sluggish navigation
   }, [statusFilter, sortBy, sortDirection, router]);
   
   // Save filter preferences when they change
@@ -215,14 +198,7 @@ export function InitiativeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     refreshInitiatives();
     
-    // Set up polling to periodically re-fetch initiatives
-    const interval = setInterval(() => {
-      if (!document.hidden) { // Only refresh when tab is visible
-        refreshInitiatives();
-      }
-    }, 60000); // Try every minute
-    
-    return () => clearInterval(interval);
+    // Don't set up polling to avoid performance issues
   }, []);
 
   const createInitiative = async (initiativeData: Partial<Initiative>) => {

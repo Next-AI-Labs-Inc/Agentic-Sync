@@ -7,8 +7,8 @@ A comprehensive task management system with MongoDB integration, featuring an in
 - **Active Development**: This project is currently under active development
 - **Tasks View**: Fully functional with inline editing and optimistic updates
 - **Initiatives View**: Functional but being updated to match Tasks UI pattern
-- **Documentation**: Home page available, but subpages temporarily disabled due to routing issues
-- **KPI Feature**: Currently being optimized for performance
+- **Documentation**: Currently only the home page is available. Sub-pages have been temporarily disabled due to routing issues and will be reimplemented in a future update.
+- **KPI Feature**: Removed to focus on core task management functionality
 
 ## Features
 

@@ -1,21 +1,41 @@
 # IX Tasks Documentation
 
-Welcome to the IX Tasks documentation. This section contains comprehensive guides and information about the task management system.
+Welcome to the IX Tasks documentation. This documentation provides information about using the IX Tasks system, a comprehensive task management system with MongoDB integration, featuring an instant, social media-like UI experience.
 
-## Available Documentation
+> **Note:** Only this home page is currently available. Detailed documentation pages are being revised and will be available in a future update.
 
-- [Enhanced UI Guide](./ENHANCED_UI_GUIDE.md) - Complete documentation of the instant UI updates and animations
-- [Social Media-Like Experience](./SOCIAL_MEDIA_LIKE_EXPERIENCE.md) - How we created an instant, responsive UX like social media platforms
-- [Using Tasks](./using-tasks.md) - Guide to using the task management system
-- [Working with Initiatives](./initiatives-guide.md) - Understanding and managing initiatives
-- [KPI Tracking](./kpi-tracking.md) - Working with Key Performance Indicators
+## User Experience Focus
+
+When creating or updating tasks and initiatives, always focus on user impact and business value first, with technical details secondary. This helps ensure that the task management system serves as an effective communication tool for both technical and non-technical stakeholders.
+
+### Content Guidelines
+
+1. **User Impact Field**: Always populate this field with a clear explanation of how a task benefits users or the business
+   - Focus on outcomes, not implementation details
+   - Use conversational, accessible language
+   - Avoid technical jargon in this field
+
+2. **Description Field**: Use this for technical implementation details
+   - Include technical specifications, architecture considerations, and implementation notes
+   - This information helps AI agents or developers continue work on the task
+
+3. **Initiative Titles**: Should clearly communicate strategic purpose
+   - Initiatives group related tasks toward a particular aim
+   - Titles should reflect the business outcome, not technical implementation
+
+## Interface Patterns
+
+- **Tasks and Initiatives**: Both use collapsible cards that show essential information when collapsed
+- **Collapsed View**: Shows title, user impact (for tasks), and status indicators
+- **Expanded View**: Shows full details including technical implementation information
+- **Inline Editing**: All text fields are directly editable by clicking on them
 
 ## Key Features
 
 - **Instant UI Updates**: Actions like creating, updating, and deleting tasks happen instantly
 - **Cross-Project Task Management**: Manage tasks across multiple projects
 - **Initiative Tracking**: Organize work under strategic initiatives
-- **KPI Monitoring**: Track progress on key metrics
+- **User Impact Tracking**: Focus on how tasks benefit users and the business
 - **MongoDB Integration**: Seamless synchronization with the database
 
 ## Getting Started

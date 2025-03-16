@@ -49,11 +49,11 @@ export default function DocsPage() {
       setLoading(true);
       
       try {
-        const docFile = getDocFileName(router.pathname);
+        // Only load the index document for now to avoid routing issues
+        const docFile = 'index.md';
         setCurrentDoc(docFile);
         
-        // In a real app, this would fetch from the server
-        // For simplicity, we're using a direct import
+        // Get the content directly without a server fetch to improve speed
         const response = await fetch(`/api/docs?file=${docFile}`);
         if (response.ok) {
           const content = await response.text();
@@ -70,7 +70,8 @@ export default function DocsPage() {
     };
     
     loadDoc();
-  }, [router.pathname]);
+    // Remove router.pathname dependency to prevent reloading on route changes
+  }, []);
 
   // Render loading state
   if (loading) {
