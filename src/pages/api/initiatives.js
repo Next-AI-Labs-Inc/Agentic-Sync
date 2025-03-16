@@ -15,8 +15,6 @@ async function getClient() {
 
 // Helper function to deduplicate initiatives
 function deduplicateInitiatives(initiatives) {
-  console.log(`Deduplicating ${initiatives.length} initiatives`);
-  
   // First deduplicate by ID
   const idMap = new Map();
   const titleProjectMap = new Map();
@@ -53,21 +51,6 @@ function deduplicateInitiatives(initiatives) {
     } else {
       titleProjectMap.set(titleProjectKey, id);
     }
-  }
-  
-  // Log duplicate details
-  if (duplicatesById.length > 0) {
-    console.warn(`Found ${duplicatesById.length} duplicate initiative IDs. Examples:`);
-    duplicatesById.slice(0, 5).forEach(dup => {
-      console.warn(`- ID: ${dup.id}, Name: "${dup.name}", Project: ${dup.project}`);
-    });
-  }
-  
-  if (duplicatesByTitleProject.length > 0) {
-    console.warn(`Found ${duplicatesByTitleProject.length} initiatives with duplicate name+project but different IDs`);
-    duplicatesByTitleProject.slice(0, 5).forEach(dup => {
-      console.warn(`- "${dup.name}" (Project: ${dup.project}) has IDs: ${dup.id} and ${dup.existingId}`);
-    });
   }
   
   // First deduplicate by ID
@@ -114,14 +97,11 @@ function deduplicateInitiatives(initiatives) {
     }
   }
   
-  console.log(`Deduplicated ${initiatives.length} → ${uniqueInitiatives.length} initiatives`);
   return uniqueInitiatives;
 }
 
 // API handler
 export default async function handler(req, res) {
-  console.log('API handler called for initiatives');
-  
   // Get MongoDB client
   let client;
   
@@ -132,21 +112,16 @@ export default async function handler(req, res) {
     
     // GET - retrieve all initiatives
     if (req.method === 'GET') {
-      console.log('GET request received for initiatives');
       const initiatives = await collection.find({}).toArray();
       
       // Deduplicate initiatives
       const uniqueInitiatives = deduplicateInitiatives(initiatives);
-      
-      // Log some info
-      console.log(`Returning ${uniqueInitiatives.length} initiatives`);
       
       // Send response
       res.status(200).json(uniqueInitiatives);
     } 
     // POST - create a new initiative
     else if (req.method === 'POST') {
-      console.log('POST request received for initiatives');
       const initiativeData = req.body;
       
       // Validate required fields
@@ -195,7 +170,6 @@ export default async function handler(req, res) {
       // Get the inserted initiative
       const insertedInitiative = await collection.findOne({ _id: result.insertedId });
       
-      console.log('Initiative created:', insertedInitiative.id || insertedInitiative._id);
       res.status(201).json(insertedInitiative);
     } 
     // Method not allowed

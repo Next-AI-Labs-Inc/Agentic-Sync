@@ -223,8 +223,6 @@ export async function createTask(taskData: TaskFormData) {
  */
 export async function createInitiative(initiativeData: Partial<Initiative>) {
   try {
-    console.log('Creating new initiative:', initiativeData.name);
-    
     // Format the initiative data with timestamps
     const now = new Date().toISOString();
     const formattedData = {
@@ -234,7 +232,6 @@ export async function createInitiative(initiativeData: Partial<Initiative>) {
     };
     
     const response = await apiClient.post('/api/initiatives', formattedData);
-    console.log('Successfully created initiative:', response.data.id || response.data._id);
     return response.data;
   } catch (error) {
     console.error('Error creating initiative:', error);
@@ -253,21 +250,17 @@ export async function createInitiative(initiativeData: Partial<Initiative>) {
  */
 export async function getInitiatives() {
   try {
-    console.log('Fetching initiatives from:', `${apiClient.defaults.baseURL}/api/initiatives`);
-    
     // Add cache busting to avoid stale data
     const timestamp = Date.now();
     const response = await apiClient.get(`/api/initiatives?_t=${timestamp}`);
     
     if (Array.isArray(response.data)) {
-      console.log(`Successfully retrieved ${response.data.length} initiatives`);
-      
       // Sort by updatedAt for most recent first
       return response.data.sort((a, b) => 
         new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
       );
     } else {
-      console.warn('API returned non-array initiative data:', response.data);
+      console.warn('API returned non-array initiative data');
       return [];
     }
   } catch (error) {
@@ -282,9 +275,7 @@ export async function getInitiatives() {
  */
 export async function deleteInitiative(id: number) {
   try {
-    console.log(`Deleting initiative with ID: ${id}`);
     const response = await apiClient.delete(`/api/initiatives/${id}`);
-    console.log(`Successfully deleted initiative ${id}`);
     return response.data;
   } catch (error) {
     console.error(`Error deleting initiative ${id}:`, error);
@@ -298,8 +289,6 @@ export async function deleteInitiative(id: number) {
  */
 export async function updateInitiative(id: number, updateData: Partial<Initiative>) {
   try {
-    console.log(`Updating initiative ${id} with:`, updateData);
-    
     // Ensure updatedAt is set
     const dataWithTimestamp = {
       ...updateData,
@@ -312,7 +301,6 @@ export async function updateInitiative(id: number, updateData: Partial<Initiativ
     }
     
     const response = await apiClient.put(`/api/initiatives/${id}`, dataWithTimestamp);
-    console.log(`Successfully updated initiative ${id}`);
     return response.data;
   } catch (error) {
     console.error(`Error updating initiative ${id}:`, error);

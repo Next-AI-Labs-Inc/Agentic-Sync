@@ -122,7 +122,6 @@ export function InitiativeProvider({ children }: { children: ReactNode }) {
     
     try {
       // Try using direct axios call as a fallback since the real API server may not be running
-      console.log("Fetching initiatives directly via axios");
       try {
         const response = await axios.get('/api/initiatives', {
           headers: {
@@ -132,18 +131,16 @@ export function InitiativeProvider({ children }: { children: ReactNode }) {
         });
         
         if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-          console.log(`Successfully retrieved ${response.data.length} initiatives directly`);
           setInitiatives(deduplicateInitiatives(response.data));
           setError(null);
           setLoading(false);
           return;
         }
       } catch (axiosError) {
-        console.log("Direct axios attempt failed:", axiosError?.message);
+        // Silently fall back to the next method
       }
       
       // Fall back to taskApiService
-      console.log("Falling back to taskApiService.getInitiatives()");
       const data = await taskApiService.getInitiatives();
       
       if (data && Array.isArray(data) && data.length > 0) {
