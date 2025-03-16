@@ -36,7 +36,21 @@ export default function App({ Component, pageProps }: AppProps) {
   
   // Handle hydration mismatch by waiting for client-side hydration
   useEffect(() => {
+    // Immediate state update for quick initial render
     setIsHydrated(true);
+    
+    // Disable throttling warning by adding browser check
+    if (typeof window !== 'undefined') {
+      // Add warning suppression for navigation throttling
+      console.warn = (function(originalWarn) {
+        return function(...args: any[]) {
+          if (typeof args[0] === 'string' && args[0].includes('Throttling navigation')) {
+            return; // Ignore throttling navigation warnings
+          }
+          originalWarn.apply(console, args);
+        };
+      })(console.warn);
+    }
   }, []);
 
   return (

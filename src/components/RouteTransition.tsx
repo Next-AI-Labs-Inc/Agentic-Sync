@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 
 interface RouteTransitionProps {
@@ -8,32 +8,58 @@ interface RouteTransitionProps {
 const RouteTransition: React.FC<RouteTransitionProps> = ({ children }) => {
   const router = useRouter();
   const [isRouteChanging, setIsRouteChanging] = useState(false);
-  const [loadingKey, setLoadingKey] = useState('');
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Force opacity back to 100 after a timeout to prevent stuck UI
+  const clearTransitionState = () => {
+    setIsRouteChanging(false);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  };
 
   useEffect(() => {
     const handleRouteChangeStart = (url: string) => {
-      setIsRouteChanging(true);
-      setLoadingKey(url);
+      // Only set route changing if it's a different route
+      if (url !== router.asPath) {
+        setIsRouteChanging(true);
+        
+        // Set a maximum timeout for the transition effect
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(() => {
+          setIsRouteChanging(false);
+        }, 1000); // Force reset after 1 second max
+      }
     };
 
     const handleRouteChangeComplete = () => {
-      setIsRouteChanging(false);
+      clearTransitionState();
     };
 
     const handleRouteChangeError = () => {
-      setIsRouteChanging(false);
+      clearTransitionState();
     };
 
     router.events.on('routeChangeStart', handleRouteChangeStart);
     router.events.on('routeChangeComplete', handleRouteChangeComplete);
     router.events.on('routeChangeError', handleRouteChangeError);
 
+    // Force to opacity 100 on initial render
+    setIsRouteChanging(false);
+
     return () => {
+      clearTransitionState();
       router.events.off('routeChangeStart', handleRouteChangeStart);
       router.events.off('routeChangeComplete', handleRouteChangeComplete);
       router.events.off('routeChangeError', handleRouteChangeError);
     };
   }, [router]);
+
+  // Immediately render content with full opacity
+  useEffect(() => {
+    setIsRouteChanging(false);
+  }, []);
 
   return (
     <div className="page-transition-container">
@@ -44,7 +70,7 @@ const RouteTransition: React.FC<RouteTransitionProps> = ({ children }) => {
       )}
       <div 
         key={router.pathname}
-        className={`page-content ${isRouteChanging ? 'opacity-50' : 'opacity-100'} transition-opacity duration-300`}
+        className={`page-content opacity-100 transition-opacity duration-300`}
       >
         {children}
       </div>

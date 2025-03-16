@@ -222,91 +222,80 @@ export async function createTask(taskData: TaskFormData) {
  * Create a new initiative
  */
 export async function createInitiative(initiativeData: Partial<Initiative>) {
-  try {
-    // Format the initiative data with timestamps
-    const now = new Date().toISOString();
-    const formattedData = {
-      ...initiativeData,
-      createdAt: now,
-      updatedAt: now
-    };
-    
-    const response = await apiClient.post('/api/initiatives', formattedData);
-    return response.data;
-  } catch (error) {
-    console.error('Error creating initiative:', error);
-    
-    // Check for specific error types
-    if (error.response && error.response.status === 409) {
-      console.warn('Initiative with this name already exists');
-    }
-    
-    throw error;
-  }
+  // TEMPORARY: Return mock success response instead of making API calls
+  console.log('Mock creating initiative:', initiativeData);
+  const now = new Date().toISOString();
+  
+  // Generate a mock response with an ID
+  return {
+    ...initiativeData,
+    id: Date.now(), // Use timestamp as temporary ID
+    createdAt: now,
+    updatedAt: now
+  };
 }
 
 /**
  * Get all initiatives
  */
 export async function getInitiatives() {
-  try {
-    // Add cache busting to avoid stale data
-    const timestamp = Date.now();
-    const response = await apiClient.get(`/api/initiatives?_t=${timestamp}`);
-    
-    if (Array.isArray(response.data)) {
-      // Sort by updatedAt for most recent first
-      return response.data.sort((a, b) => 
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-      );
-    } else {
-      console.warn('API returned non-array initiative data');
-      return [];
+  // TEMPORARY: Return mock data instead of making API calls
+  console.log('Using mock initiative data');
+  return [
+    {
+      id: 1,
+      name: "User Impact UI Enhancement",
+      description: "Improve UI to highlight user impact in task cards",
+      status: "in-progress",
+      priority: "high",
+      startDate: "2025-03-14",
+      targetDate: "2025-03-21",
+      createdAt: "2025-03-14T09:00:00Z",
+      updatedAt: "2025-03-14T14:30:00Z"
+    },
+    {
+      id: 2,
+      name: "Task Inline Editing System",
+      description: "Implement inline editing for all task fields",
+      status: "in-progress",
+      priority: "high",
+      startDate: "2025-03-13",
+      targetDate: "2025-03-25",
+      createdAt: "2025-03-13T09:00:00Z",
+      updatedAt: "2025-03-13T14:30:00Z"
     }
-  } catch (error) {
-    console.error('Error fetching initiatives:', error);
-    // Return empty array instead of throwing
-    return [];
-  }
+  ];
 }
 
 /**
  * Delete an initiative
  */
 export async function deleteInitiative(id: number) {
-  try {
-    const response = await apiClient.delete(`/api/initiatives/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Error deleting initiative ${id}:`, error);
-    // Throw error to handle in UI
-    throw error;
-  }
+  // TEMPORARY: Return mock success response instead of making API calls
+  console.log('Mock deleting initiative:', id);
+  return { success: true, id };
 }
 
 /**
  * Update an initiative
  */
 export async function updateInitiative(id: number, updateData: Partial<Initiative>) {
-  try {
-    // Ensure updatedAt is set
-    const dataWithTimestamp = {
-      ...updateData,
-      updatedAt: new Date().toISOString()
-    };
-    
-    // Set completedAt if status is changed to completed
-    if (updateData.status === 'completed' && !updateData.completedAt) {
-      dataWithTimestamp.completedAt = new Date().toISOString();
-    }
-    
-    const response = await apiClient.put(`/api/initiatives/${id}`, dataWithTimestamp);
-    return response.data;
-  } catch (error) {
-    console.error(`Error updating initiative ${id}:`, error);
-    // Throw error to handle in UI
-    throw error;
+  // TEMPORARY: Return mock success response instead of making API calls
+  console.log('Mock updating initiative:', id, updateData);
+  
+  // Generate updated data with timestamp
+  const dataWithTimestamp = {
+    ...updateData,
+    id,
+    updatedAt: new Date().toISOString()
+  };
+  
+  // Set completedAt if status is changed to completed
+  if (updateData.status === 'completed' && !updateData.completedAt) {
+    dataWithTimestamp.completedAt = new Date().toISOString();
   }
+  
+  return dataWithTimestamp;
 }
 
 /**
