@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useCa
 import { useRouter } from 'next/router';
 import { Initiative } from '@/types';
 import * as taskApiService from '@/services/taskApiService';
+import axios from 'axios';
 
 // Define new types for sorting and filtering
 export type InitiativeSortOption = 'updated' | 'created' | 'priority' | 'status';
@@ -120,23 +121,47 @@ export function InitiativeProvider({ children }: { children: ReactNode }) {
     setError(null);
     
     try {
-      // Try to fetch from API using the taskApiService
+      // Try using direct axios call as a fallback since the real API server may not be running
+      console.log("Fetching initiatives directly via axios");
+      try {
+        const response = await axios.get('/api/initiatives', {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          timeout: 5000
+        });
+        
+        if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+          console.log(`Successfully retrieved ${response.data.length} initiatives directly`);
+          setInitiatives(deduplicateInitiatives(response.data));
+          setError(null);
+          setLoading(false);
+          return;
+        }
+      } catch (axiosError) {
+        console.log("Direct axios attempt failed:", axiosError?.message);
+      }
+      
+      // Fall back to taskApiService
+      console.log("Falling back to taskApiService.getInitiatives()");
       const data = await taskApiService.getInitiatives();
       
-      if (data && Array.isArray(data)) {
+      if (data && Array.isArray(data) && data.length > 0) {
+        // We got valid data from the API
         setInitiatives(deduplicateInitiatives(data));
         setError(null);
       } else {
-        console.warn('API returned non-array initiative data');
+        // Empty array or invalid data
+        console.warn('API returned empty or invalid initiative data');
         
         // If we don't have any initiatives yet, use sample data
         if (initiatives.length === 0) {
-          // Fallback or sample initiatives
-          setInitiatives([
+          // Sample fallback initiatives
+          const sampleInitiatives = [
             {
               id: 1,
-              name: "Documentation Map Enhancement",
-              description: "Comprehensive improvements to the documentation mapping system",
+              name: "User Impact UI Enhancement",
+              description: "Improve UI to highlight user impact in task cards",
               status: "in-progress",
               priority: "high",
               startDate: "2025-03-14",
@@ -146,8 +171,8 @@ export function InitiativeProvider({ children }: { children: ReactNode }) {
             },
             {
               id: 2,
-              name: "Bug Reporting System",
-              description: "End-to-end system for capturing, tracking, and managing bugs",
+              name: "Task Inline Editing System",
+              description: "Implement inline editing for all task fields",
               status: "in-progress",
               priority: "high",
               startDate: "2025-03-13",
@@ -155,7 +180,35 @@ export function InitiativeProvider({ children }: { children: ReactNode }) {
               createdAt: "2025-03-13T09:00:00Z",
               updatedAt: "2025-03-13T14:30:00Z"
             }
-          ]);
+          ];
+          
+          // Try to create these sample initiatives via the API
+          try {
+            console.log('No initiatives found - creating sample initiatives');
+            
+            // Create each sample initiative
+            for (const initiative of sampleInitiatives) {
+              await taskApiService.createInitiative(initiative);
+            }
+            
+            // Fetch the newly created initiatives
+            const freshData = await taskApiService.getInitiatives();
+            if (freshData && Array.isArray(freshData) && freshData.length > 0) {
+              setInitiatives(deduplicateInitiatives(freshData));
+            } else {
+              // If API still fails, use the samples directly
+              setInitiatives(sampleInitiatives);
+              setError('Created sample initiatives but could not fetch them.');
+            }
+          } catch (createError) {
+            console.error('Error creating sample initiatives:', createError);
+            // Use sample data directly
+            setInitiatives(sampleInitiatives);
+            setError('Using sample initiatives - could not connect to API.');
+          }
+        } else {
+          // Keep existing initiatives if we have them
+          setError('Could not refresh initiatives from API. Using cached data.');
         }
       }
     } catch (err) {
@@ -168,8 +221,8 @@ export function InitiativeProvider({ children }: { children: ReactNode }) {
         setInitiatives([
           {
             id: 1,
-            name: "Documentation Map Enhancement",
-            description: "Comprehensive improvements to the documentation mapping system",
+            name: "User Impact UI Enhancement",
+            description: "Improve UI to highlight user impact in task cards",
             status: "in-progress",
             priority: "high",
             startDate: "2025-03-14",
@@ -179,8 +232,8 @@ export function InitiativeProvider({ children }: { children: ReactNode }) {
           },
           {
             id: 2,
-            name: "Bug Reporting System",
-            description: "End-to-end system for capturing, tracking, and managing bugs",
+            name: "Task Inline Editing System",
+            description: "Implement inline editing for all task fields",
             status: "in-progress",
             priority: "high",
             startDate: "2025-03-13",

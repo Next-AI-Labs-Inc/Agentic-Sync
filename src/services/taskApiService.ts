@@ -223,10 +223,27 @@ export async function createTask(taskData: TaskFormData) {
  */
 export async function createInitiative(initiativeData: Partial<Initiative>) {
   try {
-    const response = await apiClient.post('/api/initiatives', initiativeData);
+    console.log('Creating new initiative:', initiativeData.name);
+    
+    // Format the initiative data with timestamps
+    const now = new Date().toISOString();
+    const formattedData = {
+      ...initiativeData,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    const response = await apiClient.post('/api/initiatives', formattedData);
+    console.log('Successfully created initiative:', response.data.id || response.data._id);
     return response.data;
   } catch (error) {
     console.error('Error creating initiative:', error);
+    
+    // Check for specific error types
+    if (error.response && error.response.status === 409) {
+      console.warn('Initiative with this name already exists');
+    }
+    
     throw error;
   }
 }
@@ -236,11 +253,27 @@ export async function createInitiative(initiativeData: Partial<Initiative>) {
  */
 export async function getInitiatives() {
   try {
-    const response = await apiClient.get('/api/initiatives');
-    return response.data;
+    console.log('Fetching initiatives from:', `${apiClient.defaults.baseURL}/api/initiatives`);
+    
+    // Add cache busting to avoid stale data
+    const timestamp = Date.now();
+    const response = await apiClient.get(`/api/initiatives?_t=${timestamp}`);
+    
+    if (Array.isArray(response.data)) {
+      console.log(`Successfully retrieved ${response.data.length} initiatives`);
+      
+      // Sort by updatedAt for most recent first
+      return response.data.sort((a, b) => 
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      );
+    } else {
+      console.warn('API returned non-array initiative data:', response.data);
+      return [];
+    }
   } catch (error) {
     console.error('Error fetching initiatives:', error);
-    throw error;
+    // Return empty array instead of throwing
+    return [];
   }
 }
 
@@ -249,10 +282,13 @@ export async function getInitiatives() {
  */
 export async function deleteInitiative(id: number) {
   try {
+    console.log(`Deleting initiative with ID: ${id}`);
     const response = await apiClient.delete(`/api/initiatives/${id}`);
+    console.log(`Successfully deleted initiative ${id}`);
     return response.data;
   } catch (error) {
     console.error(`Error deleting initiative ${id}:`, error);
+    // Throw error to handle in UI
     throw error;
   }
 }
@@ -262,10 +298,25 @@ export async function deleteInitiative(id: number) {
  */
 export async function updateInitiative(id: number, updateData: Partial<Initiative>) {
   try {
-    const response = await apiClient.put(`/api/initiatives/${id}`, updateData);
+    console.log(`Updating initiative ${id} with:`, updateData);
+    
+    // Ensure updatedAt is set
+    const dataWithTimestamp = {
+      ...updateData,
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Set completedAt if status is changed to completed
+    if (updateData.status === 'completed' && !updateData.completedAt) {
+      dataWithTimestamp.completedAt = new Date().toISOString();
+    }
+    
+    const response = await apiClient.put(`/api/initiatives/${id}`, dataWithTimestamp);
+    console.log(`Successfully updated initiative ${id}`);
     return response.data;
   } catch (error) {
     console.error(`Error updating initiative ${id}:`, error);
+    // Throw error to handle in UI
     throw error;
   }
 }
