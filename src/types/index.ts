@@ -3,6 +3,7 @@ export interface Task {
   _id?: string;       // Original MongoDB _id field
   title: string;
   description?: string;
+  userImpact?: string; // Description of how this task impacts users
   status: 'proposed' | 'todo' | 'in-progress' | 'done' | 'reviewed';
   priority: 'low' | 'medium' | 'high';
   project: string;

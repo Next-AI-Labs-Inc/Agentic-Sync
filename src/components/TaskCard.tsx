@@ -25,6 +25,7 @@ interface TaskCardProps {
   onMarkTested: (taskId: string, project: string) => Promise<void>;
   onDelete: (taskId: string, project: string) => Promise<void>;
   onUpdateDate?: (taskId: string, project: string, newDate: string) => Promise<void>;
+  onUpdateTask?: (taskId: string, project: string, updates: Partial<Task>) => Promise<void>;
 }
 
 // Reusable Popover Component
@@ -283,12 +284,22 @@ function Popover({ content, position = 'top', children, className = '' }: Popove
   );
 }
 
-export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete, onUpdateDate }: TaskCardProps) {
+export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete, onUpdateDate, onUpdateTask }: TaskCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [isNew, setIsNew] = useState(task._isNew || false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isEditingDate, setIsEditingDate] = useState(false);
   const [newDateValue, setNewDateValue] = useState('');
+  
+  // Inline editing states
+  const [isEditingInitiative, setIsEditingInitiative] = useState(false);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [isEditingUserImpact, setIsEditingUserImpact] = useState(false);
+  const [editedInitiative, setEditedInitiative] = useState(task.initiative || '');
+  const [editedTitle, setEditedTitle] = useState(task.title);
+  const [editedDescription, setEditedDescription] = useState(task.description || '');
+  const [editedUserImpact, setEditedUserImpact] = useState(task.userImpact || '');
   
   // Initialize date value once when editing starts
   useEffect(() => {
@@ -338,6 +349,92 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
     if (onUpdateDate) {
       onUpdateDate(task.id, task.project, newDateValue);
       setIsEditingDate(false);
+    }
+  };
+  
+  // Handle inline editing
+  const handleInlineEdit = (field: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation(); // Prevent card expansion
+    
+    switch (field) {
+      case 'initiative':
+        setIsEditingInitiative(true);
+        break;
+      case 'title':
+        setIsEditingTitle(true);
+        break;
+      case 'description':
+        setIsEditingDescription(true);
+        break;
+      case 'userImpact':
+        setIsEditingUserImpact(true);
+        break;
+    }
+  };
+  
+  // Submit inline edits
+  const handleInlineSubmit = (field: string) => (e: React.FormEvent | React.FocusEvent) => {
+    e.preventDefault();
+    e.stopPropagation(); // Prevent card expansion
+    
+    if (!onUpdateTask) return;
+    
+    let updates: Partial<Task> = {};
+    
+    switch (field) {
+      case 'initiative':
+        updates.initiative = editedInitiative.trim();
+        setIsEditingInitiative(false);
+        break;
+      case 'title':
+        updates.title = editedTitle.trim();
+        setIsEditingTitle(false);
+        break;
+      case 'description':
+        updates.description = editedDescription.trim();
+        setIsEditingDescription(false);
+        break;
+      case 'userImpact':
+        updates.userImpact = editedUserImpact.trim();
+        setIsEditingUserImpact(false);
+        break;
+    }
+    
+    if (Object.keys(updates).length > 0) {
+      onUpdateTask(task.id, task.project, updates);
+    }
+  };
+  
+  // Handle keyboard events for inline editing
+  const handleInlineKeyDown = (field: string) => (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      // Cancel editing and reset to original value
+      switch (field) {
+        case 'initiative':
+          setEditedInitiative(task.initiative || '');
+          setIsEditingInitiative(false);
+          break;
+        case 'title':
+          setEditedTitle(task.title);
+          setIsEditingTitle(false);
+          break;
+        case 'description':
+          setEditedDescription(task.description || '');
+          setIsEditingDescription(false);
+          break;
+        case 'userImpact':
+          setEditedUserImpact(task.userImpact || '');
+          setIsEditingUserImpact(false);
+          break;
+      }
+      e.preventDefault();
+      e.stopPropagation();
+    } else if (e.key === 'Enter' && !e.shiftKey) {
+      // Submit on Enter but not with Shift (for multiline text areas)
+      if (field !== 'description' && field !== 'userImpact') {
+        handleInlineSubmit(field)(e as unknown as React.FormEvent);
+      }
     }
   };
 
@@ -651,12 +748,34 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
         
         {/* Header row with initiative, title, badges */}
         <div className="flex flex-col gap-1">
-          {/* Initiative at the top (if exists) */}
-          {task.initiative && (
+          {/* Initiative at the top (if exists) - with inline editing */}
+          {(task.initiative || isEditingInitiative) && (
             <div className="flex items-start justify-between mb-1">
-              <h2 className="text-lg font-semibold text-gray-800 font-anthropic">
-                {task.initiative}
-              </h2>
+              {isEditingInitiative ? (
+                <div onClick={(e) => e.stopPropagation()}>
+                  <input
+                    type="text"
+                    value={editedInitiative}
+                    onChange={(e) => setEditedInitiative(e.target.value)}
+                    onBlur={handleInlineSubmit('initiative')}
+                    onKeyDown={handleInlineKeyDown('initiative')}
+                    className="w-full px-2 py-1 text-lg font-semibold text-gray-800 font-anthropic border border-blue-300 rounded"
+                    autoFocus
+                  />
+                </div>
+              ) : (
+                <h2 
+                  className="text-lg font-semibold text-gray-800 font-anthropic group cursor-pointer"
+                  onClick={(e) => onUpdateTask && handleInlineEdit('initiative')(e)}
+                >
+                  {task.initiative}
+                  {onUpdateTask && (
+                    <span className="ml-2 text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                      edit
+                    </span>
+                  )}
+                </h2>
+              )}
               
               <div className="flex items-center space-x-1">
                 <DropdownMenu 
@@ -680,16 +799,36 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
             </div>
           )}
           
-          {/* Title row */}
+          {/* Title row - with inline editing */}
           <div className={`flex items-start justify-between ${!task.initiative ? 'mb-1' : ''}`}>
             <div className="flex items-center">
-              <h3
-                className={`text-lg font-normal font-anthropic ${
-                  task.status === 'reviewed' ? 'text-gray-500' : 'text-gray-800'
-                }`}
-              >
-                {task.title}
-              </h3>
+              {isEditingTitle ? (
+                <div onClick={(e) => e.stopPropagation()} className="w-full">
+                  <input
+                    type="text"
+                    value={editedTitle}
+                    onChange={(e) => setEditedTitle(e.target.value)}
+                    onBlur={handleInlineSubmit('title')}
+                    onKeyDown={handleInlineKeyDown('title')}
+                    className="w-full px-2 py-1 text-lg font-normal font-anthropic border border-blue-300 rounded"
+                    autoFocus
+                  />
+                </div>
+              ) : (
+                <h3
+                  className={`text-lg font-normal font-anthropic group cursor-pointer ${
+                    task.status === 'reviewed' ? 'text-gray-500' : 'text-gray-800'
+                  }`}
+                  onClick={(e) => onUpdateTask && handleInlineEdit('title')(e)}
+                >
+                  {task.title}
+                  {onUpdateTask && (
+                    <span className="ml-2 text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                      edit
+                    </span>
+                  )}
+                </h3>
+              )}
             </div>
             
             {/* Only show gear if no initiative */}
@@ -716,12 +855,72 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
             )}
           </div>
 
-          {/* Description (always visible) */}
-          {task.description && (
-            <div className={`text-base text-gray-600 ${expanded ? '' : 'line-clamp-2'}`}>
-              {task.description}
-            </div>
-          )}
+          {/* User Impact (takes precedence in collapsed view) or Description */}
+          {task.userImpact || task.description ? (
+            <>
+              {/* If userImpact exists, show it in collapsed view */}
+              {task.userImpact && !expanded ? (
+                <div className="text-base text-gray-600 line-clamp-2">
+                  {isEditingUserImpact ? (
+                    <div onClick={(e) => e.stopPropagation()} className="w-full">
+                      <textarea
+                        value={editedUserImpact}
+                        onChange={(e) => setEditedUserImpact(e.target.value)}
+                        onBlur={handleInlineSubmit('userImpact')}
+                        onKeyDown={handleInlineKeyDown('userImpact')}
+                        className="w-full px-2 py-1 text-base text-gray-600 border border-blue-300 rounded"
+                        rows={2}
+                        autoFocus
+                      />
+                    </div>
+                  ) : (
+                    <div 
+                      className="group cursor-pointer"
+                      onClick={(e) => onUpdateTask && handleInlineEdit('userImpact')(e)}
+                    >
+                      {task.userImpact}
+                      {onUpdateTask && (
+                        <span className="ml-2 text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                          edit
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* Show description if no userImpact or view is expanded */
+                task.description && (
+                  <div className={`text-base text-gray-600 ${expanded ? '' : 'line-clamp-2'}`}>
+                    {isEditingDescription ? (
+                      <div onClick={(e) => e.stopPropagation()} className="w-full">
+                        <textarea
+                          value={editedDescription}
+                          onChange={(e) => setEditedDescription(e.target.value)}
+                          onBlur={handleInlineSubmit('description')}
+                          onKeyDown={handleInlineKeyDown('description')}
+                          className="w-full px-2 py-1 text-base text-gray-600 border border-blue-300 rounded"
+                          rows={3}
+                          autoFocus
+                        />
+                      </div>
+                    ) : (
+                      <div 
+                        className="group cursor-pointer"
+                        onClick={(e) => onUpdateTask && handleInlineEdit('description')(e)}
+                      >
+                        {task.description}
+                        {onUpdateTask && (
+                          <span className="ml-2 text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                            edit
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              )}
+            </>
+          ) : null}
           
           {/* Project name and status badges */}
           <div className="flex items-center justify-between mt-1">
@@ -841,7 +1040,69 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
       {/* Expanded content */}
       {expanded && (
         <div className="px-4 pb-4 pt-2 border-t border-gray-100">
-          {/* Initiative details are shown in the unexpanded view now */}
+          {/* User Impact (when expanded and it exists) */}
+          {(task.userImpact || isEditingUserImpact) && (
+            <div className="mt-4 text-base">
+              <h4 className="font-medium text-gray-700 mb-1">User Impact</h4>
+              {isEditingUserImpact ? (
+                <div onClick={(e) => e.stopPropagation()} className="w-full">
+                  <textarea
+                    value={editedUserImpact}
+                    onChange={(e) => setEditedUserImpact(e.target.value)}
+                    onBlur={handleInlineSubmit('userImpact')}
+                    onKeyDown={handleInlineKeyDown('userImpact')}
+                    className="w-full px-2 py-1 text-base text-gray-600 border border-blue-300 rounded"
+                    rows={3}
+                    autoFocus
+                  />
+                </div>
+              ) : (
+                <div 
+                  className="text-gray-600 group cursor-pointer"
+                  onClick={(e) => onUpdateTask && handleInlineEdit('userImpact')(e)}
+                >
+                  {task.userImpact}
+                  {onUpdateTask && (
+                    <span className="ml-2 text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                      edit
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Description (when no user impact is shown in collapsed view) */}
+          {task.userImpact && task.description && (
+            <div className="mt-4 text-base">
+              <h4 className="font-medium text-gray-700 mb-1">Description</h4>
+              {isEditingDescription ? (
+                <div onClick={(e) => e.stopPropagation()} className="w-full">
+                  <textarea
+                    value={editedDescription}
+                    onChange={(e) => setEditedDescription(e.target.value)}
+                    onBlur={handleInlineSubmit('description')}
+                    onKeyDown={handleInlineKeyDown('description')}
+                    className="w-full px-2 py-1 text-base text-gray-600 border border-blue-300 rounded"
+                    rows={3}
+                    autoFocus
+                  />
+                </div>
+              ) : (
+                <div 
+                  className="text-gray-600 group cursor-pointer"
+                  onClick={(e) => onUpdateTask && handleInlineEdit('description')(e)}
+                >
+                  {task.description}
+                  {onUpdateTask && (
+                    <span className="ml-2 text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                      edit
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Tags */}
           {task.tags && task.tags.length > 0 && (
