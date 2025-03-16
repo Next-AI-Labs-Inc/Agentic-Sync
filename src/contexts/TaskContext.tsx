@@ -40,6 +40,7 @@ interface TaskContextValue {
   markTaskTested: (taskId: string, project: string) => Promise<void>;
   deleteTask: (taskId: string, project: string) => Promise<void>;
   addTask: (taskData: TaskFormData) => Promise<void>;
+  updateTaskDate: (taskId: string, project: string, newDate: string) => Promise<void>;
   filteredTasks: Task[];
   taskCountsByStatus: Record<string, number>;
 }
@@ -695,6 +696,65 @@ export function TaskProvider({
       refreshTasks();
     }
   };
+  
+  const updateTaskDate = async (taskId: string, project: string, newDate: string) => {
+    // Get the current task
+    const taskToUpdate = localTaskCache.get(taskId);
+    if (!taskToUpdate) {
+      console.error(`Task with ID ${taskId} not found in cache`);
+      return;
+    }
+
+    // Validate the date format
+    const isValidDate = !isNaN(new Date(newDate).getTime());
+    if (!isValidDate) {
+      console.error(`Invalid date format: ${newDate}`);
+      return;
+    }
+
+    console.log(`Updating task ${taskId} date from ${taskToUpdate.createdAt} to ${newDate}`);
+
+    // Create update data
+    const updateData: Partial<Task> = {
+      createdAt: newDate,
+      updatedAt: new Date().toISOString()
+    };
+
+    // Create updated task for optimistic update
+    const updatedTask = { ...taskToUpdate, ...updateData };
+
+    // Update local cache optimistically
+    const newCache = new Map(localTaskCache);
+    newCache.set(taskId, updatedTask);
+    setLocalTaskCache(newCache);
+
+    // Update tasks array optimistically and ensure newest tasks stay first
+    const optimisticTasks = tasks.map((task) => (task.id === taskId ? updatedTask : task));
+
+    // Always sort by newest first 
+    const sortedTasks = sortByNewestFirst(optimisticTasks);
+
+    // Update state immediately for responsive UI
+    setTasks(sortedTasks);
+
+    try {
+      // Perform the actual API update
+      await taskApiService.updateTask(taskId, updateData);
+
+      // Emit event for real-time sync to other clients
+      taskSyncService.emitTaskUpdated(updatedTask);
+
+      // No need to refresh tasks as we've already updated locally
+    } catch (error) {
+      console.error('Error updating task date:', error);
+
+      // Revert to previous state on error
+      setTasks(tasks);
+
+      // Refresh data from server to ensure consistency
+      refreshTasks();
+    }
+  };
 
   const addTask = async (taskData: TaskFormData) => {
     // Generate a deterministic ID for optimistic updates
@@ -815,6 +875,7 @@ export function TaskProvider({
     markTaskTested,
     deleteTask,
     addTask,
+    updateTaskDate,
     filteredTasks,
     taskCountsByStatus
   };

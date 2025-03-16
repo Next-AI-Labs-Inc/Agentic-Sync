@@ -22,6 +22,7 @@ interface TaskCardProps {
   ) => Promise<void>;
   onMarkTested: (taskId: string, project: string) => Promise<void>;
   onDelete: (taskId: string, project: string) => Promise<void>;
+  onUpdateDate?: (taskId: string, project: string, newDate: string) => Promise<void>;
 }
 
 // Reusable Popover Component
@@ -287,6 +288,13 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
   const [isEditingDate, setIsEditingDate] = useState(false);
   const [newDateValue, setNewDateValue] = useState('');
   
+  // Initialize date value once when editing starts
+  useEffect(() => {
+    if (isEditingDate) {
+      setNewDateValue(task.createdAt || new Date().toISOString());
+    }
+  }, [isEditingDate, task.createdAt]);
+  
   // Clear the new flag after animation completes
   useEffect(() => {
     if (isNew) {
@@ -313,10 +321,11 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
   
   // Handle date edit
   const handleDateClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation(); // Prevent card expansion
+    console.log('Date clicked!');
     if (onUpdateDate) {
       setIsEditingDate(true);
-      setNewDateValue(task.createdAt || new Date().toISOString());
     }
   };
   
@@ -331,8 +340,10 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
   };
 
   // Handle card click for expansion
-  const handleCardClick = () => {
+  const handleCardClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setExpanded(!expanded);
+    console.log("Card clicked, expanded:", !expanded);
   };
 
   // Status change handlers with transition effects
@@ -611,14 +622,38 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
         task.status === 'reviewed' ? 'bg-gray-50' : 'bg-white'
       } ${isNew ? 'animate-fade-in border-l-4 border-l-blue-500' : ''} 
       ${isDeleting ? 'fade-out pointer-events-none' : ''}
-      rounded-lg shadow-sm border border-gray-200 transition-all duration-200 cursor-pointer`}
-      onClick={handleCardClick}
+      rounded-lg shadow-sm border border-gray-200 transition-all duration-200`}
     >
       <div className="p-4">
+        {/* Close button (top right) */}
+        <div className="flex justify-between items-center mb-1">
+          {!expanded && (
+            <div className="text-xs text-gray-400 italic">
+              Click on title to expand
+            </div>
+          )}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setExpanded(false);
+            }}
+            className={`text-gray-400 hover:text-gray-600 ${!expanded ? 'hidden' : ''}`}
+            aria-label="Close details"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        
         {/* Header row with title, badges */}
         <div className="flex flex-col gap-1">
           <div className="flex items-start justify-between">
-            <div className="flex items-center">
+            <div 
+              className="flex items-center cursor-pointer hover:bg-gray-50 px-2 py-1 rounded" 
+              onClick={handleCardClick}
+            >
               <h3
                 className={`text-lg font-medium ${
                   task.status === 'reviewed' ? 'text-gray-500' : ''
@@ -731,44 +766,52 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
             </div>
           )}
 
-          {/* Created date only - clickable if onUpdateDate is provided */}
+          {/* Created date with edit button */}
           <div className="mt-1 text-sm text-gray-500">
             {isEditingDate ? (
-              <form onSubmit={handleDateSubmit} onClick={(e) => e.stopPropagation()} className="inline-flex items-center">
-                <input
-                  type="text"
-                  value={newDateValue}
-                  onChange={(e) => setNewDateValue(e.target.value)}
-                  placeholder="YYYY-MM-DDThh:mm:ss.sssZ"
-                  className="px-2 py-1 border border-blue-300 rounded text-xs w-64"
-                  autoFocus
-                />
-                <button 
-                  type="submit" 
-                  className="ml-1 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs"
-                >
-                  Save
-                </button>
-                <button 
-                  type="button" 
-                  className="ml-1 px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsEditingDate(false);
-                  }}
-                >
-                  Cancel
-                </button>
-              </form>
+              <div onClick={(e) => e.stopPropagation()}>
+                <form onSubmit={handleDateSubmit} className="inline-flex items-center">
+                  <label className="mr-2">New date:</label>
+                  <input
+                    type="text"
+                    value={newDateValue}
+                    onChange={(e) => setNewDateValue(e.target.value)}
+                    placeholder="YYYY-MM-DDThh:mm:ss.sssZ"
+                    className="px-2 py-1 border border-blue-300 rounded text-xs w-64"
+                    autoFocus
+                  />
+                  <button 
+                    type="submit" 
+                    className="ml-1 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs"
+                  >
+                    Save
+                  </button>
+                  <button 
+                    type="button" 
+                    className="ml-1 px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
+                    onClick={() => setIsEditingDate(false)}
+                  >
+                    Cancel
+                  </button>
+                </form>
+              </div>
             ) : (
-              <span 
-                className={onUpdateDate ? "cursor-pointer hover:text-blue-600" : ""}
-                onClick={onUpdateDate ? handleDateClick : undefined}
-                title={onUpdateDate ? "Click to edit creation date" : ""}
-              >
-                Created {formatTimeAgo(task.createdAt)} 
-                {onUpdateDate && <span className="ml-1 text-xs text-blue-500">✎</span>}
-              </span>
+              <div className="flex items-center">
+                <span>Created {formatTimeAgo(task.createdAt)}</span>
+                {onUpdateDate && (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setIsEditingDate(true);
+                    }}
+                    className="ml-2 text-blue-500 hover:text-blue-700 px-2 py-0.5 bg-blue-50 rounded text-xs"
+                    title="Edit creation date"
+                  >
+                    Edit date
+                  </button>
+                )}
+              </div>
             )}
             
             {/* Show other dates only in expanded view */}
