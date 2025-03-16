@@ -424,10 +424,10 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
           key="move-to-todo-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">Move to Todo</h4>
-              <p className="text-xs text-gray-600">
-                Move this task from the proposal stage to the todo list. This indicates the task has
-                been accepted and is ready to be worked on.
+              <h4 className="font-medium text-gray-900 mb-1">Ready to work on this?</h4>
+              <p className="text-sm text-gray-600">
+                Click this button to accept this task proposal and move it to your todo list.
+                This way your team knows you're planning to work on it soon.
               </p>
             </div>
           }
@@ -449,10 +449,9 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
           key="move-to-in-progress-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">Start Progress</h4>
-              <p className="text-xs text-gray-600">
-                Move this task to the in-progress stage. This indicates that work on the task has
-                begun and is currently active.
+              <h4 className="font-medium text-gray-900 mb-1">Starting work on this?</h4>
+              <p className="text-sm text-gray-600">
+                Click this button when you begin working on this task so your team knows it's actively being worked on.
               </p>
             </div>
           }
@@ -474,10 +473,10 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
           key="move-to-done-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">Mark Done</h4>
-              <p className="text-xs text-gray-600">
-                Move this task to the done stage. This indicates that all work on the task has been
-                completed and it's ready for review.
+              <h4 className="font-medium text-gray-900 mb-1">Finished the work?</h4>
+              <p className="text-sm text-gray-600">
+                Click this button when you've completed all the work for this task and it's ready for
+                someone to review it.
               </p>
             </div>
           }
@@ -499,10 +498,9 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
           key="move-to-reviewed-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">Mark Reviewed</h4>
-              <p className="text-xs text-gray-600">
-                Mark this task as reviewed. This indicates that the completed work has been checked
-                and approved by a reviewer.
+              <h4 className="font-medium text-gray-900 mb-1">Reviewed this work?</h4>
+              <p className="text-sm text-gray-600">
+                After checking this completed task and confirming everything looks good, click this button to mark it as reviewed.
               </p>
             </div>
           }
@@ -525,10 +523,9 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
           key="move-to-in-progress-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">Still Working</h4>
-              <p className="text-xs text-gray-600">
-                Move this task back to the in-progress stage. Use this if the task was marked as
-                done prematurely or if additional work is needed.
+              <h4 className="font-medium text-gray-900 mb-1">Need more work?</h4>
+              <p className="text-sm text-gray-600">
+                If this task isn't actually complete and needs more work, click this button to move it back to in-progress.
               </p>
             </div>
           }
@@ -551,10 +548,9 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
           key="move-to-done-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">Reopen Task</h4>
-              <p className="text-xs text-gray-600">
-                Move this task back to the done stage. Use this if the task needs additional review
-                or adjustments.
+              <h4 className="font-medium text-gray-900 mb-1">Need another look?</h4>
+              <p className="text-sm text-gray-600">
+                If this task needs to be reviewed again or requires adjustments, click this button to reopen it.
               </p>
             </div>
           }
@@ -579,10 +575,9 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
           key="mark-tested-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">Mark Tested</h4>
-              <p className="text-xs text-gray-600">
-                Mark this task as tested and complete in a single step. This indicates that the task
-                has been completed, tested, and is ready for review.
+              <h4 className="font-medium text-gray-900 mb-1">Tested and done?</h4>
+              <p className="text-sm text-gray-600">
+                If you've completed this task and verified it works correctly, click this button to mark it as tested and complete in one step.
               </p>
             </div>
           }
@@ -602,9 +597,9 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
         key="delete-popover"
         content={
           <div className="w-64">
-            <h4 className="font-medium text-gray-900 mb-1">Delete Task</h4>
-            <p className="text-xs text-gray-600">
-              Permanently delete this task. This action cannot be undone. Use with caution.
+            <h4 className="font-medium text-gray-900 mb-1">Delete this task?</h4>
+            <p className="text-sm text-gray-600">
+              This will permanently remove the task from your system. This action cannot be undone.
             </p>
           </div>
         }
@@ -663,49 +658,12 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
               >
                 {task.project ? <><span className="text-gray-600">{formatProjectName(task.project)}:</span> </> : ''}{task.title}
               </h3>
-              <Popover
-                content={
-                  <div className="w-72">
-                    <h4 className="font-medium text-gray-900 mb-1">Task Details</h4>
-                    <div className="text-gray-600 mb-2">
-                      <p className="mb-1">{task.description || 'No description provided'}</p>
-                      <p className="text-sm mt-2 font-medium">Created {formatTimeAgo(task.createdAt)}</p>
-                      <p className="text-sm">Updated {formatTimeAgo(task.updatedAt)}</p>
-                      {task.completedAt && (
-                        <p className="text-sm">Completed {formatTimeAgo(task.completedAt)}</p>
-                      )}
-                      {task.initiative && (
-                        <p className="text-sm mt-1">{task.initiative}</p>
-                      )}
-                    </div>
-                  </div>
-                }
-                position="top"
-              >
-                <FaInfoCircle className="ml-2 text-gray-400 hover:text-gray-600 cursor-pointer" />
-              </Popover>
             </div>
 
             <div className="flex items-center space-x-1">
 
-              {/* Status badge with popover */}
-              <Popover
-                content={
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-1">Status: {task.status}</h4>
-                    <p className="text-sm text-gray-600">
-                      {task.status === 'proposed' && 'Task has been proposed but not started yet'}
-                      {task.status === 'todo' && 'Task is ready to be worked on'}
-                      {task.status === 'in-progress' && 'Task is currently being worked on'}
-                      {task.status === 'done' && 'Task has been completed'}
-                      {task.status === 'reviewed' && 'Task has been completed and reviewed'}
-                    </p>
-                  </div>
-                }
-                position="top"
-              >
-                <span className={`badge ${getStatusColor(task.status)}`}>{task.status}</span>
-              </Popover>
+              {/* Status badge */}
+              <span className={`badge ${getStatusColor(task.status)}`}>{task.status}</span>
 
               {/* Tested badge with popover */}
               {task.tested && (
@@ -741,7 +699,7 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
           )}
 
           {/* Created date with edit button */}
-          <div className="mt-1 text-base text-gray-500">
+          <div className="mt-1 text-sm text-gray-500">
             {isEditingDate ? (
               <div onClick={(e) => e.stopPropagation()}>
                 <form onSubmit={handleDateSubmit} className="inline-flex items-center">
@@ -787,28 +745,6 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
                 )}
               </div>
             )}
-            
-            {/* Show other dates only in expanded view */}
-            {expanded && !isEditingDate && (
-              <>
-                <span className="mx-2">·</span>
-                <span>Updated {formatTimeAgo(task.updatedAt)}</span>
-                
-                {task.status === 'done' && task.completedAt && (
-                  <>
-                    <span className="mx-2">·</span>
-                    <span>Completed {formatTimeAgo(task.completedAt)}</span>
-                  </>
-                )}
-                
-                {task.status === 'reviewed' && task.reviewedAt && (
-                  <>
-                    <span className="mx-2">·</span>
-                    <span>Reviewed {formatTimeAgo(task.reviewedAt)}</span>
-                  </>
-                )}
-              </>
-            )}
           </div>
 
           {expanded && (
@@ -834,7 +770,7 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
                   e.stopPropagation();
                   setExpanded(false);
                 }}
-                className="text-gray-500 hover:text-gray-700 text-sm font-medium"
+                className="btn-outline-secondary py-1 px-3 text-sm"
               >
                 Collapse ↑
               </button>
@@ -908,7 +844,6 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
 
           {/* Creation details - all in relative time */}
           <div className="mt-4 text-xs text-gray-500">
-            <p className="font-medium">Created {formatTimeAgo(task.createdAt)}</p>
             <p>Last updated {formatTimeAgo(task.updatedAt)}</p>
             {task.completedAt && <p>Completed {formatTimeAgo(task.completedAt)}</p>}
             {task.reviewedAt && <p>Reviewed {formatTimeAgo(task.reviewedAt)}</p>}
