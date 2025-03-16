@@ -33,6 +33,9 @@ export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps
   const [formData, setFormData] = useState<TaskFormData>({
     title: '',
     description: '',
+    userImpact: '',
+    requirements: '',
+    technicalPlan: '',
     priority: 'medium',
     project: getInitialProject(),
     status: 'todo',
@@ -103,6 +106,9 @@ export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps
     setFormData({
       title: '',
       description: '',
+      userImpact: '',
+      requirements: '',
+      technicalPlan: '',
       priority: 'medium',
       project: currentProject, // Keep the same project
       status: 'todo',
@@ -169,8 +175,62 @@ export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps
             value={formData.description}
             onChange={handleChange}
             className="form-textarea h-24"
-            placeholder="Enter task description (supports markdown)"
+            placeholder="Enter a brief overview of what this task does"
           />
+        </div>
+        
+        {/* User Impact */}
+        <div className="mb-4">
+          <label htmlFor="userImpact" className="form-label">
+            User Impact
+          </label>
+          <textarea
+            id="userImpact"
+            name="userImpact"
+            value={formData.userImpact}
+            onChange={handleChange}
+            className="form-textarea h-24"
+            placeholder="Explain how this task benefits users and why it matters (this will be shown in the collapsed view instead of description)"
+          />
+          <div className="mt-1 text-xs text-gray-500">
+            This will replace the description in the collapsed view if provided
+          </div>
+        </div>
+        
+        {/* Requirements */}
+        <div className="mb-4">
+          <label htmlFor="requirements" className="form-label">
+            Requirements
+          </label>
+          <textarea
+            id="requirements"
+            name="requirements"
+            value={formData.requirements}
+            onChange={handleChange}
+            className="form-textarea h-24"
+            placeholder="List the requirements this solution must fulfill (use bullet points with - at the start of each line)"
+          />
+          <div className="mt-1 text-xs text-gray-500">
+            Format as a bulleted list using - at the start of each line
+          </div>
+        </div>
+        
+        {/* Technical Plan */}
+        <div className="mb-4">
+          <label htmlFor="technicalPlan" className="form-label">
+            Technical Plan
+          </label>
+          <textarea
+            id="technicalPlan"
+            name="technicalPlan"
+            value={formData.technicalPlan}
+            onChange={handleChange}
+            className="form-textarea h-24"
+            placeholder="Detail the step-by-step implementation plan (use numbered list with 1., 2., etc.)"
+          />
+          <div className="mt-1 text-xs text-gray-500">
+            Format as a numbered list using 1., 2., etc. at the start of each line
+          </div>
         </div>
         
         {/* Priority, Status, and Project */}

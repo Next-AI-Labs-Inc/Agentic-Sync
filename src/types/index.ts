@@ -4,6 +4,8 @@ export interface Task {
   title: string;
   description?: string;
   userImpact?: string; // Description of how this task impacts users
+  requirements?: string; // List of requirements the solution must fulfill
+  technicalPlan?: string; // Step-by-step implementation plan
   status: 'proposed' | 'todo' | 'in-progress' | 'done' | 'reviewed';
   priority: 'low' | 'medium' | 'high';
   project: string;
@@ -97,6 +99,9 @@ export type SortDirection = 'asc' | 'desc';
 export interface TaskFormData {
   title: string;
   description: string;
+  userImpact?: string;
+  requirements?: string;
+  technicalPlan?: string;
   priority: 'low' | 'medium' | 'high';
   project: string;
   status?: 'proposed' | 'todo' | 'in-progress' | 'done' | 'reviewed';

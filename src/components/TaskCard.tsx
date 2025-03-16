@@ -296,10 +296,14 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [isEditingUserImpact, setIsEditingUserImpact] = useState(false);
+  const [isEditingRequirements, setIsEditingRequirements] = useState(false);
+  const [isEditingTechnicalPlan, setIsEditingTechnicalPlan] = useState(false);
   const [editedInitiative, setEditedInitiative] = useState(task.initiative || '');
   const [editedTitle, setEditedTitle] = useState(task.title);
   const [editedDescription, setEditedDescription] = useState(task.description || '');
   const [editedUserImpact, setEditedUserImpact] = useState(task.userImpact || '');
+  const [editedRequirements, setEditedRequirements] = useState(task.requirements || '');
+  const [editedTechnicalPlan, setEditedTechnicalPlan] = useState(task.technicalPlan || '');
   
   // Initialize date value once when editing starts
   useEffect(() => {
@@ -370,6 +374,12 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
       case 'userImpact':
         setIsEditingUserImpact(true);
         break;
+      case 'requirements':
+        setIsEditingRequirements(true);
+        break;
+      case 'technicalPlan':
+        setIsEditingTechnicalPlan(true);
+        break;
     }
   };
   
@@ -399,6 +409,14 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
         updates.userImpact = editedUserImpact.trim();
         setIsEditingUserImpact(false);
         break;
+      case 'requirements':
+        updates.requirements = editedRequirements.trim();
+        setIsEditingRequirements(false);
+        break;
+      case 'technicalPlan':
+        updates.technicalPlan = editedTechnicalPlan.trim();
+        setIsEditingTechnicalPlan(false);
+        break;
     }
     
     if (Object.keys(updates).length > 0) {
@@ -427,12 +445,21 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
           setEditedUserImpact(task.userImpact || '');
           setIsEditingUserImpact(false);
           break;
+        case 'requirements':
+          setEditedRequirements(task.requirements || '');
+          setIsEditingRequirements(false);
+          break;
+        case 'technicalPlan':
+          setEditedTechnicalPlan(task.technicalPlan || '');
+          setIsEditingTechnicalPlan(false);
+          break;
       }
       e.preventDefault();
       e.stopPropagation();
     } else if (e.key === 'Enter' && !e.shiftKey) {
       // Submit on Enter but not with Shift (for multiline text areas)
-      if (field !== 'description' && field !== 'userImpact') {
+      if (field !== 'description' && field !== 'userImpact' && 
+          field !== 'requirements' && field !== 'technicalPlan') {
         handleInlineSubmit(field)(e as unknown as React.FormEvent);
       }
     }
@@ -1130,6 +1157,72 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
                   <li key={index}>{step}</li>
                 ))}
               </ul>
+            </div>
+          )}
+
+          {/* Requirements - NEW FIELD */}
+          {(task.requirements || isEditingRequirements) && (
+            <div className="mt-4 text-base">
+              <h4 className="font-medium text-gray-700 mb-1">Requirements</h4>
+              {isEditingRequirements ? (
+                <div onClick={(e) => e.stopPropagation()} className="w-full">
+                  <textarea
+                    value={editedRequirements}
+                    onChange={(e) => setEditedRequirements(e.target.value)}
+                    onBlur={handleInlineSubmit('requirements')}
+                    onKeyDown={handleInlineKeyDown('requirements')}
+                    className="w-full px-2 py-1 text-base text-gray-600 border border-blue-300 rounded"
+                    rows={5}
+                    autoFocus
+                    placeholder="List the requirements this solution must fulfill (use bullet points with - at the start of each line)"
+                  />
+                </div>
+              ) : (
+                <div 
+                  className="text-gray-600 group cursor-pointer"
+                  onClick={(e) => onUpdateTask && handleInlineEdit('requirements')(e)}
+                >
+                  <ReactMarkdown>{task.requirements}</ReactMarkdown>
+                  {onUpdateTask && (
+                    <span className="ml-2 text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                      edit
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Technical Plan - NEW FIELD */}
+          {(task.technicalPlan || isEditingTechnicalPlan) && (
+            <div className="mt-4 text-base">
+              <h4 className="font-medium text-gray-700 mb-1">Technical Plan</h4>
+              {isEditingTechnicalPlan ? (
+                <div onClick={(e) => e.stopPropagation()} className="w-full">
+                  <textarea
+                    value={editedTechnicalPlan}
+                    onChange={(e) => setEditedTechnicalPlan(e.target.value)}
+                    onBlur={handleInlineSubmit('technicalPlan')}
+                    onKeyDown={handleInlineKeyDown('technicalPlan')}
+                    className="w-full px-2 py-1 text-base text-gray-600 border border-blue-300 rounded"
+                    rows={5}
+                    autoFocus
+                    placeholder="Detail the step-by-step implementation plan (use numbered list with 1., 2., etc.)"
+                  />
+                </div>
+              ) : (
+                <div 
+                  className="text-gray-600 group cursor-pointer"
+                  onClick={(e) => onUpdateTask && handleInlineEdit('technicalPlan')(e)}
+                >
+                  <ReactMarkdown>{task.technicalPlan}</ReactMarkdown>
+                  {onUpdateTask && (
+                    <span className="ml-2 text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                      edit
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
