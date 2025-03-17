@@ -28,6 +28,7 @@ export default function TasksCorePage() {
     markTaskTested,
     deleteTask,
     updateTaskDate,
+    updateTask,
     addTask,
     refreshTasks,
     taskCountsByStatus
@@ -155,6 +156,7 @@ export default function TasksCorePage() {
               onMarkTested={markTaskTested}
               onDelete={deleteTask}
               onUpdateDate={updateTaskDate}
+              onUpdateTask={(taskId, project, updates) => updateTask(taskId, updates)}
             />
           ))}
         </div>
