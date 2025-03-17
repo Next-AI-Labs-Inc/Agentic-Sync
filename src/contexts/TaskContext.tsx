@@ -44,6 +44,9 @@ interface TaskContextValue {
   updateTask: (taskId: string, updateData: Partial<Task>) => Promise<void>;
   filteredTasks: Task[];
   taskCountsByStatus: Record<string, number>;
+  dedupeEnabled: boolean;
+  setDedupeEnabled: (enabled: boolean) => void;
+  runManualDedupe: () => void;
 }
 
 const TaskContext = createContext<TaskContextValue | undefined>(undefined);
@@ -183,6 +186,8 @@ export function TaskProvider({
   const [sortBy, setSortBy] = useState<SortOption>('created');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [taskCountsByStatus, setTaskCountsByStatus] = useState<Record<string, number>>({});
+  // Flag to make deduplication optional - default to false for better performance
+  const [dedupeEnabled, setDedupeEnabled] = useState<boolean>(false);
 
   // Load filter preferences from localStorage on initial render
   useEffect(() => {
@@ -322,6 +327,20 @@ export function TaskProvider({
     setLocalTaskCache(newCache);
   }, [tasks]);
 
+  // Function to manually trigger deduplication
+  const runManualDedupe = useCallback(() => {
+    if (tasks.length === 0) return;
+    
+    console.log('Manually running deduplication...');
+    const deDupedTasks = deduplicateTasks(tasks);
+    
+    // Update tasks with deduplicated version
+    setTasks(deDupedTasks);
+    setTaskCountsByStatus(calculateStatusCounts(deDupedTasks));
+    
+    console.log(`Deduplication complete: ${tasks.length} → ${deDupedTasks.length} tasks`);
+  }, [tasks]);
+  
   // Refresh tasks from the MongoDB API
   const refreshTasks = useCallback(async () => {
     // Track current API request with an AbortController
@@ -369,12 +388,18 @@ export function TaskProvider({
           id: task._id || task.id // Use MongoDB _id as our id
         }));
 
-        // Double check with our deduplication function
-        const deDupedTasks = deduplicateTasks(processedTasks);
-        console.log(`After deduplication: ${deDupedTasks.length} tasks`);
+        // Only run deduplication if enabled
+        let finalTasks = processedTasks;
+        if (dedupeEnabled) {
+          console.log('Deduplication is enabled, running deduplication...');
+          finalTasks = deduplicateTasks(processedTasks);
+          console.log(`After deduplication: ${finalTasks.length} tasks`);
+        } else {
+          console.log('Deduplication is disabled for better performance');
+        }
 
         // Always sort by newest first
-        const sortedTasks = sortByNewestFirst(deDupedTasks);
+        const sortedTasks = sortByNewestFirst(finalTasks);
 
         // Only do verification in development mode
         if (process.env.NODE_ENV === 'development' && sortedTasks.length >= 2) {
@@ -576,38 +601,58 @@ export function TaskProvider({
     };
   }, [projectFilter]); // Remove refreshTasks from dependencies to prevent loops
 
+  // Memoize date for recent-completed filter calculation
+  const twoDaysAgoMemo = React.useMemo(() => {
+    const date = new Date();
+    date.setDate(date.getDate() - 2);
+    return date.getTime();
+  }, []);
+
+  // Pre-compute filter predicates for better performance
+  const filterPredicates = React.useMemo(() => {
+    return {
+      // Default 'all' filter (excludes done/reviewed)
+      all: (task: Task): boolean => task.status !== 'done' && task.status !== 'reviewed',
+      
+      // 'pending' filter (excludes done/reviewed) - identical to 'all'
+      pending: (task: Task): boolean => task.status !== 'done' && task.status !== 'reviewed',
+      
+      // 'recent-completed' filter (done/reviewed within last 2 days)
+      recentCompleted: (task: Task): boolean => {
+        return Boolean(
+          (task.status === 'done' || task.status === 'reviewed') &&
+          task.completedAt &&
+          new Date(task.completedAt).getTime() > twoDaysAgoMemo
+        );
+      },
+      
+      // Status-specific filters
+      byStatus: (status: string) => (task: Task): boolean => task.status === status
+    };
+  }, [twoDaysAgoMemo]);
+  
   // Filter tasks by status with optimized memoization
   const filteredTasks = React.useMemo(() => {
     // Quick return for empty tasks array
     if (!tasks.length) return [];
     
-    // For 'all' view, filter out 'done' status tasks by default
+    // Select the appropriate filter predicate
+    let filterFn: (task: Task) => boolean;
+    
     if (completedFilter === 'all') {
-      return tasks.filter((task) => task.status !== 'done' && task.status !== 'reviewed');
+      filterFn = filterPredicates.all;
+    } else if (completedFilter === 'pending') {
+      filterFn = filterPredicates.pending;
+    } else if (completedFilter === 'recent-completed') {
+      filterFn = filterPredicates.recentCompleted;
+    } else {
+      // Status-specific filter
+      filterFn = filterPredicates.byStatus(completedFilter);
     }
     
-    // Apply appropriate filter based on completedFilter
-    if (completedFilter === 'pending') {
-      return tasks.filter((task) => task.status !== 'done' && task.status !== 'reviewed');
-    } 
-    
-    if (completedFilter === 'recent-completed') {
-      const twoDaysAgo = new Date();
-      twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-      const twoDaysAgoTime = twoDaysAgo.getTime();
-
-      return tasks.filter((task) => {
-        return (
-          (task.status === 'done' || task.status === 'reviewed') &&
-          task.completedAt &&
-          new Date(task.completedAt).getTime() > twoDaysAgoTime
-        );
-      });
-    } 
-    
-    // Filter by specific status (proposed, todo, in-progress, done, reviewed)
-    return tasks.filter((task) => task.status === completedFilter);
-  }, [tasks, completedFilter]);
+    // Apply the selected filter predicate
+    return tasks.filter(filterFn);
+  }, [tasks, completedFilter, filterPredicates]);
 
   // Task operations with optimistic updates
   const updateTaskStatus = async (
@@ -955,7 +1000,10 @@ export function TaskProvider({
     updateTaskDate,
     updateTask,
     filteredTasks,
-    taskCountsByStatus
+    taskCountsByStatus,
+    dedupeEnabled,
+    setDedupeEnabled,
+    runManualDedupe
   };
 
   return <TaskContext.Provider value={value}>{children}</TaskContext.Provider>;

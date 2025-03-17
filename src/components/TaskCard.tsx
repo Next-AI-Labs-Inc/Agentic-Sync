@@ -290,7 +290,7 @@ function Popover({ content, position = 'top', children, className = '' }: Popove
   );
 }
 
-export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete, onUpdateDate, onUpdateTask }: TaskCardProps) {
+function TaskCard({ task, onStatusChange, onMarkTested, onDelete, onUpdateDate, onUpdateTask }: TaskCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [isNew, setIsNew] = useState(task._isNew || false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -1410,3 +1410,14 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
     </div>
   );
 }
+
+// Export a memoized version of the component to prevent unnecessary re-renders
+export default React.memo(TaskCard, (prevProps, nextProps) => {
+  // Compare the key properties to determine if re-render is needed
+  return (
+    prevProps.task.id === nextProps.task.id &&
+    prevProps.task.title === nextProps.task.title &&
+    prevProps.task.status === nextProps.task.status &&
+    prevProps.task.updatedAt === nextProps.task.updatedAt
+  );
+});

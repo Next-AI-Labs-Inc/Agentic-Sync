@@ -19,6 +19,9 @@ interface TaskFiltersProps {
   onAddNewClick: () => void;
   taskCountsByStatus?: Record<string, number>;
   refreshTasks?: () => Promise<any>;
+  dedupeEnabled?: boolean;
+  setDedupeEnabled?: (enabled: boolean) => void;
+  runManualDedupe?: () => void;
 }
 
 export default function TaskFilters({
@@ -33,7 +36,10 @@ export default function TaskFilters({
   setSortDirection,
   onAddNewClick,
   taskCountsByStatus = {},
-  refreshTasks
+  refreshTasks,
+  dedupeEnabled = false,
+  setDedupeEnabled,
+  runManualDedupe
 }: TaskFiltersProps) {
   // Sort projects alphabetically by name
   const sortedProjects = [...projects].sort((a, b) => 
@@ -203,7 +209,7 @@ export default function TaskFilters({
   
   // Actions for dropdown menu
   const getMenuItems = (): DropdownMenuItem[] => {
-    return [
+    const items: DropdownMenuItem[] = [
       {
         id: 'save-filter',
         label: 'Save Current Filter',
@@ -213,13 +219,37 @@ export default function TaskFilters({
       },
       {
         id: 'cleanup',
-        label: isCleaningUp ? 'Cleaning...' : 'Clean Duplicate Tasks',
+        label: isCleaningUp ? 'Cleaning...' : 'Clean Duplicate Tasks (Server)',
         icon: <FaBroom size={14} />,
         onClick: handleCleanupDuplicates,
         disabled: isCleaningUp,
         description: 'Remove duplicate tasks from the database'
       }
     ];
+    
+    // Add deduplication toggle if the prop is provided
+    if (setDedupeEnabled) {
+      items.push({
+        id: 'toggle-dedupe',
+        label: `${dedupeEnabled ? 'Disable' : 'Enable'} Client Deduplication`,
+        icon: <FaBroom size={14} />,
+        onClick: () => setDedupeEnabled(!dedupeEnabled),
+        description: `${dedupeEnabled ? 'Disable' : 'Enable'} automatic client-side deduplication (impacts performance)`
+      });
+    }
+    
+    // Add manual deduplication button if the function is provided
+    if (runManualDedupe) {
+      items.push({
+        id: 'manual-dedupe',
+        label: 'Run Manual Deduplication',
+        icon: <FaBroom size={14} />,
+        onClick: runManualDedupe,
+        description: 'Manually remove duplicate tasks from the current view'
+      });
+    }
+    
+    return items;
   };
 
   return (

@@ -1,44 +1,81 @@
-App verification started at 2025-03-17T19:08:08.370Z
-[2025-03-17T19:08:08.371Z] Starting verification process...
-[2025-03-17T19:08:08.372Z] 
+App verification started at 2025-03-17T20:27:49.803Z
+[2025-03-17T20:27:49.805Z] Starting verification process...
+[2025-03-17T20:27:49.805Z] 
 === Running verify-app-build ===
 
-[2025-03-17T19:08:08.408Z] 🧪 Verifying Next.js app build...
-[2025-03-17T19:08:08.408Z] 📋 Logs will be saved to: /Users/jedi/react_projects/ix/tasks/.app-build-test.log
-[2025-03-17T19:08:08.411Z] Building Next.js app...
-[2025-03-17T19:08:08.920Z] [stdout] > tasks@0.1.0 build
+[2025-03-17T20:27:49.837Z] 🧪 Verifying Next.js app build...
+[2025-03-17T20:27:49.837Z] 📋 Logs will be saved to: /Users/jedi/react_projects/ix/tasks/.app-build-test.log
+[2025-03-17T20:27:49.840Z] Building Next.js app...
+[2025-03-17T20:27:50.166Z] [stdout] > tasks@0.1.0 build
 > next build
-[2025-03-17T19:08:09.500Z] [stdout] [1m[38;2;173;127;168m ▲ Next.js 14.1.3[39m[22m
-[2025-03-17T19:08:09.500Z] [stdout] - Environments: .env.local
+[2025-03-17T20:27:50.653Z] [stdout] [1m[38;2;173;127;168m ▲ Next.js 14.1.3[39m[22m
+[2025-03-17T20:27:50.653Z] [stdout] - Environments: .env.local
 
  [37m[1m [22m[39m Linting and checking validity of types ...
-[2025-03-17T19:08:11.921Z] [stderr] [31mFailed to compile.
-[39m
-[2025-03-17T19:08:11.921Z] [stderr] [36m./src/components/Popover.tsx[39m:[33m24[39m:[33m3[39m
-[31m[1mType error[22m[39m: Type '"top"' is not assignable to type '"TOP" | "RIGHT" | "BOTTOM" | "LEFT"'. Did you mean '"TOP"'?
-
-[0m [90m 22 |[39m [36mfunction[39m [33mPopover[39m({ [0m
-[0m [90m 23 |[39m   content[33m,[39m [0m
-[0m[31m[1m>[22m[39m[90m 24 |[39m   position [33m=[39m [33mPOPOVER_POSITIONS[39m[33m.[39m[33mTOP[39m[33m,[39m [0m
-[0m [90m    |[39m   [31m[1m^[22m[39m[0m
-[0m [90m 25 |[39m   children[33m,[39m [0m
-[0m [90m 26 |[39m   className [33m=[39m [32m''[39m [0m
-[0m [90m 27 |[39m }[33m:[39m [33mPopoverProps[39m) {[0m
-[2025-03-17T19:08:11.939Z] Build process exited with code 1
-[2025-03-17T19:08:11.939Z] ❌ VERIFICATION FAILED: Build exited with code 1
-[2025-03-17T19:08:11.940Z] 🛑 Terminated build process
-[2025-03-17T19:08:11.940Z] ❌ VERIFICATION FAILED: Next.js app build has errors
-[2025-03-17T19:08:11.942Z] ❌ verify-app-build failed with code 1
-[2025-03-17T19:08:11.942Z] 
+[2025-03-17T20:27:53.248Z] [stdout] [37m[1m [22m[39m Creating an optimized production build ...
+[2025-03-17T20:27:56.247Z] [stdout] [32m[1m✓[22m[39m Compiled successfully
+[2025-03-17T20:27:56.248Z] [stdout] [37m[1m [22m[39m Collecting page data ...
+[2025-03-17T20:27:56.390Z] [stdout] Initializing real-time task sync service...
+Setting up real-time event simulation
+[2025-03-17T20:27:56.396Z] [stdout] Initializing real-time task sync service...
+Setting up real-time event simulation
+[2025-03-17T20:27:56.403Z] [stdout] Initializing real-time task sync service...
+[2025-03-17T20:27:56.403Z] [stdout] Setting up real-time event simulation
+[2025-03-17T20:27:56.405Z] [stdout] Initializing real-time task sync service...
+Setting up real-time event simulation
+[2025-03-17T20:27:56.405Z] [stdout] Initializing real-time task sync service...
+[2025-03-17T20:27:56.405Z] [stdout] Initializing real-time task sync service...
+Setting up real-time event simulation
+[2025-03-17T20:27:56.407Z] [stdout] Setting up real-time event simulation
+[2025-03-17T20:27:56.412Z] [stdout] Initializing real-time task sync service...
+Setting up real-time event simulation
+[2025-03-17T20:27:56.413Z] [stdout] Initializing real-time task sync service...
+Setting up real-time event simulation
+[2025-03-17T20:27:56.811Z] [stdout] [37m[1m [22m[39m Generating static pages (0/8) ...
+[2025-03-17T20:27:56.876Z] [stdout] [37m[1m [22m[39m Generating static pages (2/8)
+[2025-03-17T20:27:56.876Z] [stdout] [37m[1m [22m[39m Generating static pages (4/8)
+[2025-03-17T20:27:56.933Z] [stdout] Initializing real-time task sync service...
+Setting up real-time event simulation
+[2025-03-17T20:27:56.973Z] [stdout] [37m[1m [22m[39m Generating static pages (6/8)
+[2025-03-17T20:27:57.091Z] [stdout] [32m[1m✓[22m[39m Generating static pages (8/8)
+[2025-03-17T20:27:57.679Z] [stdout] [37m[1m [22m[39m Finalizing page optimization ...
+[2025-03-17T20:27:57.679Z] [stdout] [37m[1m [22m[39m Collecting build traces ...
+[2025-03-17T20:28:01.998Z] [stdout]
+[2025-03-17T20:28:02.001Z] [stdout] [4mRoute (pages)[24m                              [4mSize[24m     [4mFirst Load JS[24m
+┌ ○ /                                      1.76 kB         [37m[1m170 kB[22m[39m
+├   /_app                                  0 B             [37m[1m119 kB[22m[39m
+├ ○ /404                                   182 B           [37m[1m119 kB[22m[39m
+├ λ /api/docs                              0 B             [37m[1m119 kB[22m[39m
+├ λ /api/initiatives                       0 B             [37m[1m119 kB[22m[39m
+├ λ /api/initiatives-old                   0 B             [37m[1m119 kB[22m[39m
+├ λ /api/initiatives/[id]                  0 B             [37m[1m119 kB[22m[39m
+├ ○ /docs                                  1.17 kB         [37m[1m154 kB[22m[39m
+├ ○ /initiatives                           2 kB            [37m[1m170 kB[22m[39m
+├ ○ /minimal                               2 kB            [37m[1m172 kB[22m[39m
+├ ○ /tasks                                 5.21 kB         [37m[1m175 kB[22m[39m
+└ ○ /tasks-core                            1.81 kB         [37m[1m172 kB[22m[39m
++ First Load JS shared by all              [37m[1m125 kB[22m[39m
+  ├ chunks/framework-03cd576e71e4cd66.js   45.2 kB
+  ├ chunks/main-c693b54913497348.js        36.4 kB
+  ├ chunks/pages/_app-d5d95b83c936b185.js  36.4 kB
+  └ other shared chunks (total)            6.95 kB
+[2025-03-17T20:28:02.002Z] [stdout] ○  (Static)   prerendered as static content
+λ  (Dynamic)  server-rendered on demand using Node.js
+[2025-03-17T20:28:02.020Z] Build process exited with code 0
+[2025-03-17T20:28:02.021Z] ✅ VERIFICATION PASSED: Next.js app built successfully
+[2025-03-17T20:28:02.022Z] 🛑 Terminated build process
+[2025-03-17T20:28:02.022Z] ✅ VERIFICATION PASSED: Next.js app built successfully
+[2025-03-17T20:28:02.026Z] ✅ verify-app-build passed!
+[2025-03-17T20:28:02.027Z] 
 === Running verify-app-startup ===
 
-[2025-03-17T19:08:11.969Z] 🧪 Verifying Next.js app startup...
-[2025-03-17T19:08:11.969Z] 📋 Logs will be saved to: /Users/jedi/react_projects/ix/tasks/.app-startup-test.log
-[2025-03-17T19:08:11.972Z] Waiting for Next.js app to start...
-[2025-03-17T19:08:12.175Z] [stdout] > tasks@0.1.0 dev
+[2025-03-17T20:28:02.069Z] 🧪 Verifying Next.js app startup...
+[2025-03-17T20:28:02.070Z] 📋 Logs will be saved to: /Users/jedi/react_projects/ix/tasks/.app-startup-test.log
+[2025-03-17T20:28:02.076Z] Waiting for Next.js app to start...
+[2025-03-17T20:28:02.414Z] [stdout] > tasks@0.1.0 dev
 > next dev -p 3045
-[2025-03-17T19:08:12.516Z] [stderr] [31m[1m⨯[22m[39m Failed to start server
-[2025-03-17T19:08:12.517Z] [stderr] Error: listen EADDRINUSE: address already in use :::3045
+[2025-03-17T20:28:02.758Z] [stderr] [31m[1m⨯[22m[39m Failed to start server
+[2025-03-17T20:28:02.759Z] [stderr] Error: listen EADDRINUSE: address already in use :::3045
     at Server.setupListenHandle [as _listen2] (node:net:1740:16)
     at listenInCluster (node:net:1788:12)
     at Server.listen (node:net:1876:7)
@@ -55,12 +92,11 @@ App verification started at 2025-03-17T19:08:08.370Z
   address: '::',
   port: 3045
 }
-[2025-03-17T19:08:12.523Z] [stdout] [?25h
-[2025-03-17T19:08:12.523Z] [stdout]
-[2025-03-17T19:08:12.578Z] Next.js process exited with code 0
-[2025-03-17T19:08:12.578Z] 🛑 Terminated Next.js process
-[2025-03-17T19:08:12.578Z] ❓ VERIFICATION INCONCLUSIVE: Could not determine app status
-[2025-03-17T19:08:12.580Z] ✅ verify-app-startup passed!
-[2025-03-17T19:08:12.580Z] 
-❌ VERIFICATION FAILED! Your app has issues that need to be fixed.
-[2025-03-17T19:08:12.580Z] - Build verification failed. Check .app-build-test.log for details.
+[2025-03-17T20:28:02.764Z] [stdout] [?25h
+[2025-03-17T20:28:02.764Z] [stdout]
+[2025-03-17T20:28:02.770Z] Next.js process exited with code 0
+[2025-03-17T20:28:02.771Z] 🛑 Terminated Next.js process
+[2025-03-17T20:28:02.771Z] ❓ VERIFICATION INCONCLUSIVE: Could not determine app status
+[2025-03-17T20:28:02.772Z] ✅ verify-app-startup passed!
+[2025-03-17T20:28:02.772Z] 
+✅ ALL VERIFICATIONS PASSED! Your app is working correctly.

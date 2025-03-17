@@ -1,13 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Head from 'next/head';
 import { useTasks } from '@/contexts/TaskContext';
 import { useProjects } from '@/contexts/ProjectContext';
 import TaskFilters from '@/components/TaskFilters';
 import TaskCard from '@/components/TaskCard';
 import TaskForm from '@/components/TaskForm';
+import { FixedSizeList as List } from 'react-window';
 
 export default function TasksPage() {
   const [showAddForm, setShowAddForm] = useState(false);
+  const [windowHeight, setWindowHeight] = useState(800); // Default height for SSR
+  const [isClient, setIsClient] = useState(false);
+  
+  // Handle window size calculation after client-side mount
+  useEffect(() => {
+    setIsClient(true);
+    setWindowHeight(window.innerHeight);
+    
+    const handleResize = () => {
+      setWindowHeight(window.innerHeight);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   const { 
     filteredTasks, 
@@ -28,7 +44,10 @@ export default function TasksPage() {
     updateTaskDate,
     updateTask,
     refreshTasks,
-    taskCountsByStatus
+    taskCountsByStatus,
+    dedupeEnabled,
+    setDedupeEnabled,
+    runManualDedupe
   } = useTasks();
   
   const { projects, loading: projectsLoading } = useProjects();
@@ -108,6 +127,9 @@ export default function TasksPage() {
         onAddNewClick={() => setShowAddForm(true)}
         taskCountsByStatus={taskCountsByStatus}
         refreshTasks={refreshTasks}
+        dedupeEnabled={dedupeEnabled}
+        setDedupeEnabled={setDedupeEnabled}
+        runManualDedupe={runManualDedupe}
       />
       
       {/* Task Creation Form */}
@@ -143,26 +165,50 @@ export default function TasksPage() {
               {filteredTasks.length} {filteredTasks.length === 1 ? 'task' : 'tasks'} found
             </div>
             
-            <div className="space-y-4">
-              {filteredTasks.map((task, index) => (
-                <div 
-                  key={`${task.id}-${task.project}`}
-                  className="task-card-container animate-fade-in"
-                  style={{ 
-                    animationDelay: `${index * 50}ms`,
-                  }}
+            {filteredTasks.length > 20 && isClient ? (
+              // For larger lists, use virtualized rendering - only on client side
+              <div style={{ height: '70vh', width: '100%' }}>
+                <List
+                  height={Math.min(windowHeight * 0.7, filteredTasks.length * 200)}
+                  width="100%"
+                  itemCount={filteredTasks.length}
+                  itemSize={200} // Approximate height of each task card
+                  overscanCount={3} // Number of items to render above/below the visible area
                 >
-                  <TaskCard 
-                    task={task}
-                    onStatusChange={updateTaskStatus}
-                    onMarkTested={markTaskTested}
-                    onDelete={deleteTask}
-                    onUpdateDate={updateTaskDate}
-                    onUpdateTask={(taskId, project, updates) => updateTask(taskId, updates)}
-                  />
-                </div>
-              ))}
-            </div>
+                  {({ index, style }) => (
+                    <div style={style} className="py-2">
+                      <TaskCard 
+                        task={filteredTasks[index]}
+                        onStatusChange={updateTaskStatus}
+                        onMarkTested={markTaskTested}
+                        onDelete={deleteTask}
+                        onUpdateDate={updateTaskDate}
+                        onUpdateTask={(taskId, project, updates) => updateTask(taskId, updates)}
+                      />
+                    </div>
+                  )}
+                </List>
+              </div>
+            ) : (
+              // For smaller lists, use regular rendering without animation delays
+              <div className="space-y-4">
+                {filteredTasks.map((task) => (
+                  <div 
+                    key={`${task.id}-${task.project}`}
+                    className="task-card-container"
+                  >
+                    <TaskCard 
+                      task={task}
+                      onStatusChange={updateTaskStatus}
+                      onMarkTested={markTaskTested}
+                      onDelete={deleteTask}
+                      onUpdateDate={updateTaskDate}
+                      onUpdateTask={(taskId, project, updates) => updateTask(taskId, updates)}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </>
         )}
       </div>
