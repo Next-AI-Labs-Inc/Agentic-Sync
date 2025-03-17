@@ -1,6 +1,6 @@
 # IX Tasks
 
-A comprehensive task management system with MongoDB integration, featuring an instant, social media-like UI experience.
+A comprehensive task management system aligned with the Getting Things Done (GTD) methodology and enhanced to support AI agent workflow integration.
 
 ## Project Status
 
@@ -8,7 +8,76 @@ A comprehensive task management system with MongoDB integration, featuring an in
 - **Tasks View**: Fully functional with inline editing and optimistic updates
 - **Initiatives View**: Functional but being updated to match Tasks UI pattern
 - **Documentation**: Currently only the home page is available. Sub-pages have been temporarily disabled due to routing issues and will be reimplemented in a future update.
-- **KPI Feature**: Completely removed to simplify the application
+
+## Task Status Workflow
+
+This task management system implements GTD methodology with stages optimized for both human and AI agent workflows:
+
+```
+┌───────────┐  ┌────────────┐  ┌────────────┐  ┌────────────┐  ┌────────────┐
+│ Collection │  │ Processing │  │ Organizing │  │  Engaging  │  │  Reference │
+└─────┬─────┘  └─────┬──────┘  └─────┬──────┘  └─────┬──────┘  └─────┬──────┘
+      │              │               │               │               │
+      ▼              ▼               ▼               ▼               ▼
+   [INBOX]       [PROPOSED]       [TODO]       [IN-PROGRESS]    [REVIEWED]
+[BRAINSTORM]     [BACKLOG]       [MAYBE]         [DONE]        [ARCHIVED]
+                                               [ON-HOLD]
+```
+
+### GTD Workflow Status Actions
+
+#### Collection Phase
+- **Inbox**: Initial collection point for new ideas and tasks
+  - *Primary Action*: Move to Brainstorm
+  - *Secondary Actions*: Mark Tested, Delete
+
+- **Brainstorm**: Development phase for new ideas
+  - *Primary Action*: Move to Proposed for consideration
+  - *Secondary Actions*: Mark Tested, Delete
+  
+#### Processing Phase
+- **Proposed**: Task has been proposed (often by AI) but not accepted
+  - *Primary Action*: Move to Todo 
+  - *Secondary Actions*: Mark Tested, Delete
+
+- **Backlog**: Task is in the backlog for future consideration
+  - *Primary Action*: Move to Todo
+  - *Secondary Actions*: Mark Tested, Delete
+  
+#### Organizing Phase
+- **Maybe** (Someday/Maybe): Items to consider later but not currently actionable
+  - *Primary Action*: Move to Backlog
+  - *Secondary Actions*: Mark Tested, Delete
+  
+- **Todo**: Task is ready to be worked on
+  - *Primary Actions*: Start Progress, To Backlog
+  - *Secondary Actions*: Mark Tested, Delete
+  
+#### Engaging Phase
+- **In Progress**: Task is currently being worked on
+  - *Primary Actions*: Mark Done, Put On Hold
+  - *Secondary Actions*: Mark Tested, Delete
+  
+- **On Hold**: Task is temporarily paused
+  - *Primary Action*: Resume Progress
+  - *Secondary Actions*: Mark Tested, Delete
+  
+- **Done**: Task has been completed and is ready for review
+  - *Primary Actions*: Mark Reviewed, Still Working
+  - *Secondary Actions*: Delete
+  
+#### Reference Phase
+- **Reviewed**: Task has been completed and reviewed
+  - *Primary Actions*: Archive Task, Reopen Task
+  - *Secondary Actions*: Delete
+  
+- **Archived**: Task has been archived
+  - *Primary Actions*: Unarchive
+  - *Secondary Actions*: Delete
+
+### Special Filters
+- **All**: Shows all tasks (except archived)
+- **Pending**: All tasks that are not yet completed or reviewed
 
 ## Features
 
@@ -16,60 +85,41 @@ A comprehensive task management system with MongoDB integration, featuring an in
 - **Task Management**: Create, update, and track tasks across projects
 - **Initiative Tracking**: Organize work under strategic initiatives
 - **MongoDB Integration**: Seamless synchronization with the database
+- **Author/Owner Display**: Tasks show their creator/owner (automatically detects current user as "Jonathan")
+- **AI Agent Integration**: Special support for AI-generated tasks with deployment capabilities
 
 ## Recent Enhancements
 
 This project has been enhanced with:
 
+- **GTD Methodology Integration**: Full Getting Things Done workflow implementation
+- **AI Agent Workflow**: Support for AI-generated tasks with special handling
 - **Instant, Social Media-like Experience**: Tasks appear, update, and disappear instantly
 - **Optimistic UI Updates**: All changes happen immediately in the UI before server confirmation
 - **Animation System**: Subtle animations provide visual feedback for all actions
-- **No Confirmation Dialogs**: Streamlined workflow without interruptions
-- **Background Synchronization**: API calls run in the background without blocking the UI
 
-### Initiatives View Enhancements (March 2025)
+### Tasks Enhancements (March 2025)
 
-The Initiatives view has been significantly improved with the following features:
+- **Claude Agent Deployment**: Each task can launch a terminal with task-specific system prompts
+- **Improved Task Status Flow**: Reorganized to support GTD methodology
+- **Flexible Filter Layout**: Horizontal scrolling filters with logical grouping
+- **Enhanced Task Cards**: Improved inline editing and expandable details
 
-- **MongoDB Integration**: Initiatives are now stored in MongoDB for persistent, reliable storage
-- **Modern UI Elements**: 
-  - Always-visible action buttons (no more hover to reveal)
-  - Proper display of initiative descriptions
-  - Improved card layout with expandable details
-  - Visual feedback for status changes
-- **Advanced Sorting and Filtering**:
-  - Sort by creation date, update date, priority, or status
-  - Filter by initiative status (planning, in-progress, etc.)
-  - Controls for ascending/descending sort order
-- **Optimistic UI Updates**: Changes to initiatives appear immediately before server confirmation
-- **Improved Loading Experience**: Eliminated UI flickering during data loading
+## Author/Owner Display
 
-#### Setting Up Initiatives MongoDB Integration
+Tasks display their author/owner information. The system automatically detects:
 
-A migration script has been created to move initiative data from JSON files to MongoDB:
-
-```bash
-# Install required dependencies
-npm install
-
-# Run the migration script
-npm run migrate-initiatives
-
-# Start the development server
-npm run dev
-```
-
-This migration safely deduplicates initiatives to prevent data inconsistencies, similar to the task deduplication system.
+- Current user (Jonathan) as the author for local tasks
+- Other users' names for tasks they create
+- Author information is visible in both compact and expanded views
 
 ## Documentation
 
-Complete documentation is available in the application under the Docs tab. Key documentation includes:
+Key documentation includes:
 
 - [Enhanced UI Guide](./docs/ENHANCED_UI_GUIDE.md): Details of the instant UI updates and animations
 - [Initiatives Guide](./docs/initiatives-guide.md): API and usage documentation for Initiatives
 - [Social Media-like Experience](./docs/SOCIAL_MEDIA_LIKE_EXPERIENCE.md): Overview of the instant UI experience
-
-A comprehensive documentation enhancement project is in progress (Task ID: 67d72967821434ea4afa3158) which will provide complete coverage of all components, APIs, and workflows.
 
 ## Getting Started
 

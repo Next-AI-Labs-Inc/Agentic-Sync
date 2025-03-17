@@ -380,6 +380,25 @@ export default function TaskFilters({
             </button>
           </div>
           
+          {/* Someday/Maybe column */}
+          <div className="flex flex-col space-y-1">
+            <div className="px-3 py-1.5 text-sm font-medium text-gray-500 whitespace-nowrap flex items-center border-b border-gray-300">
+              Someday/Maybe
+            </div>
+            
+            {/* Maybe */}
+            <button
+              onClick={() => setCompletedFilter(TASK_STATUSES.MAYBE)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+                ${completedFilter === TASK_STATUSES.MAYBE ? STATUS_DISPLAY[TASK_STATUSES.MAYBE].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {STATUS_DISPLAY[TASK_STATUSES.MAYBE].label}
+              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+                {taskCountsByStatus[TASK_STATUSES.MAYBE] || 0}
+              </span>}
+            </button>
+          </div>
+          
           {/* Source Tasks column */}
           <div className="flex flex-col space-y-1">
             <div className="px-3 py-1.5 text-sm font-medium text-gray-500 whitespace-nowrap flex items-center border-b border-gray-300">
@@ -414,25 +433,6 @@ export default function TaskFilters({
               {STATUS_DISPLAY[TASK_STATUSES.PROPOSED].label}
               {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
                 {taskCountsByStatus[TASK_STATUSES.PROPOSED] || 0}
-              </span>}
-            </button>
-          </div>
-            
-          {/* Someday/Maybe column */}
-          <div className="flex flex-col space-y-1">
-            <div className="px-3 py-1.5 text-sm font-medium text-gray-500 whitespace-nowrap flex items-center border-b border-gray-300">
-              Someday/Maybe
-            </div>
-            
-            {/* Maybe */}
-            <button
-              onClick={() => setCompletedFilter(TASK_STATUSES.MAYBE)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
-                ${completedFilter === TASK_STATUSES.MAYBE ? STATUS_DISPLAY[TASK_STATUSES.MAYBE].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-            >
-              {STATUS_DISPLAY[TASK_STATUSES.MAYBE].label}
-              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
-                {taskCountsByStatus[TASK_STATUSES.MAYBE] || 0}
               </span>}
             </button>
           </div>

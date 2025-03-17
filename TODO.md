@@ -1,5 +1,29 @@
 # Tasks Management System TODOs
 
+## High Priority: Enable Claude Agent Deployment from each task
+
+Implement system to launch Claude with task-specific system prompts:
+
+1. Create task-specific Claude system prompt generator
+   - Generate different prompts based on task stage (Todo vs In-Progress vs Review)
+   - Include task details (title, description, requirements, etc.)
+   - Customize prompt based on task context and status
+
+2. Implement terminal launcher
+   - Add button to open new terminal window with the correct system prompt
+   - Configure terminal to launch Claude with task-specific parameters
+   - Pass task ID to terminal for reference
+
+3. Create prompt template editor
+   - Add UI to customize default prompt templates
+   - Support per-task prompt customization
+   - Save user prompt preferences
+
+4. Author detection
+   - Automatically detect current user as "Jonathan" for locally created tasks
+   - Add author field to task schema
+   - Display author in task cards (non-collapsed view)
+
 ## Brainstorm Status Implementation
 
 The Brainstorm status has been added to the UI with the following changes:
