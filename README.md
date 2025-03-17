@@ -66,7 +66,10 @@ This migration safely deduplicates initiatives to prevent data inconsistencies, 
 Complete documentation is available in the application under the Docs tab. Key documentation includes:
 
 - [Enhanced UI Guide](./docs/ENHANCED_UI_GUIDE.md): Details of the instant UI updates and animations
-- Comprehensive guides for using Tasks, Initiatives, and KPIs
+- [Initiatives Guide](./docs/initiatives-guide.md): API and usage documentation for Initiatives
+- [Social Media-like Experience](./docs/SOCIAL_MEDIA_LIKE_EXPERIENCE.md): Overview of the instant UI experience
+
+A comprehensive documentation enhancement project is in progress (Task ID: 67d72967821434ea4afa3158) which will provide complete coverage of all components, APIs, and workflows.
 
 ## Getting Started
 

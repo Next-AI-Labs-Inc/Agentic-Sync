@@ -125,7 +125,7 @@ export function InitiativeProvider({ children }: { children: ReactNode }) {
     
     try {
       // Use mock data directly without attempting API calls
-      const sampleInitiatives = [
+      const sampleInitiatives: Initiative[] = [
         {
           id: 1,
           name: "User Impact UI Enhancement",

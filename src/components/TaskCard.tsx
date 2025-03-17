@@ -9,18 +9,24 @@ import {
   FaArrowLeft,
   FaEye,
   FaInfoCircle,
-  FaCog
+  FaCog,
+  FaPause,
+  FaListAlt,
+  FaArchive
 } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import { Task } from '@/types';
 import DropdownMenu from './DropdownMenu';
+import EditableItemList from './EditableItems/EditableItemList';
+import { parseListString, formatBulletedList, formatNumberedList } from '@/utils/listParser';
+import { POPOVER_POSITIONS } from '@/constants/ui';
 
 interface TaskCardProps {
   task: Task;
   onStatusChange: (
     taskId: string,
     project: string,
-    status: 'proposed' | 'todo' | 'in-progress' | 'done' | 'reviewed'
+    status: 'proposed' | 'backlog' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived'
   ) => Promise<void>;
   onMarkTested: (taskId: string, project: string) => Promise<void>;
   onDelete: (taskId: string, project: string) => Promise<void>;
@@ -284,7 +290,7 @@ function Popover({ content, position = 'top', children, className = '' }: Popove
   );
 }
 
-export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete, onUpdateDate, onUpdateTask }: TaskCardProps) {
+function TaskCard({ task, onStatusChange, onMarkTested, onDelete, onUpdateDate, onUpdateTask }: TaskCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [isNew, setIsNew] = useState(task._isNew || false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -296,14 +302,10 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [isEditingUserImpact, setIsEditingUserImpact] = useState(false);
-  const [isEditingRequirements, setIsEditingRequirements] = useState(false);
-  const [isEditingTechnicalPlan, setIsEditingTechnicalPlan] = useState(false);
   const [editedInitiative, setEditedInitiative] = useState(task.initiative || '');
   const [editedTitle, setEditedTitle] = useState(task.title);
   const [editedDescription, setEditedDescription] = useState(task.description || '');
   const [editedUserImpact, setEditedUserImpact] = useState(task.userImpact || '');
-  const [editedRequirements, setEditedRequirements] = useState(task.requirements || '');
-  const [editedTechnicalPlan, setEditedTechnicalPlan] = useState(task.technicalPlan || '');
   
   // Initialize date value once when editing starts
   useEffect(() => {
@@ -374,12 +376,6 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
       case 'userImpact':
         setIsEditingUserImpact(true);
         break;
-      case 'requirements':
-        setIsEditingRequirements(true);
-        break;
-      case 'technicalPlan':
-        setIsEditingTechnicalPlan(true);
-        break;
     }
   };
   
@@ -409,14 +405,6 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
         updates.userImpact = editedUserImpact.trim();
         setIsEditingUserImpact(false);
         break;
-      case 'requirements':
-        updates.requirements = editedRequirements.trim();
-        setIsEditingRequirements(false);
-        break;
-      case 'technicalPlan':
-        updates.technicalPlan = editedTechnicalPlan.trim();
-        setIsEditingTechnicalPlan(false);
-        break;
     }
     
     if (Object.keys(updates).length > 0) {
@@ -445,21 +433,12 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
           setEditedUserImpact(task.userImpact || '');
           setIsEditingUserImpact(false);
           break;
-        case 'requirements':
-          setEditedRequirements(task.requirements || '');
-          setIsEditingRequirements(false);
-          break;
-        case 'technicalPlan':
-          setEditedTechnicalPlan(task.technicalPlan || '');
-          setIsEditingTechnicalPlan(false);
-          break;
       }
       e.preventDefault();
       e.stopPropagation();
     } else if (e.key === 'Enter' && !e.shiftKey) {
       // Submit on Enter but not with Shift (for multiline text areas)
-      if (field !== 'description' && field !== 'userImpact' && 
-          field !== 'requirements' && field !== 'technicalPlan') {
+      if (field !== 'description' && field !== 'userImpact') {
         handleInlineSubmit(field)(e as unknown as React.FormEvent);
       }
     }
@@ -467,18 +446,27 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
 
   // Handle card click for expansion
   const handleCardClick = (e: React.MouseEvent) => {
-    // Only prevent default if it's a button or form element
+    // First check if the click should be ignored
     if (e.target instanceof HTMLButtonElement || 
         e.target instanceof HTMLInputElement || 
-        e.target instanceof HTMLFormElement) {
-      return; // Let buttons and form inputs handle their own clicks
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLFormElement ||
+        // Check for editors and interactive elements
+        (e.target instanceof HTMLElement && 
+         (e.target.closest('.popover') || 
+          e.target.closest('.dropdown-menu') ||
+          e.target.closest('.editable-item')))
+    ) {
+      return; // Let interactive elements handle their own clicks
     }
+    
+    // Toggle expanded state
     setExpanded(!expanded);
   };
 
   // Status change handlers with transition effects
   const handleStatusChange =
-    (newStatus: 'proposed' | 'todo' | 'in-progress' | 'done' | 'reviewed') =>
+    (newStatus: 'proposed' | 'backlog' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived') =>
     (e: React.MouseEvent) => {
       e.stopPropagation(); // Prevent card expansion
       
@@ -526,14 +514,20 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
     switch (status) {
       case 'proposed':
         return 'bg-purple-100 text-purple-800';
+      case 'backlog':
+        return 'bg-slate-100 text-slate-800';
       case 'todo':
         return 'bg-blue-100 text-blue-800';
       case 'in-progress':
         return 'bg-yellow-100 text-yellow-800';
+      case 'on-hold':
+        return 'bg-amber-100 text-amber-800';
       case 'done':
         return 'bg-green-100 text-green-800';
       case 'reviewed':
         return 'bg-indigo-100 text-indigo-800';
+      case 'archived':
+        return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -557,7 +551,7 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
               </p>
             </div>
           }
-          position="top"
+          position={POPOVER_POSITIONS.TOP}
         >
           <button
             key="move-to-todo"
@@ -581,7 +575,7 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
               </p>
             </div>
           }
-          position="top"
+          position={POPOVER_POSITIONS.TOP}
         >
           <button
             key="move-to-in-progress"
@@ -590,6 +584,55 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
           >
             <FaArrowRight className="mr-1" size={12} />
             Start Progress
+          </button>
+        </Popover>
+      );
+      
+      // Add To Backlog button
+      actions.push(
+        <Popover
+          key="move-to-backlog-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">Move to backlog?</h4>
+              <p className="text-sm text-gray-600">
+                This will move the task to your backlog for future consideration, keeping it in your system but out of your active workflow.
+              </p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-backlog"
+            onClick={handleStatusChange('backlog')}
+            className="btn-outline-secondary"
+          >
+            <FaListAlt className="mr-1" size={12} />
+            To Backlog
+          </button>
+        </Popover>
+      );
+    } else if (task.status === 'backlog') {
+      actions.push(
+        <Popover
+          key="backlog-to-todo-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">Ready to work on this backlog item?</h4>
+              <p className="text-sm text-gray-600">
+                Click this button to move this task from your backlog to your todo list, indicating it's now ready to be worked on.
+              </p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="backlog-to-todo"
+            onClick={handleStatusChange('todo')}
+            className="btn-outline-primary"
+          >
+            <FaArrowRight className="mr-1" size={12} />
+            Move to Todo
           </button>
         </Popover>
       );
@@ -606,7 +649,7 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
               </p>
             </div>
           }
-          position="top"
+          position={POPOVER_POSITIONS.TOP}
         >
           <button
             key="move-to-done"
@@ -615,6 +658,55 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
           >
             <FaArrowRight className="mr-1" size={12} />
             Mark Done
+          </button>
+        </Popover>
+      );
+      
+      // Add On Hold button
+      actions.push(
+        <Popover
+          key="move-to-on-hold-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">Put on hold?</h4>
+              <p className="text-sm text-gray-600">
+                This will temporarily pause work on this task, indicating that it's not being actively worked on but hasn't been abandoned.
+              </p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-on-hold"
+            onClick={handleStatusChange('on-hold')}
+            className="btn-outline-secondary"
+          >
+            <FaPause className="mr-1" size={12} />
+            Put On Hold
+          </button>
+        </Popover>
+      );
+    } else if (task.status === 'on-hold') {
+      actions.push(
+        <Popover
+          key="resume-progress-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">Ready to resume work?</h4>
+              <p className="text-sm text-gray-600">
+                Click this button to resume work on this task that was previously put on hold.
+              </p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="resume-progress"
+            onClick={handleStatusChange('in-progress')}
+            className="btn-outline-primary"
+          >
+            <FaArrowRight className="mr-1" size={12} />
+            Resume Progress
           </button>
         </Popover>
       );
@@ -630,7 +722,7 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
               </p>
             </div>
           }
-          position="top"
+          position={POPOVER_POSITIONS.TOP}
         >
           <button
             key="move-to-reviewed"
@@ -655,7 +747,7 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
               </p>
             </div>
           }
-          position="top"
+          position={POPOVER_POSITIONS.TOP}
         >
           <button
             key="move-to-in-progress"
@@ -664,6 +756,31 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
           >
             <FaArrowLeft className="mr-1" size={12} />
             Still Working
+          </button>
+        </Popover>
+      );
+    } else if (task.status === 'archived') {
+      // Add ability to unarchive a task
+      actions.push(
+        <Popover
+          key="unarchive-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">Unarchive this task?</h4>
+              <p className="text-sm text-gray-600">
+                This will move the task back to the reviewed state, making it visible in the active task lists again.
+              </p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="unarchive"
+            onClick={handleStatusChange('reviewed')}
+            className="btn-outline-secondary"
+          >
+            <FaArrowLeft className="mr-1" size={12} />
+            Unarchive
           </button>
         </Popover>
       );
@@ -680,7 +797,7 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
               </p>
             </div>
           }
-          position="top"
+          position={POPOVER_POSITIONS.TOP}
         >
           <button
             key="move-to-done"
@@ -689,6 +806,31 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
           >
             <FaArrowLeft className="mr-1" size={12} />
             Reopen Task
+          </button>
+        </Popover>
+      );
+      
+      // Add Archive button for reviewed tasks
+      actions.push(
+        <Popover
+          key="move-to-archived-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">Archive this task?</h4>
+              <p className="text-sm text-gray-600">
+                This will move the task to the archived state, keeping it for reference but removing it from your active task list.
+              </p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-archived"
+            onClick={handleStatusChange('archived')}
+            className="btn-outline-secondary"
+          >
+            <FaArchive className="mr-1" size={12} />
+            Archive
           </button>
         </Popover>
       );
@@ -707,7 +849,7 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
               </p>
             </div>
           }
-          position="top"
+          position={POPOVER_POSITIONS.TOP}
         >
           <button key="mark-tested" onClick={handleMarkTested} className="btn-outline-success">
             <FaCheck className="mr-1" size={12} />
@@ -729,7 +871,7 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
             </p>
           </div>
         }
-        position="top"
+        position={POPOVER_POSITIONS.TOP}
       >
         <button key="delete" onClick={handleDelete} className="btn-outline-danger">
           <FaTrash className="mr-1" size={12} />
@@ -747,11 +889,16 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
         task.status === 'reviewed' ? 'bg-gray-50' : 'bg-white'
       } ${isNew ? 'animate-fade-in border-l-4 border-l-blue-500' : ''} 
       ${isDeleting ? 'fade-out pointer-events-none' : ''}
+      ${expanded ? 'expanded' : ''}
       rounded-lg shadow-sm border border-gray-200 transition-all duration-200`}
     >
       <div className="p-4 cursor-pointer" onClick={(e) => {
-          // Only trigger handleCardClick if the card is not already expanded
-          if (!expanded) {
+          // Allow toggling expanded state when clicking the card,
+          // unless it's inside an interactive element
+          if (e.target === e.currentTarget || 
+              (e.target instanceof HTMLElement && !e.target.closest('.editable-item') && 
+               !e.target.closest('button') && !e.target.closest('input') && 
+               !e.target.closest('textarea'))) {
             handleCardClick(e);
           }
         }}>
@@ -779,20 +926,20 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
           {(task.initiative || isEditingInitiative) && (
             <div className="flex items-start justify-between mb-1">
               {isEditingInitiative ? (
-                <div onClick={(e) => e.stopPropagation()}>
-                  <input
-                    type="text"
+                <div onClick={(e) => e.stopPropagation()} className="w-full">
+                  <textarea
                     value={editedInitiative}
                     onChange={(e) => setEditedInitiative(e.target.value)}
                     onBlur={handleInlineSubmit('initiative')}
                     onKeyDown={handleInlineKeyDown('initiative')}
                     className="w-full px-2 py-1 text-lg font-semibold text-gray-800 font-anthropic border border-blue-300 rounded"
+                    rows={(editedInitiative.match(/\n/g) || []).length + 1}
                     autoFocus
                   />
                 </div>
               ) : (
                 <h2 
-                  className="text-lg font-semibold text-gray-800 font-anthropic group cursor-pointer"
+                  className="text-lg font-semibold text-gray-800 font-anthropic group cursor-pointer whitespace-pre-wrap break-words"
                   onClick={(e) => onUpdateTask && handleInlineEdit('initiative')(e)}
                 >
                   {task.initiative}
@@ -828,22 +975,22 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
           
           {/* Title row - with inline editing */}
           <div className={`flex items-start justify-between ${!task.initiative ? 'mb-1' : ''}`}>
-            <div className="flex items-center">
+            <div className="flex items-start w-full">
               {isEditingTitle ? (
                 <div onClick={(e) => e.stopPropagation()} className="w-full">
-                  <input
-                    type="text"
+                  <textarea
                     value={editedTitle}
                     onChange={(e) => setEditedTitle(e.target.value)}
                     onBlur={handleInlineSubmit('title')}
                     onKeyDown={handleInlineKeyDown('title')}
                     className="w-full px-2 py-1 text-lg font-normal font-anthropic border border-blue-300 rounded"
+                    rows={(editedTitle.match(/\n/g) || []).length + 1}
                     autoFocus
                   />
                 </div>
               ) : (
                 <h3
-                  className={`text-lg font-normal font-anthropic group cursor-pointer ${
+                  className={`text-lg font-normal font-anthropic group cursor-pointer whitespace-pre-wrap break-words ${
                     task.status === 'reviewed' ? 'text-gray-500' : 'text-gray-800'
                   }`}
                   onClick={(e) => onUpdateTask && handleInlineEdit('title')(e)}
@@ -972,7 +1119,7 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
                       </p>
                     </div>
                   }
-                  position="top"
+                  position={POPOVER_POSITIONS.TOP}
                 >
                   <span className="badge badge-tested">tested</span>
                 </Popover>
@@ -1148,93 +1295,107 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
             </div>
           )}
 
-          {/* Verification steps */}
-          {task.verificationSteps && task.verificationSteps.length > 0 && (
-            <div className="mt-4 text-base">
-              <h4 className="font-medium text-gray-700 mb-1">Verification Steps</h4>
-              <ul className="list-disc pl-5 text-gray-600">
-                {task.verificationSteps.map((step, index) => (
-                  <li key={index}>{step}</li>
-                ))}
-              </ul>
+          {/* Verification Steps - Editable Item List */}
+          {((task.verificationSteps && task.verificationSteps.length > 0) || onUpdateTask) && (
+            <div className="mt-4 text-base" onClick={(e) => e.stopPropagation()}>
+              {onUpdateTask ? (
+                <EditableItemList
+                  label="Verification Steps"
+                  items={task.verificationSteps || []}
+                  onUpdate={(newItems) => {
+                    if (onUpdateTask) {
+                      onUpdateTask(task.id, task.project, {
+                        verificationSteps: newItems
+                      });
+                    }
+                  }}
+                />
+              ) : (
+                <div className="text-gray-600">
+                  <h4 className="font-medium text-gray-700 mb-1">Verification Steps</h4>
+                  <ul className="list-disc pl-5 text-gray-600">
+                    {task.verificationSteps?.map((step, index) => (
+                      <li key={index}>{step}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Requirements - NEW FIELD */}
-          {(task.requirements || isEditingRequirements) && (
-            <div className="mt-4 text-base">
-              <h4 className="font-medium text-gray-700 mb-1">Requirements</h4>
-              {isEditingRequirements ? (
-                <div onClick={(e) => e.stopPropagation()} className="w-full">
-                  <textarea
-                    value={editedRequirements}
-                    onChange={(e) => setEditedRequirements(e.target.value)}
-                    onBlur={handleInlineSubmit('requirements')}
-                    onKeyDown={handleInlineKeyDown('requirements')}
-                    className="w-full px-2 py-1 text-base text-gray-600 border border-blue-300 rounded"
-                    rows={5}
-                    autoFocus
-                    placeholder="List the requirements this solution must fulfill (use bullet points with - at the start of each line)"
-                  />
-                </div>
+          {/* Requirements - Editable Item List */}
+          {(task.requirements || onUpdateTask) && (
+            <div className="mt-4 text-base" onClick={(e) => e.stopPropagation()}>
+              {onUpdateTask ? (
+                <EditableItemList
+                  label="Requirements"
+                  items={parseListString(task.requirements)}
+                  onUpdate={(newItems) => {
+                    if (onUpdateTask) {
+                      onUpdateTask(task.id, task.project, {
+                        requirements: formatBulletedList(newItems)
+                      });
+                    }
+                  }}
+                />
               ) : (
-                <div 
-                  className="text-gray-600 group cursor-pointer"
-                  onClick={(e) => onUpdateTask && handleInlineEdit('requirements')(e)}
-                >
+                <div className="text-gray-600">
+                  <h4 className="font-medium text-gray-700 mb-1">Requirements</h4>
                   <ReactMarkdown>{task.requirements}</ReactMarkdown>
-                  {onUpdateTask && (
-                    <span className="ml-2 text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                      edit
-                    </span>
-                  )}
                 </div>
               )}
             </div>
           )}
 
-          {/* Technical Plan - NEW FIELD */}
-          {(task.technicalPlan || isEditingTechnicalPlan) && (
-            <div className="mt-4 text-base">
-              <h4 className="font-medium text-gray-700 mb-1">Technical Plan</h4>
-              {isEditingTechnicalPlan ? (
-                <div onClick={(e) => e.stopPropagation()} className="w-full">
-                  <textarea
-                    value={editedTechnicalPlan}
-                    onChange={(e) => setEditedTechnicalPlan(e.target.value)}
-                    onBlur={handleInlineSubmit('technicalPlan')}
-                    onKeyDown={handleInlineKeyDown('technicalPlan')}
-                    className="w-full px-2 py-1 text-base text-gray-600 border border-blue-300 rounded"
-                    rows={5}
-                    autoFocus
-                    placeholder="Detail the step-by-step implementation plan (use numbered list with 1., 2., etc.)"
-                  />
-                </div>
+          {/* Technical Plan - Editable Item List */}
+          {(task.technicalPlan || onUpdateTask) && (
+            <div className="mt-4 text-base" onClick={(e) => e.stopPropagation()}>
+              {onUpdateTask ? (
+                <EditableItemList
+                  label="Technical Plan"
+                  items={parseListString(task.technicalPlan)}
+                  onUpdate={(newItems) => {
+                    if (onUpdateTask) {
+                      onUpdateTask(task.id, task.project, {
+                        technicalPlan: formatNumberedList(newItems)
+                      });
+                    }
+                  }}
+                />
               ) : (
-                <div 
-                  className="text-gray-600 group cursor-pointer"
-                  onClick={(e) => onUpdateTask && handleInlineEdit('technicalPlan')(e)}
-                >
+                <div className="text-gray-600">
+                  <h4 className="font-medium text-gray-700 mb-1">Technical Plan</h4>
                   <ReactMarkdown>{task.technicalPlan}</ReactMarkdown>
-                  {onUpdateTask && (
-                    <span className="ml-2 text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                      edit
-                    </span>
-                  )}
                 </div>
               )}
             </div>
           )}
 
-          {/* Next steps */}
-          {task.nextSteps && task.nextSteps.length > 0 && (
-            <div className="mt-4 text-base">
-              <h4 className="font-medium text-gray-700 mb-1">Next Steps</h4>
-              <ul className="list-disc pl-5 text-gray-600">
-                {task.nextSteps.map((step, index) => (
-                  <li key={index}>{step}</li>
-                ))}
-              </ul>
+          {/* Next Steps - Editable Item List */}
+          {((task.nextSteps && task.nextSteps.length > 0) || onUpdateTask) && (
+            <div className="mt-4 text-base" onClick={(e) => e.stopPropagation()}>
+              {onUpdateTask ? (
+                <EditableItemList
+                  label="Next Steps"
+                  items={task.nextSteps || []}
+                  onUpdate={(newItems) => {
+                    if (onUpdateTask) {
+                      onUpdateTask(task.id, task.project, {
+                        nextSteps: newItems
+                      });
+                    }
+                  }}
+                />
+              ) : (
+                <div className="text-gray-600">
+                  <h4 className="font-medium text-gray-700 mb-1">Next Steps</h4>
+                  <ul className="list-disc pl-5 text-gray-600">
+                    {task.nextSteps?.map((step, index) => (
+                      <li key={index}>{step}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
 
@@ -1263,3 +1424,22 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
     </div>
   );
 }
+
+// Export a memoized version of the component to prevent unnecessary re-renders
+export default React.memo(TaskCard, (prevProps, nextProps) => {
+  // Compare all relevant properties to ensure proper re-rendering
+  return (
+    prevProps.task.id === nextProps.task.id &&
+    prevProps.task.title === nextProps.task.title &&
+    prevProps.task.status === nextProps.task.status &&
+    prevProps.task.updatedAt === nextProps.task.updatedAt &&
+    prevProps.task.description === nextProps.task.description &&
+    prevProps.task.userImpact === nextProps.task.userImpact &&
+    prevProps.task.initiative === nextProps.task.initiative &&
+    prevProps.onStatusChange === nextProps.onStatusChange &&
+    prevProps.onMarkTested === nextProps.onMarkTested &&
+    prevProps.onDelete === nextProps.onDelete &&
+    prevProps.onUpdateDate === nextProps.onUpdateDate &&
+    prevProps.onUpdateTask === nextProps.onUpdateTask
+  );
+});

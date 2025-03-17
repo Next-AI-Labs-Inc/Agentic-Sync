@@ -118,8 +118,8 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </footer>
       
-      {/* User Task Tracker */}
-      <UserTaskTracker />
+      {/* User Task Tracker - To avoid test bugs in development, don't show in /docs pages */}
+      {!router.pathname.startsWith('/docs') && <UserTaskTracker />}
     </div>
   );
 }

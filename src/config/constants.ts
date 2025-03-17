@@ -10,10 +10,13 @@
  */
 export const TASK_STATUSES = {
   PROPOSED: 'proposed',
+  BACKLOG: 'backlog',
   TODO: 'todo',
   IN_PROGRESS: 'in-progress',
   DONE: 'done',
   REVIEWED: 'reviewed',
+  ON_HOLD: 'on-hold',
+  ARCHIVED: 'archived',
   
   // Special filter options
   ALL: 'all',
@@ -31,6 +34,12 @@ export const STATUS_DISPLAY = {
     icon: 'FaRegLightbulb',
     description: 'Task has been proposed but not started yet'
   },
+  [TASK_STATUSES.BACKLOG]: {
+    label: 'Backlog',
+    color: 'bg-slate-100 text-slate-800',
+    icon: 'FaListAlt',
+    description: 'Task is in the backlog for future consideration'
+  },
   [TASK_STATUSES.TODO]: {
     label: 'To Do',
     color: 'bg-blue-100 text-blue-800',
@@ -42,6 +51,12 @@ export const STATUS_DISPLAY = {
     color: 'bg-yellow-100 text-yellow-800',
     icon: 'FaSpinner',
     description: 'Task is currently being worked on'
+  },
+  [TASK_STATUSES.ON_HOLD]: {
+    label: 'On Hold',
+    color: 'bg-amber-100 text-amber-800',
+    icon: 'FaPause',
+    description: 'Task is temporarily paused'
   },
   [TASK_STATUSES.DONE]: {
     label: 'Done',
@@ -55,11 +70,17 @@ export const STATUS_DISPLAY = {
     icon: 'FaCheck',
     description: 'Task has been completed and reviewed'
   },
+  [TASK_STATUSES.ARCHIVED]: {
+    label: 'Archived',
+    color: 'bg-gray-100 text-gray-800',
+    icon: 'FaArchive',
+    description: 'Task has been archived and is no longer active'
+  },
   [TASK_STATUSES.ALL]: {
-    label: 'All Tasks',
+    label: 'All Active',
     color: 'bg-blue-100 text-blue-800',
     icon: 'FaTasks',
-    description: 'All tasks regardless of status'
+    description: 'All active tasks (excludes done and reviewed)'
   },
   [TASK_STATUSES.PENDING]: {
     label: 'All Pending',

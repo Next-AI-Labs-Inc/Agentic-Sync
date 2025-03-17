@@ -8,7 +8,7 @@ interface PopoverProps {
   /** Content to display inside the popover */
   content: React.ReactNode;
   /** Position of the popover relative to its trigger element */
-  position?: PopoverPosition;
+  position?: 'top' | 'right' | 'bottom' | 'left';
   /** Trigger element that toggles the popover visibility */
   children: React.ReactNode;
   /** Additional classes to apply to the popover trigger wrapper */
@@ -21,7 +21,7 @@ interface PopoverProps {
  */
 function Popover({ 
   content, 
-  position = POPOVER_POSITIONS.TOP, 
+  position = 'top',
   children, 
   className = '' 
 }: PopoverProps) {

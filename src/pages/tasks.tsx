@@ -1,13 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Head from 'next/head';
 import { useTasks } from '@/contexts/TaskContext';
 import { useProjects } from '@/contexts/ProjectContext';
 import TaskFilters from '@/components/TaskFilters';
 import TaskCard from '@/components/TaskCard';
 import TaskForm from '@/components/TaskForm';
+import { FixedSizeList as List } from 'react-window';
 
 export default function TasksPage() {
   const [showAddForm, setShowAddForm] = useState(false);
+  const [windowHeight, setWindowHeight] = useState(800); // Default height for SSR
+  const [isClient, setIsClient] = useState(false);
+  
+  // Handle window size calculation after client-side mount
+  useEffect(() => {
+    setIsClient(true);
+    setWindowHeight(window.innerHeight);
+    
+    const handleResize = () => {
+      setWindowHeight(window.innerHeight);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   const { 
     filteredTasks, 
@@ -26,8 +42,12 @@ export default function TasksPage() {
     deleteTask,
     addTask,
     updateTaskDate,
+    updateTask,
     refreshTasks,
-    taskCountsByStatus
+    taskCountsByStatus,
+    dedupeEnabled,
+    setDedupeEnabled,
+    runManualDedupe
   } = useTasks();
   
   const { projects, loading: projectsLoading } = useProjects();
@@ -65,7 +85,7 @@ export default function TasksPage() {
       }
     }
     
-    return 'No tasks found';
+    return 'No active tasks found (done and reviewed tasks are filtered out)';
   };
   
   return (
@@ -107,6 +127,9 @@ export default function TasksPage() {
         onAddNewClick={() => setShowAddForm(true)}
         taskCountsByStatus={taskCountsByStatus}
         refreshTasks={refreshTasks}
+        dedupeEnabled={dedupeEnabled}
+        setDedupeEnabled={setDedupeEnabled}
+        runManualDedupe={runManualDedupe}
       />
       
       {/* Task Creation Form */}
@@ -142,14 +165,12 @@ export default function TasksPage() {
               {filteredTasks.length} {filteredTasks.length === 1 ? 'task' : 'tasks'} found
             </div>
             
+            {/* Always use the same rendering approach regardless of list size to ensure consistency */}
             <div className="space-y-4">
-              {filteredTasks.map((task, index) => (
+              {filteredTasks.map((task) => (
                 <div 
                   key={`${task.id}-${task.project}`}
-                  className="task-card-container animate-fade-in"
-                  style={{ 
-                    animationDelay: `${index * 50}ms`,
-                  }}
+                  className="task-card-container relative" 
                 >
                   <TaskCard 
                     task={task}
@@ -157,10 +178,11 @@ export default function TasksPage() {
                     onMarkTested={markTaskTested}
                     onDelete={deleteTask}
                     onUpdateDate={updateTaskDate}
+                    onUpdateTask={(taskId, project, updates) => updateTask(taskId, updates)}
                   />
                 </div>
               ))}
-            </div>
+            </div>}
           </>
         )}
       </div>

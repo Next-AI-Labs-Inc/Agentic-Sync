@@ -37,8 +37,10 @@ export async function getTasks(filters?: Record<string, string | string[]>, sign
     // Add dedup parameter to signal the server to remove duplicates
     queryParams.append('dedup', 'true');
     
-    // Add cache-busting timestamp
-    queryParams.append('_t', Date.now().toString());
+    // Only add timestamp in development for debugging
+    if (process.env.NODE_ENV === 'development') {
+      queryParams.append('_t', Date.now().toString());
+    }
     
     const url = `/api/developer/tasks?${queryParams.toString()}`;
     console.log(`Fetching tasks from: ${url}`);
@@ -53,153 +55,31 @@ export async function getTasks(filters?: Record<string, string | string[]>, sign
       return [];
     }
     
-    // Check for and log duplicates before returning
+    // Get the tasks from the response
     const tasks = response.data.data;
     if (Array.isArray(tasks)) {
-      // Track duplicates by ID
-      const idMap = new Map();
-      const duplicatesById = [];
-      
-      // Track duplicates by title+project
-      const titleProjectMap = new Map();
-      const duplicatesByTitleProject = [];
-      
-      for (const task of tasks) {
-        // Skip if request was aborted
-        if (signal?.aborted) {
-          return [];
-        }
-        
-        // ID-based duplicate check
-        const id = task._id || task.id;
-        if (idMap.has(id)) {
-          duplicatesById.push({
-            id,
-            title: task.title.substring(0, 30) + (task.title.length > 30 ? '...' : ''),
-            project: task.project
-          });
-        } else {
-          idMap.set(id, true);
-        }
-        
-        // Title+Project based duplicate check
-        const titleProjectKey = `${task.title}:::${task.project}`;
-        if (titleProjectMap.has(titleProjectKey)) {
-          const existingId = titleProjectMap.get(titleProjectKey);
-          if (existingId !== id) { // Don't count if it's the same task (same ID)
-            duplicatesByTitleProject.push({
-              id,
-              existingId,
-              title: task.title.substring(0, 30) + (task.title.length > 30 ? '...' : ''),
-              project: task.project
-            });
-          }
-        } else {
-          titleProjectMap.set(titleProjectKey, id);
-        }
-      }
-      
-      // Check for abort again
+      // Skip deduplication if the server already did it or request was aborted
       if (signal?.aborted) {
         return [];
       }
       
-      // Log duplicate details only in development
+      // Only do minimal normalization without expensive client-side deduplication
+      // (the server should be responsible for deduplication)
+      const normalizedTasks = tasks.map(task => ({
+        ...task,
+        id: task._id || task.id // Ensure each task has an id property
+      }));
+      
+      // In development, just log the task count
       if (process.env.NODE_ENV === 'development') {
-        if (duplicatesById.length > 0) {
-          console.warn(`API returned ${duplicatesById.length} duplicate task IDs. Examples:`);
-          duplicatesById.slice(0, 5).forEach(dup => {
-            console.warn(`- ID: ${dup.id}, Title: "${dup.title}", Project: ${dup.project}`);
-          });
-        }
-        
-        if (duplicatesByTitleProject.length > 0) {
-          console.warn(`API returned ${duplicatesByTitleProject.length} tasks with duplicate title+project but different IDs. Examples:`);
-          duplicatesByTitleProject.slice(0, 5).forEach(dup => {
-            console.warn(`- "${dup.title}" (Project: ${dup.project}) has IDs: ${dup.id} and ${dup.existingId}`);
-          });
-        }
-        
-        console.log(`API returned ${tasks.length} tasks (${idMap.size} unique by ID, ${titleProjectMap.size} unique by title+project)`);
+        console.log(`API returned ${normalizedTasks.length} tasks`);
       }
       
-      // Skip deduplication process if request was aborted
-      if (signal?.aborted) {
-        return [];
-      }
-      
-      // First deduplicate by ID
-      const uniqueTasksById = [];
-      const seenIds = new Set();
-      for (const task of tasks) {
-        const id = task._id || task.id;
-        if (!seenIds.has(id)) {
-          seenIds.add(id);
-          uniqueTasksById.push(task);
-        }
-      }
-      
-      // Skip further processing if request was aborted
-      if (signal?.aborted) {
-        return [];
-      }
-      
-      // Then deduplicate by title+project
-      const uniqueTasks: any[] = [];
-      const seenTitleProjects = new Map<string, any>(); // Map from title+project to task
-      
-      for (const task of uniqueTasksById) {
-        // Skip if request was aborted
-        if (signal?.aborted) {
-          return [];
-        }
-        
-        const titleProjectKey = `${task.title}:::${task.project}`;
-        const id = task._id || task.id;
-        
-        if (!seenTitleProjects.has(titleProjectKey)) {
-          // New title+project combination
-          seenTitleProjects.set(titleProjectKey, task);
-          uniqueTasks.push(task);
-        } else {
-          // Title+project exists, keep the newer one
-          const existingTask = seenTitleProjects.get(titleProjectKey);
-          const existingDate = new Date(existingTask.updatedAt);
-          const currentDate = new Date(task.updatedAt);
-          
-          if (currentDate > existingDate) {
-            // Replace the older task with this newer one
-            const indexToReplace = uniqueTasks.findIndex(t => 
-              (t._id || t.id) === (existingTask._id || existingTask.id)
-            );
-            
-            if (indexToReplace !== -1) {
-              uniqueTasks[indexToReplace] = task;
-              seenTitleProjects.set(titleProjectKey, task);
-              if (process.env.NODE_ENV === 'development') {
-                console.log(`Replaced older task "${existingTask.title}" (${existingTask._id || existingTask.id}) with newer version (${id})`);
-              }
-            }
-          } else if (process.env.NODE_ENV === 'development') {
-            console.log(`Skipped newer task ID ${id} with duplicate title+project but older date`);
-          }
-        }
-      }
-      
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`Deduplicated ${tasks.length} → ${uniqueTasksById.length} → ${uniqueTasks.length} tasks`);
-      }
-      
-      // Final abort check
-      if (signal?.aborted) {
-        return [];
-      }
-      
-      return uniqueTasks;
+      return normalizedTasks;
     }
     
     return response.data.data;
-  } catch (error) {
+  } catch (error: any) {
     // Handle aborted requests separately
     if (error.name === 'AbortError' || signal?.aborted) {
       console.log('Task fetch request was aborted');
@@ -218,7 +98,7 @@ export async function getTask(id: string) {
   try {
     const response = await apiClient.get(`/api/developer/tasks/${id}`);
     return response.data.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Error fetching task ${id}:`, error);
     throw error;
   }
@@ -263,7 +143,7 @@ export async function createTask(taskData: TaskFormData) {
     }
     
     return createdTask;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating task:', error);
     throw error;
   }
@@ -286,7 +166,7 @@ export async function createInitiative(initiativeData: Partial<Initiative>) {
     
     // Return the created initiative
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating initiative:', error);
     throw error;
   }
@@ -307,7 +187,7 @@ export async function getInitiatives() {
     const response = await axios.get('/api/initiatives');
     
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching initiatives:', error);
     
     // Return fallback data in case of error
@@ -355,7 +235,7 @@ export async function deleteInitiative(id: number) {
     const response = await axios.delete(`/api/initiatives/${id}`);
     
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting initiative:', error);
     throw error;
   }
@@ -378,7 +258,7 @@ export async function updateInitiative(id: number, updateData: Partial<Initiativ
     const response = await axios.put(`/api/initiatives/${id}`, updateData);
     
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating initiative:', error);
     throw error;
   }
@@ -393,7 +273,7 @@ export async function updateStages(stages: string[]) {
     // In a real implementation, these would be stored on the server
     localStorage.setItem('taskStages', JSON.stringify(stages));
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating stages:', error);
     throw error;
   }
@@ -413,7 +293,7 @@ export async function getStages(): Promise<string[]> {
     
     // Default stages if none are stored
     return ['proposed', 'todo', 'in-progress', 'done', 'reviewed'];
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching stages:', error);
     return ['proposed', 'todo', 'in-progress', 'done', 'reviewed'];
   }
@@ -426,7 +306,7 @@ export async function updateTask(id: string, updateData: Partial<Task>) {
   try {
     const response = await apiClient.put(`/api/developer/tasks/${id}`, updateData);
     return response.data.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Error updating task ${id}:`, error);
     throw error;
   }
@@ -439,7 +319,7 @@ export async function deleteTask(id: string) {
   try {
     const response = await apiClient.delete(`/api/developer/tasks/${id}`);
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Error deleting task ${id}:`, error);
     throw error;
   }
@@ -480,7 +360,7 @@ export async function cleanupDuplicateTasks() {
   try {
     const response = await apiClient.post('/api/developer/tasks/cleanup-duplicates');
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error cleaning up duplicate tasks:', error);
     throw error;
   }

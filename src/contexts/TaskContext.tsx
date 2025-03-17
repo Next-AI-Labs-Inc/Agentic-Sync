@@ -35,14 +35,18 @@ interface TaskContextValue {
   updateTaskStatus: (
     taskId: string,
     project: string,
-    status: 'proposed' | 'todo' | 'in-progress' | 'done' | 'reviewed'
+    status: 'proposed' | 'backlog' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived'
   ) => Promise<void>;
   markTaskTested: (taskId: string, project: string) => Promise<void>;
   deleteTask: (taskId: string, project: string) => Promise<void>;
   addTask: (taskData: TaskFormData) => Promise<void>;
   updateTaskDate: (taskId: string, project: string, newDate: string) => Promise<void>;
+  updateTask: (taskId: string, updateData: Partial<Task>) => Promise<void>;
   filteredTasks: Task[];
   taskCountsByStatus: Record<string, number>;
+  dedupeEnabled: boolean;
+  setDedupeEnabled: (enabled: boolean) => void;
+  runManualDedupe: () => void;
 }
 
 const TaskContext = createContext<TaskContextValue | undefined>(undefined);
@@ -182,6 +186,8 @@ export function TaskProvider({
   const [sortBy, setSortBy] = useState<SortOption>('created');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [taskCountsByStatus, setTaskCountsByStatus] = useState<Record<string, number>>({});
+  // Flag to make deduplication optional - default to false for better performance
+  const [dedupeEnabled, setDedupeEnabled] = useState<boolean>(false);
 
   // Load filter preferences from localStorage on initial render
   useEffect(() => {
@@ -321,6 +327,20 @@ export function TaskProvider({
     setLocalTaskCache(newCache);
   }, [tasks]);
 
+  // Function to manually trigger deduplication
+  const runManualDedupe = useCallback(() => {
+    if (tasks.length === 0) return;
+    
+    console.log('Manually running deduplication...');
+    const deDupedTasks = deduplicateTasks(tasks);
+    
+    // Update tasks with deduplicated version
+    setTasks(deDupedTasks);
+    setTaskCountsByStatus(calculateStatusCounts(deDupedTasks));
+    
+    console.log(`Deduplication complete: ${tasks.length} → ${deDupedTasks.length} tasks`);
+  }, [tasks]);
+  
   // Refresh tasks from the MongoDB API
   const refreshTasks = useCallback(async () => {
     // Track current API request with an AbortController
@@ -368,12 +388,18 @@ export function TaskProvider({
           id: task._id || task.id // Use MongoDB _id as our id
         }));
 
-        // Double check with our deduplication function
-        const deDupedTasks = deduplicateTasks(processedTasks);
-        console.log(`After deduplication: ${deDupedTasks.length} tasks`);
+        // Only run deduplication if enabled
+        let finalTasks = processedTasks;
+        if (dedupeEnabled) {
+          console.log('Deduplication is enabled, running deduplication...');
+          finalTasks = deduplicateTasks(processedTasks);
+          console.log(`After deduplication: ${finalTasks.length} tasks`);
+        } else {
+          console.log('Deduplication is disabled for better performance');
+        }
 
         // Always sort by newest first
-        const sortedTasks = sortByNewestFirst(deDupedTasks);
+        const sortedTasks = sortByNewestFirst(finalTasks);
 
         // Only do verification in development mode
         if (process.env.NODE_ENV === 'development' && sortedTasks.length >= 2) {
@@ -423,10 +449,9 @@ export function TaskProvider({
       }
     }
     
-    // Return a cleanup function to abort any in-flight requests
-    return () => {
-      abortController.abort();
-    };
+    // Abort requests when component unmounts via useEffect cleanup
+    // Return empty array as fallback
+    return [];
   }, [projectFilter]);
 
   // Subscribe to real-time task updates
@@ -576,42 +601,64 @@ export function TaskProvider({
     };
   }, [projectFilter]); // Remove refreshTasks from dependencies to prevent loops
 
+  // Memoize date for recent-completed filter calculation
+  const twoDaysAgoMemo = React.useMemo(() => {
+    const date = new Date();
+    date.setDate(date.getDate() - 2);
+    return date.getTime();
+  }, []);
+
+  // Pre-compute filter predicates for better performance
+  const filterPredicates = React.useMemo(() => {
+    return {
+      // Default 'all' filter (excludes done/reviewed)
+      all: (task: Task): boolean => task.status !== 'done' && task.status !== 'reviewed',
+      
+      // 'pending' filter (excludes done/reviewed) - identical to 'all'
+      pending: (task: Task): boolean => task.status !== 'done' && task.status !== 'reviewed',
+      
+      // 'recent-completed' filter (done/reviewed within last 2 days)
+      recentCompleted: (task: Task): boolean => {
+        return Boolean(
+          (task.status === 'done' || task.status === 'reviewed') &&
+          task.completedAt &&
+          new Date(task.completedAt).getTime() > twoDaysAgoMemo
+        );
+      },
+      
+      // Status-specific filters
+      byStatus: (status: string) => (task: Task): boolean => task.status === status
+    };
+  }, [twoDaysAgoMemo]);
+  
   // Filter tasks by status with optimized memoization
   const filteredTasks = React.useMemo(() => {
     // Quick return for empty tasks array
     if (!tasks.length) return [];
     
-    // Skip filtering if 'all' is selected
-    if (completedFilter === 'all') return tasks;
+    // Select the appropriate filter predicate
+    let filterFn: (task: Task) => boolean;
     
-    // Apply appropriate filter based on completedFilter
-    if (completedFilter === 'pending') {
-      return tasks.filter((task) => task.status !== 'done' && task.status !== 'reviewed');
-    } 
+    if (completedFilter === 'all') {
+      filterFn = filterPredicates.all;
+    } else if (completedFilter === 'pending') {
+      filterFn = filterPredicates.pending;
+    } else if (completedFilter === 'recent-completed') {
+      filterFn = filterPredicates.recentCompleted;
+    } else {
+      // Status-specific filter
+      filterFn = filterPredicates.byStatus(completedFilter);
+    }
     
-    if (completedFilter === 'recent-completed') {
-      const twoDaysAgo = new Date();
-      twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-      const twoDaysAgoTime = twoDaysAgo.getTime();
-
-      return tasks.filter((task) => {
-        return (
-          (task.status === 'done' || task.status === 'reviewed') &&
-          task.completedAt &&
-          new Date(task.completedAt).getTime() > twoDaysAgoTime
-        );
-      });
-    } 
-    
-    // Filter by specific status (proposed, todo, in-progress, done, reviewed)
-    return tasks.filter((task) => task.status === completedFilter);
-  }, [tasks, completedFilter]);
+    // Apply the selected filter predicate
+    return tasks.filter(filterFn);
+  }, [tasks, completedFilter, filterPredicates]);
 
   // Task operations with optimistic updates
   const updateTaskStatus = async (
     taskId: string,
     project: string,
-    status: 'proposed' | 'todo' | 'in-progress' | 'done' | 'reviewed'
+    status: 'proposed' | 'backlog' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived'
   ) => {
     // Get the current task
     const taskToUpdate = localTaskCache.get(taskId);
@@ -914,6 +961,25 @@ export function TaskProvider({
     return Promise.resolve();
   };
 
+  // Create a wrapper for the updateTask function from taskApiService
+  const updateTask = async (taskId: string, updateData: Partial<Task>) => {
+    try {
+      const updatedTask = await taskApiService.updateTask(taskId, updateData);
+      
+      // Update the task in local state
+      const updatedTasks = tasks.map(task => 
+        task.id === taskId ? { ...task, ...updateData } : task
+      );
+      
+      setTasks(updatedTasks);
+      
+      return updatedTask;
+    } catch (error) {
+      console.error(`Error updating task ${taskId}:`, error);
+      throw error;
+    }
+  };
+
   const value = {
     tasks,
     loading,
@@ -932,8 +998,12 @@ export function TaskProvider({
     deleteTask,
     addTask,
     updateTaskDate,
+    updateTask,
     filteredTasks,
-    taskCountsByStatus
+    taskCountsByStatus,
+    dedupeEnabled,
+    setDedupeEnabled,
+    runManualDedupe
   };
 
   return <TaskContext.Provider value={value}>{children}</TaskContext.Provider>;

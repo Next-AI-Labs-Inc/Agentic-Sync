@@ -19,6 +19,9 @@ interface TaskFiltersProps {
   onAddNewClick: () => void;
   taskCountsByStatus?: Record<string, number>;
   refreshTasks?: () => Promise<any>;
+  dedupeEnabled?: boolean;
+  setDedupeEnabled?: (enabled: boolean) => void;
+  runManualDedupe?: () => void;
 }
 
 export default function TaskFilters({
@@ -33,7 +36,10 @@ export default function TaskFilters({
   setSortDirection,
   onAddNewClick,
   taskCountsByStatus = {},
-  refreshTasks
+  refreshTasks,
+  dedupeEnabled = false,
+  setDedupeEnabled,
+  runManualDedupe
 }: TaskFiltersProps) {
   // Sort projects alphabetically by name
   const sortedProjects = [...projects].sort((a, b) => 
@@ -203,7 +209,7 @@ export default function TaskFilters({
   
   // Actions for dropdown menu
   const getMenuItems = (): DropdownMenuItem[] => {
-    return [
+    const items: DropdownMenuItem[] = [
       {
         id: 'save-filter',
         label: 'Save Current Filter',
@@ -213,13 +219,37 @@ export default function TaskFilters({
       },
       {
         id: 'cleanup',
-        label: isCleaningUp ? 'Cleaning...' : 'Clean Duplicate Tasks',
+        label: isCleaningUp ? 'Cleaning...' : 'Clean Duplicate Tasks (Server)',
         icon: <FaBroom size={14} />,
         onClick: handleCleanupDuplicates,
         disabled: isCleaningUp,
         description: 'Remove duplicate tasks from the database'
       }
     ];
+    
+    // Add deduplication toggle if the prop is provided
+    if (setDedupeEnabled) {
+      items.push({
+        id: 'toggle-dedupe',
+        label: `${dedupeEnabled ? 'Disable' : 'Enable'} Client Deduplication`,
+        icon: <FaBroom size={14} />,
+        onClick: () => setDedupeEnabled(!dedupeEnabled),
+        description: `${dedupeEnabled ? 'Disable' : 'Enable'} automatic client-side deduplication (impacts performance)`
+      });
+    }
+    
+    // Add manual deduplication button if the function is provided
+    if (runManualDedupe) {
+      items.push({
+        id: 'manual-dedupe',
+        label: 'Run Manual Deduplication',
+        icon: <FaBroom size={14} />,
+        onClick: runManualDedupe,
+        description: 'Manually remove duplicate tasks from the current view'
+      });
+    }
+    
+    return items;
   };
 
   return (
@@ -295,6 +325,18 @@ export default function TaskFilters({
               {Object.values(taskCountsByStatus).reduce((acc, count) => acc + count, 0)}
             </span>}
           </button>
+
+          {/* Backlog */}
+          <button
+            onClick={() => setCompletedFilter(TASK_STATUSES.BACKLOG)}
+            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+              ${completedFilter === TASK_STATUSES.BACKLOG ? STATUS_DISPLAY[TASK_STATUSES.BACKLOG].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+          >
+            {STATUS_DISPLAY[TASK_STATUSES.BACKLOG].label}
+            {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+              {taskCountsByStatus[TASK_STATUSES.BACKLOG] || 0}
+            </span>}
+          </button>
           
           {/* Proposed */}
           <button
@@ -332,6 +374,18 @@ export default function TaskFilters({
             </span>}
           </button>
           
+          {/* On Hold */}
+          <button
+            onClick={() => setCompletedFilter(TASK_STATUSES.ON_HOLD)}
+            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+              ${completedFilter === TASK_STATUSES.ON_HOLD ? STATUS_DISPLAY[TASK_STATUSES.ON_HOLD].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+          >
+            {STATUS_DISPLAY[TASK_STATUSES.ON_HOLD].label}
+            {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+              {taskCountsByStatus[TASK_STATUSES.ON_HOLD] || 0}
+            </span>}
+          </button>
+          
           {/* Done */}
           <button
             onClick={() => setCompletedFilter(TASK_STATUSES.DONE)}
@@ -356,6 +410,18 @@ export default function TaskFilters({
             </span>}
           </button>
           
+          {/* Archived */}
+          <button
+            onClick={() => setCompletedFilter(TASK_STATUSES.ARCHIVED)}
+            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+              ${completedFilter === TASK_STATUSES.ARCHIVED ? STATUS_DISPLAY[TASK_STATUSES.ARCHIVED].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+          >
+            {STATUS_DISPLAY[TASK_STATUSES.ARCHIVED].label}
+            {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+              {taskCountsByStatus[TASK_STATUSES.ARCHIVED] || 0}
+            </span>}
+          </button>
+          
           {/* All Pending */}
           <button
             onClick={() => setCompletedFilter(TASK_STATUSES.PENDING)}
@@ -364,7 +430,7 @@ export default function TaskFilters({
           >
             {STATUS_DISPLAY[TASK_STATUSES.PENDING].label}
             {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
-              {([TASK_STATUSES.PROPOSED, TASK_STATUSES.TODO, TASK_STATUSES.IN_PROGRESS] as const)
+              {([TASK_STATUSES.PROPOSED, TASK_STATUSES.BACKLOG, TASK_STATUSES.TODO, TASK_STATUSES.IN_PROGRESS, TASK_STATUSES.ON_HOLD] as const)
                 .reduce((acc, status) => acc + (taskCountsByStatus[status] || 0), 0)}
             </span>}
           </button>

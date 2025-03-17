@@ -5,7 +5,7 @@ export interface DropdownMenuItem {
   id: string;
   label: string;
   icon?: React.ReactNode;
-  onClick: () => void;
+  onClick: (e?: any) => void;
   disabled?: boolean;
   variant?: 'default' | 'danger';
   description?: string;

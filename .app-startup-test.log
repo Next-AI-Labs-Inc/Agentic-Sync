@@ -1,0 +1,27 @@
+App startup verification started at 2025-03-17T20:28:02.070Z
+[2025-03-17T20:28:02.076Z] Waiting for Next.js app to start...
+[2025-03-17T20:28:02.414Z] [stdout] > tasks@0.1.0 dev
+> next dev -p 3045
+[2025-03-17T20:28:02.757Z] [stderr] [31m[1m⨯[22m[39m Failed to start server
+[2025-03-17T20:28:02.759Z] [stderr] Error: listen EADDRINUSE: address already in use :::3045
+    at Server.setupListenHandle [as _listen2] (node:net:1740:16)
+    at listenInCluster (node:net:1788:12)
+    at Server.listen (node:net:1876:7)
+    at /Users/jedi/react_projects/ix/tasks/node_modules/next/dist/server/lib/start-server.js:279:16
+    at new Promise (<anonymous>)
+    at startServer (/Users/jedi/react_projects/ix/tasks/node_modules/next/dist/server/lib/start-server.js:190:11)
+    at /Users/jedi/react_projects/ix/tasks/node_modules/next/dist/server/lib/start-server.js:309:52
+    at Span.traceAsyncFn (/Users/jedi/react_projects/ix/tasks/node_modules/next/dist/trace/trace.js:151:26)
+    at process.<anonymous> (/Users/jedi/react_projects/ix/tasks/node_modules/next/dist/server/lib/start-server.js:309:35)
+    at process.emit (node:events:512:28) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '::',
+  port: 3045
+}
+[2025-03-17T20:28:02.764Z] [stdout] [?25h
+[2025-03-17T20:28:02.764Z] [stdout] 
+[2025-03-17T20:28:02.770Z] Next.js process exited with code 0
+[2025-03-17T20:28:02.771Z] 🛑 Terminated Next.js process
+[2025-03-17T20:28:02.771Z] ❓ VERIFICATION INCONCLUSIVE: Could not determine app status

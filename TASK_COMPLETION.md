@@ -1,4 +1,40 @@
-# Task Completion Documentation
+# ⚠️ TASK COMPLETION DOCUMENTATION - READ CAREFULLY ⚠️
+
+## CORRECT FORMAT FOR LOGGING COMPLETED TASKS
+
+ALL task completions MUST follow these steps:
+
+1. First, create a MongoDB task entry with status="done" following the format in ../claude.md
+2. Then add an entry to THIS file in the format below (newest at top):
+
+```
+## [YYYY-MM-DD] Task: Brief Title That Focuses on User Impact
+
+**MongoDB Task ID:** task-id-here
+
+**User Impact:** 1-2 sentences explaining how this benefits users
+
+**Technical Summary:** 1-2 sentences describing what was implemented technically
+
+**Verification:** Link to verification steps document or brief instruction
+```
+
+DO NOT add detailed requirements, implementation notes, or full documentation here.
+Those belong in the MongoDB task entry.
+
+---
+
+## [2025-03-16] Task: Prevent App Crashes with Automated Next.js Verification System 
+
+**MongoDB Task ID:** 2025-03-16-nextjs-verification-system
+
+**User Impact:** Users were experiencing outages when AI agents committed broken code. This system prevents broken code from being committed by verifying the app builds and starts successfully.
+
+**Technical Summary:** Implemented pre-commit hooks that run automated verification scripts to check app building and startup, preventing broken code from entering the repository.
+
+**Verification:** Run `npm run verify` to test the system. Try breaking the app with syntax errors and commit to see the protection working.
+
+---
 
 ## Task: Optimize Task Management Application for Performance and User Experience
 
@@ -13,6 +49,7 @@
 **User Impact:** Users were experiencing high CPU usage (100%+) when running the application, making their computers slow and requiring machine restarts. The optimizations reduce CPU consumption and make the application more responsive, while also simplifying the launch process through a single command or icon click rather than requiring separate API and frontend server launches.
 
 **Requirements:**
+
 - Must maintain all core task management functionality
 - Must reduce CPU usage to acceptable levels
 - Must not require code changes to server-side API
@@ -23,6 +60,7 @@
 - Must avoid render loops and unnecessary state updates
 
 **Technical Plan:**
+
 1. Add proper AbortController implementation for API request cancellation
 2. Fix render loops in `TaskContext.tsx` by removing `refreshTasks` from useEffect dependencies
 3. Optimize state updates by using deferred updates with setTimeout(0)
@@ -59,6 +97,7 @@
 **Problem:** The application was causing high CPU usage (up to 130%) due to render loops in TaskContext and inefficient API handling.
 
 **Solution:**
+
 - Added proper AbortController support to cancel in-flight requests when components unmount
 - Fixed render loops by removing refreshTasks from useEffect dependencies
 - Optimized state updates to avoid cascading renders
@@ -70,6 +109,7 @@
 **Problem:** Starting the application required running both the API server and frontend separately.
 
 **Solution:**
+
 - Created a combined starter script (start-all.js) that launches both servers
 - Added a desktop shortcut creator for all major platforms
 - Created an optimized mode that runs with suppressed console logs
@@ -79,6 +119,7 @@
 **Problem:** The application loaded unnecessary features like Initiatives and Docs that weren't needed.
 
 **Solution:**
+
 - Created a minimal entry point at /minimal that only loads the TaskProvider and ProjectProvider
 - Implemented an optimized tasks-core page without extra features
 - Added production mode flag that can be used in development

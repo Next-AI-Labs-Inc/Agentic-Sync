@@ -2,7 +2,10 @@
 
 Welcome to the IX Tasks documentation. This documentation provides information about using the IX Tasks system, a comprehensive task management system with MongoDB integration, featuring an instant, social media-like UI experience.
 
-> **Note:** Only this home page is currently available. Detailed documentation pages are being revised and will be available in a future update.
+> **Note:** A comprehensive documentation enhancement is in progress (Task ID: 67d72967821434ea4afa3158). Currently, the following documentation is available:
+> - [Enhanced UI Guide](./ENHANCED_UI_GUIDE.md): Details of the instant UI updates and animations
+> - [Initiatives Guide](./initiatives-guide.md): API and usage documentation for Initiatives
+> - [Social Media-like Experience](./SOCIAL_MEDIA_LIKE_EXPERIENCE.md): Overview of the instant UI experience
 
 ## User Experience Focus
 

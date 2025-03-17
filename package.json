@@ -14,9 +14,13 @@
     "test:initiatives-api": "node scripts/test-initiatives-api.js",
     "log:initiatives": "node scripts/log-initiatives.js",
     "dev:optimized": "NODE_ENV=production NEXT_PUBLIC_OPTIMIZE_CPU=true next dev -p 3045",
-    "start:all": "node scripts/start-all.js"
+    "start:all": "node scripts/start-all.js",
+    "verify-startup": "node scripts/verify-app-startup.js",
+    "verify-build": "node scripts/verify-app-build.js",
+    "verify": "node scripts/verify-app.js"
   },
   "dependencies": {
+    "@types/react-window": "^1.8.8",
     "axios": "^1.6.7",
     "date-fns": "^3.3.1",
     "mongodb": "^4.17.2",
@@ -25,6 +29,7 @@
     "react-dom": "^18",
     "react-icons": "^5.0.1",
     "react-markdown": "^9.0.1",
+    "react-window": "^1.8.9",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
