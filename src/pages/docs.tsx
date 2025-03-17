@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import ReactMarkdown from 'react-markdown';
 
@@ -18,6 +17,34 @@ export default function DocsPage() {
   const [currentDoc, setCurrentDoc] = useState<string>('index.md');
   const [docs, setDocs] = useState<DocFile[]>([]);
   const [error, setError] = useState<string | null>(null);
+  
+  // Function to load a document directly by filename
+  const loadDocumentDirectly = async (filename: string) => {
+    console.log("Loading document directly:", filename);
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      setCurrentDoc(filename);
+      
+      // Get the content from the API
+      const response = await fetch(`/api/docs?file=${filename}`);
+      if (response.ok) {
+        const content = await response.text();
+        setMarkdown(content);
+      } else {
+        setError('Documentation not found');
+        setMarkdown('# Documentation Not Found\n\nThe requested documentation could not be found.');
+      }
+    } catch (err) {
+      console.error('Error loading documentation:', err);
+      setError('Error loading documentation');
+      setMarkdown('# Error Loading Documentation\n\nThere was an error loading the documentation. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Load available documentation files
   useEffect(() => {
@@ -53,22 +80,31 @@ export default function DocsPage() {
         // Determine which document to load based on the route
         const currentPath = router.asPath;
         let docFile = 'index.md';
+        let docFound = false;
+        
+        console.log("Current path:", currentPath);
         
         if (currentPath !== '/docs') {
           // Extract the doc name from the path
           const slug = currentPath.replace('/docs/', '').split('?')[0];
+          console.log("Looking for doc with slug:", slug);
           
           // Find matching doc
-          const doc = docs.find(d => 
-            d.path === '/docs/' + slug || 
-            d.name.toLowerCase() === slug.toLowerCase()
-          );
+          docs.forEach(d => {
+            console.log(`Checking doc: name=${d.name}, path=${d.path}, filename=${d.filename}`);
+            if (d.path === '/docs/' + slug || d.name.toLowerCase() === slug.toLowerCase()) {
+              console.log("Found matching doc:", d.filename);
+              docFile = d.filename;
+              docFound = true;
+            }
+          });
           
-          if (doc) {
-            docFile = doc.filename;
+          if (!docFound) {
+            console.log("No matching doc found for slug:", slug);
           }
         }
         
+        console.log("Loading document:", docFile);
         setCurrentDoc(docFile);
         
         // Get the content from the API
@@ -77,6 +113,7 @@ export default function DocsPage() {
           const content = await response.text();
           setMarkdown(content);
         } else {
+          console.error("Failed to load document:", docFile);
           setError('Documentation not found');
           setMarkdown('# Documentation Not Found\n\nThe requested documentation could not be found.');
         }
@@ -127,8 +164,15 @@ export default function DocsPage() {
             <ul className="space-y-2">
               {docs.map((doc) => (
                 <li key={doc.name}>
-                  <Link 
-                    href={doc.path}
+                  <a 
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      // Directly load the document without changing the URL
+                      loadDocumentDirectly(doc.filename);
+                      // Update the URL for bookmarking capability
+                      window.history.pushState({}, doc.title, doc.path);
+                    }}
                     className={`block py-1 px-2 rounded transition-colors ${
                       currentDoc === doc.filename
                         ? 'bg-primary-50 text-primary-700 font-medium'
@@ -136,7 +180,7 @@ export default function DocsPage() {
                     }`}
                   >
                     {doc.title}
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>
