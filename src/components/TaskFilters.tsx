@@ -5,6 +5,7 @@ import * as taskApiService from '@/services/taskApiService';
 import { TASK_STATUSES, SORT_OPTIONS, SORT_DIRECTIONS, STATUS_DISPLAY, STORAGE_KEYS } from '@/config/constants';
 import DropdownMenu, { DropdownMenuItem } from './DropdownMenu';
 import ProjectSelector from './ProjectSelector';
+import TaskSearchIcon from './TaskSearchIcon';
 
 interface TaskFiltersProps {
   projects: Project[];
@@ -273,6 +274,7 @@ export default function TaskFilters({
           <h2 className="text-lg font-semibold">Task Filters</h2>
         </div>
         <div className="flex items-center gap-2 mt-2 md:mt-0">
+          <TaskSearchIcon />
           <DropdownMenu 
             trigger={
               <button className="btn-icon">
@@ -313,136 +315,227 @@ export default function TaskFilters({
       
       {/* Status filter tabs with counts */}
       <div className="mb-4">
-        <div className="flex overflow-x-auto space-x-1 pb-2">
-          {/* All Tasks */}
-          <button
-            onClick={() => setCompletedFilter(TASK_STATUSES.ALL)}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
-              ${completedFilter === TASK_STATUSES.ALL ? STATUS_DISPLAY[TASK_STATUSES.ALL].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-          >
-            {STATUS_DISPLAY[TASK_STATUSES.ALL].label}
-            {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
-              {Object.values(taskCountsByStatus).reduce((acc, count) => acc + count, 0)}
-            </span>}
-          </button>
+        <div className="flex space-x-6 pb-2 overflow-x-auto">
+          {/* Views column */}
+          <div className="flex flex-col space-y-1">
+            <div className="px-3 py-1.5 text-sm font-medium text-gray-500 whitespace-nowrap flex items-center border-b border-gray-300">
+              Views
+            </div>
+            
+            {/* All Tasks */}
+            <button
+              onClick={() => setCompletedFilter(TASK_STATUSES.ALL)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+                ${completedFilter === TASK_STATUSES.ALL ? STATUS_DISPLAY[TASK_STATUSES.ALL].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {STATUS_DISPLAY[TASK_STATUSES.ALL].label}
+              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+                {Object.values(taskCountsByStatus).reduce((acc, count) => acc + count, 0)}
+              </span>}
+            </button>
+            
+            {/* All Pending */}
+            <button
+              onClick={() => setCompletedFilter(TASK_STATUSES.PENDING)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+                ${completedFilter === TASK_STATUSES.PENDING ? STATUS_DISPLAY[TASK_STATUSES.PENDING].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {STATUS_DISPLAY[TASK_STATUSES.PENDING].label}
+              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+                {([TASK_STATUSES.PROPOSED, TASK_STATUSES.BACKLOG, TASK_STATUSES.BRAINSTORM, TASK_STATUSES.TODO, TASK_STATUSES.IN_PROGRESS, TASK_STATUSES.ON_HOLD] as const)
+                  .reduce((acc, status) => acc + (taskCountsByStatus[status] || 0), 0)}
+              </span>}
+            </button>
+            
+          </div>
+          
+          {/* Collection column */}
+          <div className="flex flex-col space-y-1">
+            <div className="px-3 py-1.5 text-sm font-medium text-gray-500 whitespace-nowrap flex items-center border-b border-gray-300">
+              Collection
+            </div>
+            
+            {/* Inbox */}
+            <button
+              onClick={() => setCompletedFilter(TASK_STATUSES.INBOX)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+                ${completedFilter === TASK_STATUSES.INBOX ? STATUS_DISPLAY[TASK_STATUSES.INBOX].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {STATUS_DISPLAY[TASK_STATUSES.INBOX].label}
+              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+                {taskCountsByStatus[TASK_STATUSES.INBOX] || 0}
+              </span>}
+            </button>
+            
+            {/* Brainstorm */}
+            <button
+              onClick={() => setCompletedFilter(TASK_STATUSES.BRAINSTORM)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+                ${completedFilter === TASK_STATUSES.BRAINSTORM ? STATUS_DISPLAY[TASK_STATUSES.BRAINSTORM].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {STATUS_DISPLAY[TASK_STATUSES.BRAINSTORM].label}
+              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+                {taskCountsByStatus[TASK_STATUSES.BRAINSTORM] || 0}
+              </span>}
+            </button>
+          </div>
+          
+          {/* Source Tasks column */}
+          <div className="flex flex-col space-y-1">
+            <div className="px-3 py-1.5 text-sm font-medium text-gray-500 whitespace-nowrap flex items-center border-b border-gray-300">
+              Source Tasks
+            </div>
+            
+            {/* Backlog */}
+            <button
+              onClick={() => setCompletedFilter(TASK_STATUSES.BACKLOG)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+                ${completedFilter === TASK_STATUSES.BACKLOG ? STATUS_DISPLAY[TASK_STATUSES.BACKLOG].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {STATUS_DISPLAY[TASK_STATUSES.BACKLOG].label}
+              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+                {taskCountsByStatus[TASK_STATUSES.BACKLOG] || 0}
+              </span>}
+            </button>
+          </div>
+          
+          {/* Proposed column */}
+          <div className="flex flex-col space-y-1">
+            <div className="px-3 py-1.5 text-sm font-medium text-gray-500 whitespace-nowrap flex items-center border-b border-gray-300">
+              Proposed
+            </div>
+            
+            {/* Proposed */}
+            <button
+              onClick={() => setCompletedFilter(TASK_STATUSES.PROPOSED)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+                ${completedFilter === TASK_STATUSES.PROPOSED ? STATUS_DISPLAY[TASK_STATUSES.PROPOSED].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {STATUS_DISPLAY[TASK_STATUSES.PROPOSED].label}
+              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+                {taskCountsByStatus[TASK_STATUSES.PROPOSED] || 0}
+              </span>}
+            </button>
+          </div>
+            
+          {/* Someday/Maybe column */}
+          <div className="flex flex-col space-y-1">
+            <div className="px-3 py-1.5 text-sm font-medium text-gray-500 whitespace-nowrap flex items-center border-b border-gray-300">
+              Someday/Maybe
+            </div>
+            
+            {/* Maybe */}
+            <button
+              onClick={() => setCompletedFilter(TASK_STATUSES.MAYBE)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+                ${completedFilter === TASK_STATUSES.MAYBE ? STATUS_DISPLAY[TASK_STATUSES.MAYBE].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {STATUS_DISPLAY[TASK_STATUSES.MAYBE].label}
+              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+                {taskCountsByStatus[TASK_STATUSES.MAYBE] || 0}
+              </span>}
+            </button>
+          </div>
+          
+          {/* Actionable column */}
+          <div className="flex flex-col space-y-1">
+            <div className="px-3 py-1.5 text-sm font-medium text-gray-500 whitespace-nowrap flex items-center border-b border-gray-300">
+              Actionable
+            </div>
+            
+            {/* Todo */}
+            <button
+              onClick={() => setCompletedFilter(TASK_STATUSES.TODO)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+                ${completedFilter === TASK_STATUSES.TODO ? STATUS_DISPLAY[TASK_STATUSES.TODO].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {STATUS_DISPLAY[TASK_STATUSES.TODO].label}
+              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+                {taskCountsByStatus[TASK_STATUSES.TODO] || 0}
+              </span>}
+            </button>
+          </div>
 
-          {/* Backlog */}
-          <button
-            onClick={() => setCompletedFilter(TASK_STATUSES.BACKLOG)}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
-              ${completedFilter === TASK_STATUSES.BACKLOG ? STATUS_DISPLAY[TASK_STATUSES.BACKLOG].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-          >
-            {STATUS_DISPLAY[TASK_STATUSES.BACKLOG].label}
-            {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
-              {taskCountsByStatus[TASK_STATUSES.BACKLOG] || 0}
-            </span>}
-          </button>
+          {/* Engaged column */}
+          <div className="flex flex-col space-y-1">
+            <div className="px-3 py-1.5 text-sm font-medium text-gray-500 whitespace-nowrap flex items-center border-b border-gray-300">
+              Engaged
+            </div>
+            
+            {/* In Progress */}
+            <button
+              onClick={() => setCompletedFilter(TASK_STATUSES.IN_PROGRESS)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+                ${completedFilter === TASK_STATUSES.IN_PROGRESS ? STATUS_DISPLAY[TASK_STATUSES.IN_PROGRESS].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {STATUS_DISPLAY[TASK_STATUSES.IN_PROGRESS].label}
+              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+                {taskCountsByStatus[TASK_STATUSES.IN_PROGRESS] || 0}
+              </span>}
+            </button>
+            
+            {/* For Review (renamed from Done) */}
+            <button
+              onClick={() => setCompletedFilter(TASK_STATUSES.DONE)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+                ${completedFilter === TASK_STATUSES.DONE ? STATUS_DISPLAY[TASK_STATUSES.DONE].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {STATUS_DISPLAY[TASK_STATUSES.DONE].label}
+              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+                {taskCountsByStatus[TASK_STATUSES.DONE] || 0}
+              </span>}
+            </button>
+          </div>
           
-          {/* Proposed */}
-          <button
-            onClick={() => setCompletedFilter(TASK_STATUSES.PROPOSED)}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
-              ${completedFilter === TASK_STATUSES.PROPOSED ? STATUS_DISPLAY[TASK_STATUSES.PROPOSED].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-          >
-            {STATUS_DISPLAY[TASK_STATUSES.PROPOSED].label}
-            {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
-              {taskCountsByStatus[TASK_STATUSES.PROPOSED] || 0}
-            </span>}
-          </button>
+          {/* Reference column */}
+          <div className="flex flex-col space-y-1">
+            <div className="px-3 py-1.5 text-sm font-medium text-gray-500 whitespace-nowrap flex items-center border-b border-gray-300">
+              Reference
+            </div>
+            
+            {/* Done (renamed from Reviewed) */}
+            <button
+              onClick={() => setCompletedFilter(TASK_STATUSES.REVIEWED)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+                ${completedFilter === TASK_STATUSES.REVIEWED ? STATUS_DISPLAY[TASK_STATUSES.REVIEWED].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {STATUS_DISPLAY[TASK_STATUSES.REVIEWED].label}
+              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+                {taskCountsByStatus[TASK_STATUSES.REVIEWED] || 0}
+              </span>}
+            </button>
+            
+            {/* Archived */}
+            <button
+              onClick={() => setCompletedFilter(TASK_STATUSES.ARCHIVED)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+                ${completedFilter === TASK_STATUSES.ARCHIVED ? STATUS_DISPLAY[TASK_STATUSES.ARCHIVED].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {STATUS_DISPLAY[TASK_STATUSES.ARCHIVED].label}
+              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+                {taskCountsByStatus[TASK_STATUSES.ARCHIVED] || 0}
+              </span>}
+            </button>
+          </div>
           
-          {/* Todo */}
-          <button
-            onClick={() => setCompletedFilter(TASK_STATUSES.TODO)}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
-              ${completedFilter === TASK_STATUSES.TODO ? STATUS_DISPLAY[TASK_STATUSES.TODO].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-          >
-            {STATUS_DISPLAY[TASK_STATUSES.TODO].label}
-            {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
-              {taskCountsByStatus[TASK_STATUSES.TODO] || 0}
-            </span>}
-          </button>
-          
-          {/* In Progress */}
-          <button
-            onClick={() => setCompletedFilter(TASK_STATUSES.IN_PROGRESS)}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
-              ${completedFilter === TASK_STATUSES.IN_PROGRESS ? STATUS_DISPLAY[TASK_STATUSES.IN_PROGRESS].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-          >
-            {STATUS_DISPLAY[TASK_STATUSES.IN_PROGRESS].label}
-            {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
-              {taskCountsByStatus[TASK_STATUSES.IN_PROGRESS] || 0}
-            </span>}
-          </button>
-          
-          {/* On Hold */}
-          <button
-            onClick={() => setCompletedFilter(TASK_STATUSES.ON_HOLD)}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
-              ${completedFilter === TASK_STATUSES.ON_HOLD ? STATUS_DISPLAY[TASK_STATUSES.ON_HOLD].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-          >
-            {STATUS_DISPLAY[TASK_STATUSES.ON_HOLD].label}
-            {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
-              {taskCountsByStatus[TASK_STATUSES.ON_HOLD] || 0}
-            </span>}
-          </button>
-          
-          {/* Done */}
-          <button
-            onClick={() => setCompletedFilter(TASK_STATUSES.DONE)}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
-              ${completedFilter === TASK_STATUSES.DONE ? STATUS_DISPLAY[TASK_STATUSES.DONE].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-          >
-            {STATUS_DISPLAY[TASK_STATUSES.DONE].label}
-            {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
-              {taskCountsByStatus[TASK_STATUSES.DONE] || 0}
-            </span>}
-          </button>
-          
-          {/* Reviewed */}
-          <button
-            onClick={() => setCompletedFilter(TASK_STATUSES.REVIEWED)}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
-              ${completedFilter === TASK_STATUSES.REVIEWED ? STATUS_DISPLAY[TASK_STATUSES.REVIEWED].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-          >
-            {STATUS_DISPLAY[TASK_STATUSES.REVIEWED].label}
-            {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
-              {taskCountsByStatus[TASK_STATUSES.REVIEWED] || 0}
-            </span>}
-          </button>
-          
-          {/* Archived */}
-          <button
-            onClick={() => setCompletedFilter(TASK_STATUSES.ARCHIVED)}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
-              ${completedFilter === TASK_STATUSES.ARCHIVED ? STATUS_DISPLAY[TASK_STATUSES.ARCHIVED].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-          >
-            {STATUS_DISPLAY[TASK_STATUSES.ARCHIVED].label}
-            {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
-              {taskCountsByStatus[TASK_STATUSES.ARCHIVED] || 0}
-            </span>}
-          </button>
-          
-          {/* All Pending */}
-          <button
-            onClick={() => setCompletedFilter(TASK_STATUSES.PENDING)}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
-              ${completedFilter === TASK_STATUSES.PENDING ? STATUS_DISPLAY[TASK_STATUSES.PENDING].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-          >
-            {STATUS_DISPLAY[TASK_STATUSES.PENDING].label}
-            {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
-              {([TASK_STATUSES.PROPOSED, TASK_STATUSES.BACKLOG, TASK_STATUSES.TODO, TASK_STATUSES.IN_PROGRESS, TASK_STATUSES.ON_HOLD] as const)
-                .reduce((acc, status) => acc + (taskCountsByStatus[status] || 0), 0)}
-            </span>}
-          </button>
-          
-          {/* Recently Completed */}
-          <button
-            onClick={() => setCompletedFilter(TASK_STATUSES.RECENT_COMPLETED)}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
-              ${completedFilter === TASK_STATUSES.RECENT_COMPLETED ? STATUS_DISPLAY[TASK_STATUSES.RECENT_COMPLETED].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-          >
-            {STATUS_DISPLAY[TASK_STATUSES.RECENT_COMPLETED].label}
-          </button>
+          {/* On Hold column */}
+          <div className="flex flex-col space-y-1">
+            <div className="px-3 py-1.5 text-sm font-medium text-gray-500 whitespace-nowrap flex items-center border-b border-gray-300">
+              On Hold
+            </div>
+            
+            {/* On Hold */}
+            <button
+              onClick={() => setCompletedFilter(TASK_STATUSES.ON_HOLD)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+                ${completedFilter === TASK_STATUSES.ON_HOLD ? STATUS_DISPLAY[TASK_STATUSES.ON_HOLD].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {STATUS_DISPLAY[TASK_STATUSES.ON_HOLD].label}
+              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+                {taskCountsByStatus[TASK_STATUSES.ON_HOLD] || 0}
+              </span>}
+            </button>
+          </div>
         </div>
       </div>
       

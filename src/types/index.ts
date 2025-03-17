@@ -6,7 +6,7 @@ export interface Task {
   userImpact?: string; // Description of how this task impacts users
   requirements?: string; // List of requirements the solution must fulfill
   technicalPlan?: string; // Step-by-step implementation plan
-  status: 'proposed' | 'backlog' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived';
+  status: 'brainstorm' | 'proposed' | 'backlog' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived';
   priority: 'low' | 'medium' | 'high';
   project: string;
   initiative?: string;
@@ -82,7 +82,7 @@ export interface Project {
   _isNew?: boolean; // Flag for UI animations
 }
 
-export type TaskFilterStatus = 'all' | 'proposed' | 'backlog' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived' | 'pending' | 'recent-completed';
+export type TaskFilterStatus = 'all' | 'brainstorm' | 'proposed' | 'backlog' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived' | 'pending' | 'recent-completed' | 'source-tasks';
 export type ProjectFilterType = 'all' | 'none' | string | string[];
 export type SortOption = 'priority' | 'updated' | 'created' | 'status';
 

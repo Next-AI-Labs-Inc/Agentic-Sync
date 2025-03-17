@@ -617,6 +617,9 @@ export function TaskProvider({
       // 'pending' filter (excludes done/reviewed) - identical to 'all'
       pending: (task: Task): boolean => task.status !== 'done' && task.status !== 'reviewed',
       
+      // 'source-tasks' filter (only backlog and brainstorm)
+      sourceTasks: (task: Task): boolean => task.status === 'backlog' || task.status === 'brainstorm',
+      
       // 'recent-completed' filter (done/reviewed within last 2 days)
       recentCompleted: (task: Task): boolean => {
         return Boolean(
@@ -645,6 +648,8 @@ export function TaskProvider({
       filterFn = filterPredicates.pending;
     } else if (completedFilter === 'recent-completed') {
       filterFn = filterPredicates.recentCompleted;
+    } else if (completedFilter === 'source-tasks') {
+      filterFn = filterPredicates.sourceTasks;
     } else {
       // Status-specific filter
       filterFn = filterPredicates.byStatus(completedFilter);

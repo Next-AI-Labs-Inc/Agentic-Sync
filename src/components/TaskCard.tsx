@@ -32,6 +32,8 @@ interface TaskCardProps {
   onDelete: (taskId: string, project: string) => Promise<void>;
   onUpdateDate?: (taskId: string, project: string, newDate: string) => Promise<void>;
   onUpdateTask?: (taskId: string, project: string, updates: Partial<Task>) => Promise<void>;
+  expanded?: boolean; // Whether the card is expanded by default
+  hideExpand?: boolean; // Whether to hide the expand/collapse button
 }
 
 // Reusable Popover Component
@@ -290,8 +292,17 @@ function Popover({ content, position = 'top', children, className = '' }: Popove
   );
 }
 
-function TaskCard({ task, onStatusChange, onMarkTested, onDelete, onUpdateDate, onUpdateTask }: TaskCardProps) {
-  const [expanded, setExpanded] = useState(false);
+function TaskCard({ 
+  task, 
+  onStatusChange, 
+  onMarkTested, 
+  onDelete, 
+  onUpdateDate, 
+  onUpdateTask,
+  expanded: defaultExpanded = false,
+  hideExpand = false
+}: TaskCardProps) {
+  const [expanded, setExpanded] = useState(defaultExpanded);
   const [isNew, setIsNew] = useState(task._isNew || false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isEditingDate, setIsEditingDate] = useState(false);
@@ -892,7 +903,10 @@ function TaskCard({ task, onStatusChange, onMarkTested, onDelete, onUpdateDate, 
       ${expanded ? 'expanded' : ''}
       rounded-lg shadow-sm border border-gray-200 transition-all duration-200`}
     >
-      <div className="p-4 cursor-pointer" onClick={(e) => {
+      <div className={`p-4 ${hideExpand ? '' : 'cursor-pointer'}`} onClick={(e) => {
+          // Skip if expand button is hidden
+          if (hideExpand) return;
+          
           // Allow toggling expanded state when clicking the card,
           // unless it's inside an interactive element
           if (e.target === e.currentTarget || 
@@ -904,20 +918,22 @@ function TaskCard({ task, onStatusChange, onMarkTested, onDelete, onUpdateDate, 
         }}>
         {/* Close button (top right) */}
         <div className="flex justify-end mb-1">
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setExpanded(false);
-            }}
-            className={`text-gray-400 hover:text-gray-600 ${!expanded ? 'hidden' : ''}`}
-            aria-label="Close details"
-          >
+          {!hideExpand && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setExpanded(false);
+              }}
+              className={`text-gray-400 hover:text-gray-600 ${!expanded ? 'hidden' : ''}`}
+              aria-label="Close details"
+            >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
+          )}
         </div>
         
         {/* Header row with initiative, title, badges */}
@@ -1193,16 +1209,18 @@ function TaskCard({ task, onStatusChange, onMarkTested, onDelete, onUpdateDate, 
                 </span>
               </div>
               
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setExpanded(false);
-                }}
-                className="btn-outline-secondary py-1 px-3 text-sm"
-              >
-                Collapse ↑
-              </button>
+              {!hideExpand && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setExpanded(false);
+                  }}
+                  className="btn-outline-secondary py-1 px-3 text-sm"
+                >
+                  Collapse ↑
+                </button>
+              )}
             </div>
           )}
           

@@ -4,8 +4,10 @@
 
 // Valid task statuses
 export const TASK_STATUSES = {
+  INBOX: 'inbox',
   PROPOSED: 'proposed',
   BACKLOG: 'backlog',
+  MAYBE: 'maybe',
   TODO: 'todo',
   IN_PROGRESS: 'in-progress',
   ON_HOLD: 'on-hold',
@@ -16,8 +18,10 @@ export const TASK_STATUSES = {
 
 // Status display names (for UI)
 export const STATUS_DISPLAY_NAMES = {
+  [TASK_STATUSES.INBOX]: 'Inbox',
   [TASK_STATUSES.PROPOSED]: 'Proposed',
   [TASK_STATUSES.BACKLOG]: 'Backlog',
+  [TASK_STATUSES.MAYBE]: 'Someday/Maybe',
   [TASK_STATUSES.TODO]: 'Todo',
   [TASK_STATUSES.IN_PROGRESS]: 'In Progress',
   [TASK_STATUSES.ON_HOLD]: 'On Hold',
@@ -28,8 +32,10 @@ export const STATUS_DISPLAY_NAMES = {
 
 // Status color classes for badges
 export const STATUS_COLORS = {
+  [TASK_STATUSES.INBOX]: 'bg-indigo-100 text-indigo-800',
   [TASK_STATUSES.PROPOSED]: 'bg-purple-100 text-purple-800',
   [TASK_STATUSES.BACKLOG]: 'bg-slate-100 text-slate-800',
+  [TASK_STATUSES.MAYBE]: 'bg-purple-100 text-purple-800',
   [TASK_STATUSES.TODO]: 'bg-blue-100 text-blue-800',
   [TASK_STATUSES.IN_PROGRESS]: 'bg-yellow-100 text-yellow-800',
   [TASK_STATUSES.ON_HOLD]: 'bg-amber-100 text-amber-800',
@@ -41,8 +47,10 @@ export const STATUS_COLORS = {
 
 // Status descriptions for tooltips/popovers
 export const STATUS_DESCRIPTIONS = {
+  [TASK_STATUSES.INBOX]: 'Initial collection point for new ideas and tasks',
   [TASK_STATUSES.PROPOSED]: 'Task has been proposed but not started yet',
   [TASK_STATUSES.BACKLOG]: 'Task is in the backlog for future consideration',
+  [TASK_STATUSES.MAYBE]: 'Items to consider in the future but not actionable now',
   [TASK_STATUSES.TODO]: 'Task is ready to be worked on',
   [TASK_STATUSES.IN_PROGRESS]: 'Task is currently being worked on',
   [TASK_STATUSES.ON_HOLD]: 'Task is temporarily paused',
@@ -53,8 +61,10 @@ export const STATUS_DESCRIPTIONS = {
 
 // Status transition helpers - what status can a task move to from its current status
 export const NEXT_STATUS = {
+  [TASK_STATUSES.INBOX]: TASK_STATUSES.BRAINSTORM,
   [TASK_STATUSES.PROPOSED]: TASK_STATUSES.TODO,
   [TASK_STATUSES.BACKLOG]: TASK_STATUSES.TODO,
+  [TASK_STATUSES.MAYBE]: TASK_STATUSES.BACKLOG,
   [TASK_STATUSES.TODO]: TASK_STATUSES.IN_PROGRESS,
   [TASK_STATUSES.IN_PROGRESS]: TASK_STATUSES.DONE,
   [TASK_STATUSES.ON_HOLD]: TASK_STATUSES.IN_PROGRESS,
@@ -63,7 +73,10 @@ export const NEXT_STATUS = {
 };
 
 export const PREVIOUS_STATUS = {
+  [TASK_STATUSES.BRAINSTORM]: TASK_STATUSES.INBOX,
+  [TASK_STATUSES.PROPOSED]: TASK_STATUSES.INBOX,
   [TASK_STATUSES.BACKLOG]: TASK_STATUSES.PROPOSED,
+  [TASK_STATUSES.MAYBE]: TASK_STATUSES.PROPOSED,
   [TASK_STATUSES.TODO]: TASK_STATUSES.PROPOSED,
   [TASK_STATUSES.IN_PROGRESS]: TASK_STATUSES.TODO,
   [TASK_STATUSES.ON_HOLD]: TASK_STATUSES.IN_PROGRESS,
@@ -74,14 +87,17 @@ export const PREVIOUS_STATUS = {
 
 // Status action button text
 export const STATUS_ACTION_TEXT = {
+  [TASK_STATUSES.INBOX]: 'Move to Brainstorm',
   [TASK_STATUSES.PROPOSED]: 'Move to Todo',
   [TASK_STATUSES.BACKLOG]: 'Move to Todo',
+  [TASK_STATUSES.MAYBE]: 'Move to Backlog',
   [TASK_STATUSES.TODO]: 'Start Progress',
   [TASK_STATUSES.IN_PROGRESS]: 'Mark Done',
   [TASK_STATUSES.ON_HOLD]: 'Resume Progress',
   [TASK_STATUSES.DONE]: 'Mark Reviewed',
   [TASK_STATUSES.REVIEWED]: 'Archive Task',
   TO_BACKLOG: 'To Backlog',
+  TO_MAYBE: 'To Someday/Maybe',
   ON_HOLD: 'Put On Hold',
   ARCHIVE: 'Archive',
   REOPEN: 'Reopen Task',
@@ -92,6 +108,14 @@ export const STATUS_ACTION_TEXT = {
 
 // Status action help text (for popovers)
 export const STATUS_ACTION_HELP = {
+  [TASK_STATUSES.INBOX]: {
+    title: 'Ready to develop this idea?',
+    description: 'Click this button to move this task from your inbox to brainstorming phase, where you can further develop the concept.'
+  },
+  [TASK_STATUSES.MAYBE]: {
+    title: 'Ready to consider this task?',
+    description: 'Click this button to move this task from Someday/Maybe to your backlog, indicating it\'s now worth considering in the near future.'
+  },
   [TASK_STATUSES.PROPOSED]: {
     title: 'Ready to work on this?',
     description: 'Click this button to accept this task proposal and move it to your todo list. This way your team knows you\'re planning to work on it soon.'

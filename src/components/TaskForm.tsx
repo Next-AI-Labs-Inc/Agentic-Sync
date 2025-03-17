@@ -265,11 +265,14 @@ export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps
               onChange={handleChange}
               className="form-select"
             >
+              <option value="brainstorm">Brainstorm</option>
               <option value="proposed">Proposed</option>
+              <option value="backlog">Backlog</option>
               <option value="todo">To Do</option>
               <option value="in-progress">In Progress</option>
-              <option value="done">Done</option>
-              <option value="reviewed">Reviewed</option>
+              <option value="on-hold">On Hold</option>
+              <option value="done">For Review</option>
+              <option value="reviewed">Done</option>
             </select>
           </div>
           

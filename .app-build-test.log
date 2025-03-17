@@ -1,61 +1,11 @@
-App build verification started at 2025-03-17T20:27:49.837Z
-[2025-03-17T20:27:49.840Z] Building Next.js app...
-[2025-03-17T20:27:50.166Z] [stdout] > tasks@0.1.0 build
+App build verification started at 2025-03-17T23:09:09.590Z
+[2025-03-17T23:09:09.594Z] Building Next.js app...
+[2025-03-17T23:09:10.011Z] [stdout] > tasks@0.1.0 build
 > next build
-[2025-03-17T20:27:50.652Z] [stdout] [1m[38;2;173;127;168m ▲ Next.js 14.1.3[39m[22m
-[2025-03-17T20:27:50.653Z] [stdout] - Environments: .env.local
+[2025-03-17T23:09:10.563Z] [stdout] [1m[38;2;173;127;168m ▲ Next.js 14.1.3[39m[22m
+[2025-03-17T23:09:10.563Z] [stdout] - Environments: .env.local
 
  [37m[1m [22m[39m Linting and checking validity of types ...
-[2025-03-17T20:27:53.247Z] [stdout] [37m[1m [22m[39m Creating an optimized production build ...
-[2025-03-17T20:27:56.247Z] [stdout] [32m[1m✓[22m[39m Compiled successfully
-[2025-03-17T20:27:56.248Z] [stdout] [37m[1m [22m[39m Collecting page data ...
-[2025-03-17T20:27:56.389Z] [stdout] Initializing real-time task sync service...
-Setting up real-time event simulation
-[2025-03-17T20:27:56.396Z] [stdout] Initializing real-time task sync service...
-Setting up real-time event simulation
-[2025-03-17T20:27:56.402Z] [stdout] Initializing real-time task sync service...
-[2025-03-17T20:27:56.403Z] [stdout] Setting up real-time event simulation
-[2025-03-17T20:27:56.404Z] [stdout] Initializing real-time task sync service...
-Setting up real-time event simulation
-[2025-03-17T20:27:56.405Z] [stdout] Initializing real-time task sync service...
-[2025-03-17T20:27:56.405Z] [stdout] Initializing real-time task sync service...
-Setting up real-time event simulation
-[2025-03-17T20:27:56.407Z] [stdout] Setting up real-time event simulation
-[2025-03-17T20:27:56.412Z] [stdout] Initializing real-time task sync service...
-Setting up real-time event simulation
-[2025-03-17T20:27:56.413Z] [stdout] Initializing real-time task sync service...
-Setting up real-time event simulation
-[2025-03-17T20:27:56.811Z] [stdout] [37m[1m [22m[39m Generating static pages (0/8) ...
-[2025-03-17T20:27:56.876Z] [stdout] [37m[1m [22m[39m Generating static pages (2/8)
-[2025-03-17T20:27:56.876Z] [stdout] [37m[1m [22m[39m Generating static pages (4/8)
-[2025-03-17T20:27:56.932Z] [stdout] Initializing real-time task sync service...
-Setting up real-time event simulation
-[2025-03-17T20:27:56.973Z] [stdout] [37m[1m [22m[39m Generating static pages (6/8)
-[2025-03-17T20:27:57.091Z] [stdout] [32m[1m✓[22m[39m Generating static pages (8/8)
-[2025-03-17T20:27:57.679Z] [stdout] [37m[1m [22m[39m Finalizing page optimization ...
-[2025-03-17T20:27:57.679Z] [stdout] [37m[1m [22m[39m Collecting build traces ...
-[2025-03-17T20:28:01.997Z] [stdout] 
-[2025-03-17T20:28:02.001Z] [stdout] [4mRoute (pages)[24m                              [4mSize[24m     [4mFirst Load JS[24m
-┌ ○ /                                      1.76 kB         [37m[1m170 kB[22m[39m
-├   /_app                                  0 B             [37m[1m119 kB[22m[39m
-├ ○ /404                                   182 B           [37m[1m119 kB[22m[39m
-├ λ /api/docs                              0 B             [37m[1m119 kB[22m[39m
-├ λ /api/initiatives                       0 B             [37m[1m119 kB[22m[39m
-├ λ /api/initiatives-old                   0 B             [37m[1m119 kB[22m[39m
-├ λ /api/initiatives/[id]                  0 B             [37m[1m119 kB[22m[39m
-├ ○ /docs                                  1.17 kB         [37m[1m154 kB[22m[39m
-├ ○ /initiatives                           2 kB            [37m[1m170 kB[22m[39m
-├ ○ /minimal                               2 kB            [37m[1m172 kB[22m[39m
-├ ○ /tasks                                 5.21 kB         [37m[1m175 kB[22m[39m
-└ ○ /tasks-core                            1.81 kB         [37m[1m172 kB[22m[39m
-+ First Load JS shared by all              [37m[1m125 kB[22m[39m
-  ├ chunks/framework-03cd576e71e4cd66.js   45.2 kB
-  ├ chunks/main-c693b54913497348.js        36.4 kB
-  ├ chunks/pages/_app-d5d95b83c936b185.js  36.4 kB
-  └ other shared chunks (total)            6.95 kB
-[2025-03-17T20:28:02.002Z] [stdout] ○  (Static)   prerendered as static content
-λ  (Dynamic)  server-rendered on demand using Node.js
-[2025-03-17T20:28:02.020Z] Build process exited with code 0
-[2025-03-17T20:28:02.021Z] ✅ VERIFICATION PASSED: Next.js app built successfully
-[2025-03-17T20:28:02.022Z] 🛑 Terminated build process
-[2025-03-17T20:28:02.022Z] ✅ VERIFICATION PASSED: Next.js app built successfully
+[2025-03-17T23:09:13.970Z] Received SIGTERM signal
+[2025-03-17T23:09:13.971Z] 🛑 Terminated build process
+[2025-03-17T23:09:13.971Z] ❓ VERIFICATION INCONCLUSIVE: Could not determine build status

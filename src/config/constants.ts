@@ -9,8 +9,11 @@
  * Status configuration for task workflow
  */
 export const TASK_STATUSES = {
+  INBOX: 'inbox',       // New status for initial ideas/tasks
+  BRAINSTORM: 'brainstorm',  // New status for initial brainstorming phase
   PROPOSED: 'proposed',
   BACKLOG: 'backlog',
+  MAYBE: 'maybe',      // Someday/Maybe items in GTD
   TODO: 'todo',
   IN_PROGRESS: 'in-progress',
   DONE: 'done',
@@ -22,12 +25,31 @@ export const TASK_STATUSES = {
   ALL: 'all',
   PENDING: 'pending', // All non-completed tasks
   RECENT_COMPLETED: 'recent-completed',
+  SOURCE_TASKS: 'source-tasks', // Group for backlog/brainstorm tasks
 } as const;
 
 /**
  * Status display configuration (for UI presentation)
  */
 export const STATUS_DISPLAY = {
+  [TASK_STATUSES.INBOX]: {
+    label: 'Inbox',
+    color: 'bg-indigo-100 text-indigo-800',
+    icon: 'FaInbox',
+    description: 'Initial collection point for new ideas and tasks'
+  },
+  [TASK_STATUSES.MAYBE]: {
+    label: 'Someday/Maybe',
+    color: 'bg-purple-100 text-purple-800',
+    icon: 'FaCalendarAlt',
+    description: 'Items to consider in the future but not actionable now'
+  },
+  [TASK_STATUSES.BRAINSTORM]: {
+    label: 'Brainstorm',
+    color: 'bg-teal-100 text-teal-800',
+    icon: 'FaBrain',
+    description: 'Initial brainstorming phase for task ideas'
+  },
   [TASK_STATUSES.PROPOSED]: {
     label: 'Proposed',
     color: 'bg-purple-100 text-purple-800',
@@ -59,13 +81,13 @@ export const STATUS_DISPLAY = {
     description: 'Task is temporarily paused'
   },
   [TASK_STATUSES.DONE]: {
-    label: 'Done',
+    label: 'For Review',
     color: 'bg-green-100 text-green-800',
     icon: 'FaCheckCircle',
-    description: 'Task has been completed'
+    description: 'Task has been completed and is ready for review'
   },
   [TASK_STATUSES.REVIEWED]: {
-    label: 'Reviewed',
+    label: 'Done',
     color: 'bg-indigo-100 text-indigo-800',
     icon: 'FaCheck',
     description: 'Task has been completed and reviewed'
@@ -93,6 +115,12 @@ export const STATUS_DISPLAY = {
     color: 'bg-green-100 text-green-800',
     icon: 'FaClock',
     description: 'Tasks completed in the last two days'
+  },
+  [TASK_STATUSES.SOURCE_TASKS]: {
+    label: 'Source Tasks',
+    color: 'bg-slate-100 text-slate-800',
+    icon: 'FaStream',
+    description: 'Source tasks from backlog and brainstorming'
   }
 } as const;
 

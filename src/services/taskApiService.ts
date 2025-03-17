@@ -292,10 +292,10 @@ export async function getStages(): Promise<string[]> {
     }
     
     // Default stages if none are stored
-    return ['proposed', 'todo', 'in-progress', 'done', 'reviewed'];
+    return ['brainstorm', 'proposed', 'backlog', 'todo', 'in-progress', 'on-hold', 'done', 'reviewed', 'archived'];
   } catch (error: any) {
     console.error('Error fetching stages:', error);
-    return ['proposed', 'todo', 'in-progress', 'done', 'reviewed'];
+    return ['brainstorm', 'proposed', 'backlog', 'todo', 'in-progress', 'on-hold', 'done', 'reviewed', 'archived'];
   }
 }
 
@@ -328,7 +328,7 @@ export async function deleteTask(id: string) {
 /**
  * Update a task's status
  */
-export async function updateTaskStatus(id: string, status: 'proposed' | 'todo' | 'in-progress' | 'done' | 'reviewed') {
+export async function updateTaskStatus(id: string, status: 'brainstorm' | 'proposed' | 'backlog' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived') {
   const updateData: Partial<Task> = { status };
   
   // Add timestamps for status changes
