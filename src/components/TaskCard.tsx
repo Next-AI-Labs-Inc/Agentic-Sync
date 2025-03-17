@@ -889,6 +889,7 @@ function TaskCard({ task, onStatusChange, onMarkTested, onDelete, onUpdateDate, 
         task.status === 'reviewed' ? 'bg-gray-50' : 'bg-white'
       } ${isNew ? 'animate-fade-in border-l-4 border-l-blue-500' : ''} 
       ${isDeleting ? 'fade-out pointer-events-none' : ''}
+      ${expanded ? 'expanded' : ''}
       rounded-lg shadow-sm border border-gray-200 transition-all duration-200`}
     >
       <div className="p-4 cursor-pointer" onClick={(e) => {

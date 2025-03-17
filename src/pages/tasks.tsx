@@ -165,50 +165,24 @@ export default function TasksPage() {
               {filteredTasks.length} {filteredTasks.length === 1 ? 'task' : 'tasks'} found
             </div>
             
-            {filteredTasks.length > 20 && isClient ? (
-              // For larger lists, use virtualized rendering - only on client side
-              <div style={{ height: '70vh', width: '100%' }}>
-                <List
-                  height={Math.min(windowHeight * 0.7, filteredTasks.length * 200)}
-                  width="100%"
-                  itemCount={filteredTasks.length}
-                  itemSize={200} // Approximate height of each task card
-                  overscanCount={3} // Number of items to render above/below the visible area
+            {/* Always use the same rendering approach regardless of list size to ensure consistency */}
+            <div className="space-y-4">
+              {filteredTasks.map((task) => (
+                <div 
+                  key={`${task.id}-${task.project}`}
+                  className="task-card-container relative" 
                 >
-                  {({ index, style }) => (
-                    <div style={style} className="py-2">
-                      <TaskCard 
-                        task={filteredTasks[index]}
-                        onStatusChange={updateTaskStatus}
-                        onMarkTested={markTaskTested}
-                        onDelete={deleteTask}
-                        onUpdateDate={updateTaskDate}
-                        onUpdateTask={(taskId, project, updates) => updateTask(taskId, updates)}
-                      />
-                    </div>
-                  )}
-                </List>
-              </div>
-            ) : (
-              // For smaller lists, use regular rendering without animation delays
-              <div className="space-y-4">
-                {filteredTasks.map((task) => (
-                  <div 
-                    key={`${task.id}-${task.project}`}
-                    className="task-card-container"
-                  >
-                    <TaskCard 
-                      task={task}
-                      onStatusChange={updateTaskStatus}
-                      onMarkTested={markTaskTested}
-                      onDelete={deleteTask}
-                      onUpdateDate={updateTaskDate}
-                      onUpdateTask={(taskId, project, updates) => updateTask(taskId, updates)}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
+                  <TaskCard 
+                    task={task}
+                    onStatusChange={updateTaskStatus}
+                    onMarkTested={markTaskTested}
+                    onDelete={deleteTask}
+                    onUpdateDate={updateTaskDate}
+                    onUpdateTask={(taskId, project, updates) => updateTask(taskId, updates)}
+                  />
+                </div>
+              ))}
+            </div>}
           </>
         )}
       </div>

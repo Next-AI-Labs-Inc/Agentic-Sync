@@ -34,6 +34,19 @@
 /* Fix for staggered animations */
 .task-card-container {
   transform-origin: center top;
+  position: relative;
+  z-index: 1; /* Establish a stacking context */
+}
+
+/* Ensure task cards have proper stacking context and position */
+.task-card {
+  position: relative; 
+  z-index: 1;
+}
+
+/* Ensure task cards in expanded state have higher z-index */
+.task-card.expanded {
+  z-index: 10;
 }
 
 @layer base {
@@ -135,7 +148,7 @@
   
   /* Popover styles */
   .popover {
-    @apply invisible absolute z-[1000] max-w-sm rounded-md bg-white p-3 text-sm shadow-lg ring-1 ring-gray-200 transition-all duration-150 opacity-0 transform scale-95;
+    @apply invisible absolute z-[2000] max-w-sm rounded-md bg-white p-3 text-sm shadow-lg ring-1 ring-gray-200 transition-all duration-150 opacity-0 transform scale-95;
   }
   
   .popover.show {
