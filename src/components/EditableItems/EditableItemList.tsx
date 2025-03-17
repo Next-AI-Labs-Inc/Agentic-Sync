@@ -53,19 +53,28 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
   };
   
   // Handle edit save
-  const handleSave = () => {
-    if (editIndex === null) return;
-    
-    const newItems = [...parsedItems];
-    newItems[editIndex] = editValue.trim();
-    
-    // Remove if empty
-    if (!newItems[editIndex]) {
-      newItems.splice(editIndex, 1);
+  const handleSave = (e?: React.FocusEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation(); // Prevent event from bubbling to parent elements
     }
     
-    setParsedItems(newItems);
-    onUpdate(newItems);
+    if (editIndex === null) return;
+    
+    // Only update if the content has actually changed
+    if (editValue.trim() !== parsedItems[editIndex]) {
+      const newItems = [...parsedItems];
+      newItems[editIndex] = editValue.trim();
+      
+      // Remove if empty
+      if (!newItems[editIndex]) {
+        newItems.splice(editIndex, 1);
+      }
+      
+      setParsedItems(newItems);
+      onUpdate(newItems);
+    }
+    
     setEditIndex(null);
     setEditValue('');
   };
@@ -91,7 +100,12 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
   };
   
   // Handle saving new item
-  const handleSaveNew = () => {
+  const handleSaveNew = (e?: React.FocusEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation(); // Prevent event from bubbling to parent elements
+    }
+    
     if (newItemValue.trim()) {
       const newItems = [...parsedItems, newItemValue.trim()];
       setParsedItems(newItems);
@@ -109,27 +123,41 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
   
   // Handle keyboard navigation
   const handleEditKeyDown = (e: React.KeyboardEvent) => {
+    // Always stop propagation to prevent affecting parent components
+    e.stopPropagation();
+    
     if (e.key === 'Enter') {
+      e.preventDefault(); // Prevent adding a newline
       handleSave();
     } else if (e.key === 'Escape') {
+      e.preventDefault();
       handleCancel();
     }
   };
   
   const handleNewKeyDown = (e: React.KeyboardEvent) => {
+    // Always stop propagation to prevent affecting parent components
+    e.stopPropagation();
+    
     if (e.key === 'Enter') {
+      e.preventDefault(); // Prevent adding a newline
       handleSaveNew();
     } else if (e.key === 'Escape') {
+      e.preventDefault();
       handleCancelNew();
     }
   };
 
   return (
-    <div className="mb-4">
+    <div className="mb-4 editable-item">
       <div className="flex items-center justify-between mb-2">
         <h4 className="font-medium text-gray-700">{label}</h4>
         <button
-          onClick={handleAddNew}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleAddNew();
+          }}
           className="p-1 text-blue-600 hover:text-blue-800 transition-colors"
           title={`Add new ${label.toLowerCase()} item`}
         >
@@ -153,14 +181,22 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
                 />
                 <div className="flex items-start mt-2 sm:mt-0 sm:ml-2">
                   <button
-                    onClick={handleSave}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleSave();
+                    }}
                     className="p-1 text-green-600 hover:text-green-800"
                     title="Save changes"
                   >
                     <FaCheck size={14} />
                   </button>
                   <button
-                    onClick={handleCancel}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleCancel();
+                    }}
                     className="p-1 text-red-600 hover:text-red-800 ml-1"
                     title="Cancel editing"
                   >
@@ -172,20 +208,32 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
               <>
                 <div 
                   className="flex-1 p-2 rounded hover:bg-gray-50 cursor-pointer whitespace-pre-wrap break-words"
-                  onClick={() => handleEdit(index)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleEdit(index);
+                  }}
                 >
                   {item}
                 </div>
                 <div className="flex ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
-                    onClick={() => handleEdit(index)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleEdit(index);
+                    }}
                     className="p-1 text-gray-600 hover:text-blue-600"
                     title="Edit item"
                   >
                     <FaEdit size={14} />
                   </button>
                   <button
-                    onClick={() => handleDelete(index)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDelete(index);
+                    }}
                     className="p-1 text-gray-600 hover:text-red-600 ml-1"
                     title="Delete item"
                   >
@@ -212,14 +260,22 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
               />
               <div className="flex items-start mt-2 sm:mt-0 sm:ml-2">
                 <button
-                  onClick={handleSaveNew}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSaveNew();
+                  }}
                   className="p-1 text-green-600 hover:text-green-800"
                   title="Save new item"
                 >
                   <FaCheck size={14} />
                 </button>
                 <button
-                  onClick={handleCancelNew}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleCancelNew();
+                  }}
                   className="p-1 text-red-600 hover:text-red-800 ml-1"
                   title="Cancel adding"
                 >

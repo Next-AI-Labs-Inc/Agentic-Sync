@@ -446,12 +446,21 @@ function TaskCard({ task, onStatusChange, onMarkTested, onDelete, onUpdateDate, 
 
   // Handle card click for expansion
   const handleCardClick = (e: React.MouseEvent) => {
-    // Only prevent default if it's a button or form element
+    // First check if the click should be ignored
     if (e.target instanceof HTMLButtonElement || 
         e.target instanceof HTMLInputElement || 
-        e.target instanceof HTMLFormElement) {
-      return; // Let buttons and form inputs handle their own clicks
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLFormElement ||
+        // Check for editors and interactive elements
+        (e.target instanceof HTMLElement && 
+         (e.target.closest('.popover') || 
+          e.target.closest('.dropdown-menu') ||
+          e.target.closest('.editable-item')))
+    ) {
+      return; // Let interactive elements handle their own clicks
     }
+    
+    // Toggle expanded state
     setExpanded(!expanded);
   };
 
@@ -883,8 +892,12 @@ function TaskCard({ task, onStatusChange, onMarkTested, onDelete, onUpdateDate, 
       rounded-lg shadow-sm border border-gray-200 transition-all duration-200`}
     >
       <div className="p-4 cursor-pointer" onClick={(e) => {
-          // Only trigger handleCardClick if the card is not already expanded
-          if (!expanded) {
+          // Allow toggling expanded state when clicking the card,
+          // unless it's inside an interactive element
+          if (e.target === e.currentTarget || 
+              (e.target instanceof HTMLElement && !e.target.closest('.editable-item') && 
+               !e.target.closest('button') && !e.target.closest('input') && 
+               !e.target.closest('textarea'))) {
             handleCardClick(e);
           }
         }}>
@@ -1413,11 +1426,19 @@ function TaskCard({ task, onStatusChange, onMarkTested, onDelete, onUpdateDate, 
 
 // Export a memoized version of the component to prevent unnecessary re-renders
 export default React.memo(TaskCard, (prevProps, nextProps) => {
-  // Compare the key properties to determine if re-render is needed
+  // Compare all relevant properties to ensure proper re-rendering
   return (
     prevProps.task.id === nextProps.task.id &&
     prevProps.task.title === nextProps.task.title &&
     prevProps.task.status === nextProps.task.status &&
-    prevProps.task.updatedAt === nextProps.task.updatedAt
+    prevProps.task.updatedAt === nextProps.task.updatedAt &&
+    prevProps.task.description === nextProps.task.description &&
+    prevProps.task.userImpact === nextProps.task.userImpact &&
+    prevProps.task.initiative === nextProps.task.initiative &&
+    prevProps.onStatusChange === nextProps.onStatusChange &&
+    prevProps.onMarkTested === nextProps.onMarkTested &&
+    prevProps.onDelete === nextProps.onDelete &&
+    prevProps.onUpdateDate === nextProps.onUpdateDate &&
+    prevProps.onUpdateTask === nextProps.onUpdateTask
   );
 });
