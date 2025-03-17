@@ -73,12 +73,15 @@ export const staticIndicators: Record<string, NumberIndicator> = {
  * @returns Object with counts for each status
  */
 export function calculateTaskStatusCounts(tasks: Task[]): Record<string, number> {
-  const counts = {
+  const counts: Record<string, number> = {
     proposed: 0,
+    backlog: 0,
     todo: 0,
     'in-progress': 0,
+    'on-hold': 0,
     done: 0,
     reviewed: 0,
+    archived: 0,
     total: tasks.length,
     active: 0,
     completed: 0
@@ -262,12 +265,15 @@ export function calculateCompletionPercentage(tasks: Task[]): number {
   if (!tasks.length) return 0;
   
   // Weight each status appropriately
-  const weights = {
+  const weights: Record<string, number> = {
     'proposed': 0.1, // 10% progress
+    'backlog': 0.15, // 15% progress
     'todo': 0.25, // 25% progress
     'in-progress': 0.5, // 50% progress
+    'on-hold': 0.5, // 50% progress (same as in-progress)
     'done': 0.9, // 90% progress
-    'reviewed': 1.0 // 100% progress
+    'reviewed': 1.0, // 100% progress
+    'archived': 1.0 // 100% progress (same as reviewed)
   };
   
   // Calculate weighted sum

@@ -308,6 +308,18 @@ export default function TaskFilters({
             </span>}
           </button>
           
+          {/* Backlog */}
+          <button
+            onClick={() => setCompletedFilter(TASK_STATUSES.BACKLOG)}
+            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+              ${completedFilter === TASK_STATUSES.BACKLOG ? STATUS_DISPLAY[TASK_STATUSES.BACKLOG].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+          >
+            {STATUS_DISPLAY[TASK_STATUSES.BACKLOG].label}
+            {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+              {taskCountsByStatus[TASK_STATUSES.BACKLOG] || 0}
+            </span>}
+          </button>
+          
           {/* Todo */}
           <button
             onClick={() => setCompletedFilter(TASK_STATUSES.TODO)}
@@ -329,6 +341,18 @@ export default function TaskFilters({
             {STATUS_DISPLAY[TASK_STATUSES.IN_PROGRESS].label}
             {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
               {taskCountsByStatus[TASK_STATUSES.IN_PROGRESS] || 0}
+            </span>}
+          </button>
+          
+          {/* On Hold */}
+          <button
+            onClick={() => setCompletedFilter(TASK_STATUSES.ON_HOLD)}
+            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+              ${completedFilter === TASK_STATUSES.ON_HOLD ? STATUS_DISPLAY[TASK_STATUSES.ON_HOLD].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+          >
+            {STATUS_DISPLAY[TASK_STATUSES.ON_HOLD].label}
+            {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+              {taskCountsByStatus[TASK_STATUSES.ON_HOLD] || 0}
             </span>}
           </button>
           
@@ -356,6 +380,18 @@ export default function TaskFilters({
             </span>}
           </button>
           
+          {/* Archived */}
+          <button
+            onClick={() => setCompletedFilter(TASK_STATUSES.ARCHIVED)}
+            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+              ${completedFilter === TASK_STATUSES.ARCHIVED ? STATUS_DISPLAY[TASK_STATUSES.ARCHIVED].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+          >
+            {STATUS_DISPLAY[TASK_STATUSES.ARCHIVED].label}
+            {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+              {taskCountsByStatus[TASK_STATUSES.ARCHIVED] || 0}
+            </span>}
+          </button>
+          
           {/* All Pending */}
           <button
             onClick={() => setCompletedFilter(TASK_STATUSES.PENDING)}
@@ -364,7 +400,7 @@ export default function TaskFilters({
           >
             {STATUS_DISPLAY[TASK_STATUSES.PENDING].label}
             {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
-              {([TASK_STATUSES.PROPOSED, TASK_STATUSES.TODO, TASK_STATUSES.IN_PROGRESS] as const)
+              {([TASK_STATUSES.PROPOSED, TASK_STATUSES.BACKLOG, TASK_STATUSES.TODO, TASK_STATUSES.IN_PROGRESS, TASK_STATUSES.ON_HOLD] as const)
                 .reduce((acc, status) => acc + (taskCountsByStatus[status] || 0), 0)}
             </span>}
           </button>

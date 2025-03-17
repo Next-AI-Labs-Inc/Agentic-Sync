@@ -65,7 +65,7 @@ export default function TasksPage() {
       }
     }
     
-    return 'No tasks found';
+    return 'No active tasks found (done and reviewed tasks are filtered out)';
   };
   
   return (

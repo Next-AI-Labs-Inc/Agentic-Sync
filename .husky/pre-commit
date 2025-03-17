@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🧪 Running comprehensive Next.js app verification..."
+
+# Run the full verification script
+npm run verify
+
+# Check the exit code
+VERIFY_EXIT_CODE=$?
+if [ $VERIFY_EXIT_CODE -ne 0 ]; then
+  echo "❌ ERROR: App verification failed! Your changes may have broken the app."
+  echo "❌ Review the log files in the project root for details:"
+  echo "   - .app-verification.log (overall summary)"
+  echo "   - .app-build-test.log (build details)"
+  echo "   - .app-startup-test.log (startup details)"
+  echo "❌ Commit aborted. Please fix the issues before committing."
+  exit 1
+fi
+
+echo "✅ App verification passed! Proceeding with commit."

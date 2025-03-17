@@ -199,7 +199,7 @@ export async function getTasks(filters?: Record<string, string | string[]>, sign
     }
     
     return response.data.data;
-  } catch (error) {
+  } catch (error: any) {
     // Handle aborted requests separately
     if (error.name === 'AbortError' || signal?.aborted) {
       console.log('Task fetch request was aborted');
@@ -218,7 +218,7 @@ export async function getTask(id: string) {
   try {
     const response = await apiClient.get(`/api/developer/tasks/${id}`);
     return response.data.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Error fetching task ${id}:`, error);
     throw error;
   }
@@ -263,7 +263,7 @@ export async function createTask(taskData: TaskFormData) {
     }
     
     return createdTask;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating task:', error);
     throw error;
   }
@@ -286,7 +286,7 @@ export async function createInitiative(initiativeData: Partial<Initiative>) {
     
     // Return the created initiative
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating initiative:', error);
     throw error;
   }
@@ -307,7 +307,7 @@ export async function getInitiatives() {
     const response = await axios.get('/api/initiatives');
     
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching initiatives:', error);
     
     // Return fallback data in case of error
@@ -355,7 +355,7 @@ export async function deleteInitiative(id: number) {
     const response = await axios.delete(`/api/initiatives/${id}`);
     
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting initiative:', error);
     throw error;
   }
@@ -378,7 +378,7 @@ export async function updateInitiative(id: number, updateData: Partial<Initiativ
     const response = await axios.put(`/api/initiatives/${id}`, updateData);
     
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating initiative:', error);
     throw error;
   }
@@ -393,7 +393,7 @@ export async function updateStages(stages: string[]) {
     // In a real implementation, these would be stored on the server
     localStorage.setItem('taskStages', JSON.stringify(stages));
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating stages:', error);
     throw error;
   }
@@ -413,7 +413,7 @@ export async function getStages(): Promise<string[]> {
     
     // Default stages if none are stored
     return ['proposed', 'todo', 'in-progress', 'done', 'reviewed'];
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching stages:', error);
     return ['proposed', 'todo', 'in-progress', 'done', 'reviewed'];
   }
@@ -426,7 +426,7 @@ export async function updateTask(id: string, updateData: Partial<Task>) {
   try {
     const response = await apiClient.put(`/api/developer/tasks/${id}`, updateData);
     return response.data.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Error updating task ${id}:`, error);
     throw error;
   }
@@ -439,7 +439,7 @@ export async function deleteTask(id: string) {
   try {
     const response = await apiClient.delete(`/api/developer/tasks/${id}`);
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Error deleting task ${id}:`, error);
     throw error;
   }
@@ -480,7 +480,7 @@ export async function cleanupDuplicateTasks() {
   try {
     const response = await apiClient.post('/api/developer/tasks/cleanup-duplicates');
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error cleaning up duplicate tasks:', error);
     throw error;
   }

@@ -35,12 +35,13 @@ interface TaskContextValue {
   updateTaskStatus: (
     taskId: string,
     project: string,
-    status: 'proposed' | 'todo' | 'in-progress' | 'done' | 'reviewed'
+    status: 'proposed' | 'backlog' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived'
   ) => Promise<void>;
   markTaskTested: (taskId: string, project: string) => Promise<void>;
   deleteTask: (taskId: string, project: string) => Promise<void>;
   addTask: (taskData: TaskFormData) => Promise<void>;
   updateTaskDate: (taskId: string, project: string, newDate: string) => Promise<void>;
+  updateTask: (taskId: string, updateData: Partial<Task>) => Promise<void>;
   filteredTasks: Task[];
   taskCountsByStatus: Record<string, number>;
 }
@@ -423,10 +424,9 @@ export function TaskProvider({
       }
     }
     
-    // Return a cleanup function to abort any in-flight requests
-    return () => {
-      abortController.abort();
-    };
+    // Abort requests when component unmounts via useEffect cleanup
+    // Return empty array as fallback
+    return [];
   }, [projectFilter]);
 
   // Subscribe to real-time task updates
@@ -581,8 +581,10 @@ export function TaskProvider({
     // Quick return for empty tasks array
     if (!tasks.length) return [];
     
-    // Skip filtering if 'all' is selected
-    if (completedFilter === 'all') return tasks;
+    // For 'all' view, filter out 'done' status tasks by default
+    if (completedFilter === 'all') {
+      return tasks.filter((task) => task.status !== 'done' && task.status !== 'reviewed');
+    }
     
     // Apply appropriate filter based on completedFilter
     if (completedFilter === 'pending') {
@@ -611,7 +613,7 @@ export function TaskProvider({
   const updateTaskStatus = async (
     taskId: string,
     project: string,
-    status: 'proposed' | 'todo' | 'in-progress' | 'done' | 'reviewed'
+    status: 'proposed' | 'backlog' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived'
   ) => {
     // Get the current task
     const taskToUpdate = localTaskCache.get(taskId);
@@ -914,6 +916,25 @@ export function TaskProvider({
     return Promise.resolve();
   };
 
+  // Create a wrapper for the updateTask function from taskApiService
+  const updateTask = async (taskId: string, updateData: Partial<Task>) => {
+    try {
+      const updatedTask = await taskApiService.updateTask(taskId, updateData);
+      
+      // Update the task in local state
+      const updatedTasks = tasks.map(task => 
+        task.id === taskId ? { ...task, ...updateData } : task
+      );
+      
+      setTasks(updatedTasks);
+      
+      return updatedTask;
+    } catch (error) {
+      console.error(`Error updating task ${taskId}:`, error);
+      throw error;
+    }
+  };
+
   const value = {
     tasks,
     loading,
@@ -932,6 +953,7 @@ export function TaskProvider({
     deleteTask,
     addTask,
     updateTaskDate,
+    updateTask,
     filteredTasks,
     taskCountsByStatus
   };

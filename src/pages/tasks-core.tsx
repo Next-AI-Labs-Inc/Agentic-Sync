@@ -29,6 +29,7 @@ export default function TasksCorePage() {
     deleteTask,
     updateTaskDate,
     addTask,
+    refreshTasks,
     taskCountsByStatus
   } = useTasks();
   
@@ -83,15 +84,18 @@ export default function TasksCorePage() {
       
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
         <TaskFilters 
+          projects={[]} /* Empty array for now since this is a simplified view */
           completedFilter={completedFilter}
-          onCompletedFilterChange={setCompletedFilter}
+          setCompletedFilter={setCompletedFilter}
           projectFilter={projectFilter as ProjectFilterType}
-          onProjectFilterChange={setProjectFilter}
+          setProjectFilter={setProjectFilter}
           sortBy={sortBy}
-          onSortByChange={setSortBy}
+          setSortBy={setSortBy}
           sortDirection={sortDirection}
-          onSortDirectionChange={setSortDirection}
-          counts={taskCountsByStatus}
+          setSortDirection={setSortDirection}
+          onAddNewClick={handleFormOpen}
+          taskCountsByStatus={taskCountsByStatus}
+          refreshTasks={refreshTasks}
         />
       </div>
       
@@ -150,14 +154,14 @@ export default function TasksCorePage() {
               onStatusChange={updateTaskStatus}
               onMarkTested={markTaskTested}
               onDelete={deleteTask}
-              onDateChange={updateTaskDate}
+              onUpdateDate={updateTaskDate}
             />
           ))}
         </div>
       )}
       
       {isFormOpen && (
-        <TaskForm onClose={handleFormClose} onSubmit={handleAddTask} />
+        <TaskForm projects={[]} onCancel={handleFormClose} onSubmit={handleAddTask} />
       )}
     </>
   );
