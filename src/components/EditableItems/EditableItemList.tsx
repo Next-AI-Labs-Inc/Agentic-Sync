@@ -19,8 +19,8 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newItemValue, setNewItemValue] = useState('');
   
-  const editInputRef = useRef<HTMLInputElement>(null);
-  const newInputRef = useRef<HTMLInputElement>(null);
+  const editInputRef = useRef<HTMLTextAreaElement>(null);
+  const newInputRef = useRef<HTMLTextAreaElement>(null);
   
   // Parse the items on initial render and when items change
   useEffect(() => {
@@ -141,17 +141,17 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
         {parsedItems.map((item, index) => (
           <li key={index} className="flex items-start group relative">
             {editIndex === index ? (
-              <div className="flex w-full">
-                <input
-                  ref={editInputRef}
-                  type="text"
+              <div className="flex w-full flex-col sm:flex-row">
+                <textarea
+                  ref={editInputRef as React.RefObject<HTMLTextAreaElement>}
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value)}
                   onBlur={handleSave}
                   onKeyDown={handleEditKeyDown}
-                  className="flex-1 p-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="flex-1 w-full p-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 min-h-[60px]"
+                  rows={Math.max(2, (editValue.match(/\n/g) || []).length + 1)}
                 />
-                <div className="flex ml-2">
+                <div className="flex items-start mt-2 sm:mt-0 sm:ml-2">
                   <button
                     onClick={handleSave}
                     className="p-1 text-green-600 hover:text-green-800"
@@ -171,7 +171,7 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
             ) : (
               <>
                 <div 
-                  className="flex-1 p-2 rounded hover:bg-gray-50 cursor-pointer"
+                  className="flex-1 p-2 rounded hover:bg-gray-50 cursor-pointer whitespace-pre-wrap break-words"
                   onClick={() => handleEdit(index)}
                 >
                   {item}
@@ -199,18 +199,18 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
         
         {isAddingNew && (
           <li className="flex items-start">
-            <div className="flex w-full">
-              <input
-                ref={newInputRef}
-                type="text"
+            <div className="flex w-full flex-col sm:flex-row">
+              <textarea
+                ref={newInputRef as React.RefObject<HTMLTextAreaElement>}
                 value={newItemValue}
                 onChange={(e) => setNewItemValue(e.target.value)}
                 onBlur={handleSaveNew}
                 onKeyDown={handleNewKeyDown}
                 placeholder={`Enter new ${label.toLowerCase()} item...`}
-                className="flex-1 p-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="flex-1 w-full p-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 min-h-[60px]"
+                rows={Math.max(2, (newItemValue.match(/\n/g) || []).length + 1)}
               />
-              <div className="flex ml-2">
+              <div className="flex items-start mt-2 sm:mt-0 sm:ml-2">
                 <button
                   onClick={handleSaveNew}
                   className="p-1 text-green-600 hover:text-green-800"
