@@ -912,20 +912,20 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
           {(task.initiative || isEditingInitiative) && (
             <div className="flex items-start justify-between mb-1">
               {isEditingInitiative ? (
-                <div onClick={(e) => e.stopPropagation()}>
-                  <input
-                    type="text"
+                <div onClick={(e) => e.stopPropagation()} className="w-full">
+                  <textarea
                     value={editedInitiative}
                     onChange={(e) => setEditedInitiative(e.target.value)}
                     onBlur={handleInlineSubmit('initiative')}
                     onKeyDown={handleInlineKeyDown('initiative')}
                     className="w-full px-2 py-1 text-lg font-semibold text-gray-800 font-anthropic border border-blue-300 rounded"
+                    rows={(editedInitiative.match(/\n/g) || []).length + 1}
                     autoFocus
                   />
                 </div>
               ) : (
                 <h2 
-                  className="text-lg font-semibold text-gray-800 font-anthropic group cursor-pointer"
+                  className="text-lg font-semibold text-gray-800 font-anthropic group cursor-pointer whitespace-pre-wrap break-words"
                   onClick={(e) => onUpdateTask && handleInlineEdit('initiative')(e)}
                 >
                   {task.initiative}
@@ -961,22 +961,22 @@ export default function TaskCard({ task, onStatusChange, onMarkTested, onDelete,
           
           {/* Title row - with inline editing */}
           <div className={`flex items-start justify-between ${!task.initiative ? 'mb-1' : ''}`}>
-            <div className="flex items-center">
+            <div className="flex items-start w-full">
               {isEditingTitle ? (
                 <div onClick={(e) => e.stopPropagation()} className="w-full">
-                  <input
-                    type="text"
+                  <textarea
                     value={editedTitle}
                     onChange={(e) => setEditedTitle(e.target.value)}
                     onBlur={handleInlineSubmit('title')}
                     onKeyDown={handleInlineKeyDown('title')}
                     className="w-full px-2 py-1 text-lg font-normal font-anthropic border border-blue-300 rounded"
+                    rows={(editedTitle.match(/\n/g) || []).length + 1}
                     autoFocus
                   />
                 </div>
               ) : (
                 <h3
-                  className={`text-lg font-normal font-anthropic group cursor-pointer ${
+                  className={`text-lg font-normal font-anthropic group cursor-pointer whitespace-pre-wrap break-words ${
                     task.status === 'reviewed' ? 'text-gray-500' : 'text-gray-800'
                   }`}
                   onClick={(e) => onUpdateTask && handleInlineEdit('title')(e)}
