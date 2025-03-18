@@ -5,6 +5,7 @@
 // Valid task statuses
 export const TASK_STATUSES = {
   INBOX: 'inbox',
+  BRAINSTORM: 'brainstorm',
   PROPOSED: 'proposed',
   BACKLOG: 'backlog',
   MAYBE: 'maybe',
@@ -19,6 +20,7 @@ export const TASK_STATUSES = {
 // Status display names (for UI)
 export const STATUS_DISPLAY_NAMES = {
   [TASK_STATUSES.INBOX]: 'Inbox',
+  [TASK_STATUSES.BRAINSTORM]: 'Brainstorm',
   [TASK_STATUSES.PROPOSED]: 'Proposed',
   [TASK_STATUSES.BACKLOG]: 'Backlog',
   [TASK_STATUSES.MAYBE]: 'Someday/Maybe',
@@ -33,6 +35,7 @@ export const STATUS_DISPLAY_NAMES = {
 // Status color classes for badges
 export const STATUS_COLORS = {
   [TASK_STATUSES.INBOX]: 'bg-indigo-100 text-indigo-800',
+  [TASK_STATUSES.BRAINSTORM]: 'bg-blue-100 text-blue-800',
   [TASK_STATUSES.PROPOSED]: 'bg-purple-100 text-purple-800',
   [TASK_STATUSES.BACKLOG]: 'bg-slate-100 text-slate-800',
   [TASK_STATUSES.MAYBE]: 'bg-purple-100 text-purple-800',
@@ -48,6 +51,7 @@ export const STATUS_COLORS = {
 // Status descriptions for tooltips/popovers
 export const STATUS_DESCRIPTIONS = {
   [TASK_STATUSES.INBOX]: 'Initial collection point for new ideas and tasks',
+  [TASK_STATUSES.BRAINSTORM]: 'Space to develop ideas and flesh out tasks',
   [TASK_STATUSES.PROPOSED]: 'Task has been proposed but not started yet',
   [TASK_STATUSES.BACKLOG]: 'Task is in the backlog for future consideration',
   [TASK_STATUSES.MAYBE]: 'Items to consider in the future but not actionable now',
@@ -87,6 +91,7 @@ export const PREVIOUS_STATUS = {
 
 // Status action button text
 export const STATUS_ACTION_TEXT = {
+  // Primary Actions by Status
   [TASK_STATUSES.INBOX]: 'Move to Brainstorm',
   [TASK_STATUSES.PROPOSED]: 'Move to Todo',
   [TASK_STATUSES.BACKLOG]: 'Move to Todo',
@@ -96,6 +101,8 @@ export const STATUS_ACTION_TEXT = {
   [TASK_STATUSES.ON_HOLD]: 'Resume Progress',
   [TASK_STATUSES.DONE]: 'Mark Reviewed',
   [TASK_STATUSES.REVIEWED]: 'Archive Task',
+  
+  // Common transitions
   TO_BACKLOG: 'To Backlog',
   TO_MAYBE: 'To Someday/Maybe',
   ON_HOLD: 'Put On Hold',
@@ -103,14 +110,32 @@ export const STATUS_ACTION_TEXT = {
   REOPEN: 'Reopen Task',
   STILL_WORKING: 'Still Working',
   MARK_TESTED: 'Mark Tested',
-  DELETE: 'Delete'
+  DELETE: 'Delete',
+  
+  // New actions from the workflow plan
+  MARK_ACTIONABLE: 'Mark Actionable',
+  MOVE_TO_BRAINSTORM: 'Move to Brainstorm',
+  MOVE_TO_SOMEDAY: 'Move to Someday/Maybe',
+  MARK_REFERENCE: 'Mark as Reference',
+  MOVE_TO_PROPOSED: 'Move to Proposed',
+  MOVE_TO_INBOX: 'Move to Inbox',
+  REJECT: 'Reject',
+  MOVE_TO_REVIEW: 'Move to Review',
+  UNARCHIVE: 'Unarchive',
+  DELETE_PERMANENTLY: 'Delete Permanently',
+  MOVE_TO_DONE: 'Move to Done'
 };
 
 // Status action help text (for popovers)
 export const STATUS_ACTION_HELP = {
+  // Base status actions
   [TASK_STATUSES.INBOX]: {
     title: 'Ready to develop this idea?',
     description: 'Click this button to move this task from your inbox to brainstorming phase, where you can further develop the concept.'
+  },
+  [TASK_STATUSES.BRAINSTORM]: {
+    title: 'Ready to propose this idea?',
+    description: 'Click this button to move this task from brainstorming to the proposed stage, making it visible for consideration by your team.'
   },
   [TASK_STATUSES.MAYBE]: {
     title: 'Ready to consider this task?',
@@ -144,6 +169,8 @@ export const STATUS_ACTION_HELP = {
     title: 'Archive this task?',
     description: 'This task has been reviewed and can now be archived to reduce clutter in your active tasks.'
   },
+  
+  // Common transitions
   TO_BACKLOG: {
     title: 'Move to backlog?',
     description: 'This will move the task to your backlog for future consideration, keeping it in your system but out of your active workflow.'
@@ -171,7 +198,68 @@ export const STATUS_ACTION_HELP = {
   DELETE: {
     title: 'Delete this task?',
     description: 'This will permanently remove the task from your system. This action cannot be undone.'
+  },
+  
+  // New actions from workflow plan
+  MARK_ACTIONABLE: {
+    title: 'Ready to act on this?',
+    description: 'Mark this task as actionable and move it to your Todo list, indicating you can work on it now.'
+  },
+  MOVE_TO_BRAINSTORM: {
+    title: 'Need more thinking?',
+    description: 'Move this task to the Brainstorm stage to develop the idea further before deciding on next steps.'
+  },
+  MOVE_TO_SOMEDAY: {
+    title: 'Save for the future?',
+    description: 'Move this task to Someday/Maybe for ideas that are worth keeping but not actionable now.'
+  },
+  MARK_REFERENCE: {
+    title: 'Keep as reference?',
+    description: 'Mark this as reference material to keep for future use without requiring action.'
+  },
+  MOVE_TO_PROPOSED: {
+    title: 'Propose for consideration?',
+    description: 'Move this to the Proposed stage to get feedback or consideration from others.'
+  },
+  MOVE_TO_INBOX: {
+    title: 'Back to Inbox?',
+    description: 'Return this task to your Inbox for reconsideration or to restart the processing workflow.'
+  },
+  REJECT: {
+    title: 'Reject this proposal?',
+    description: 'Reject and delete this task if it\'s not valuable or relevant to your work.'
+  },
+  MOVE_TO_REVIEW: {
+    title: 'Ready for review?',
+    description: 'Move this task to the For Review stage to indicate it\'s ready for someone to verify.'
+  },
+  UNARCHIVE: {
+    title: 'Bring back to active?',
+    description: 'Unarchive this task and move it back to the backlog for reconsideration.'
+  },
+  DELETE_PERMANENTLY: {
+    title: 'Delete permanently?',
+    description: 'This will permanently remove the task with no way to recover it. Are you sure?'
+  },
+  MOVE_TO_DONE: {
+    title: 'Mark as Done?',
+    description: 'Move this task to the Done status, indicating the work is complete.'
   }
+};
+
+// Coaching messages for each task status
+export const STATUS_COACHING = {
+  [TASK_STATUSES.INBOX]: "Quick decision time: Can you act on this now? Move to Todo if yes. Need more thinking? Send to Brainstorm. Something for the future? Add to Someday/Maybe.",
+  [TASK_STATUSES.BRAINSTORM]: "Is this idea ready for action yet? If so, mark it actionable. Need input from others? Move to Proposed. Not ready but worth keeping? Move to Someday/Maybe.",
+  [TASK_STATUSES.PROPOSED]: "Time to decide on this suggestion. Ready to take it on? Mark actionable. Not now but later? Move to backlog. Not valuable? Reject it.",
+  [TASK_STATUSES.BACKLOG]: "Your waiting list. Is this task a priority now? Mark actionable. Not now but someday? Move to Someday/Maybe. No longer relevant? Archive or delete.",
+  [TASK_STATUSES.MAYBE]: "Your future possibilities. Has this become relevant now? Mark actionable. Getting closer to relevant? Move to backlog. Still interesting but very future? Leave here.",
+  [TASK_STATUSES.TODO]: "What's your next move here? Ready to work on it now? Start progress. Something blocking it? Put on hold. Not a priority right now? Move to backlog.",
+  [TASK_STATUSES.IN_PROGRESS]: "Focus on completing this. Finished with your part? Move to review. Completely done? Mark done. Stuck? Put on hold with a note about why.",
+  [TASK_STATUSES.ON_HOLD]: "Something's blocking this task. Has the blocker been resolved? Resume progress. Will remain blocked for a while? Move to backlog.",
+  [TASK_STATUSES.DONE]: "Nicely done! Ready to put this away? Archive it. Need formal sign-off? Mark reviewed. Need to revisit? Reopen it.",
+  [TASK_STATUSES.REVIEWED]: "This task has passed review. Archive for reference or reopen if anything needs to be addressed.",
+  [TASK_STATUSES.ARCHIVED]: "Reference material kept for history. Need to revive this task? Unarchive it back to the backlog."
 };
 
 // Export type for TypeScript

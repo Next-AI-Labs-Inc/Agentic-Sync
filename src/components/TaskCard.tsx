@@ -18,8 +18,17 @@ import ReactMarkdown from 'react-markdown';
 import { Task } from '@/types';
 import DropdownMenu from './DropdownMenu';
 import EditableItemList from './EditableItems/EditableItemList';
+
+// Utility function to safely get action help content
+const getActionHelp = (statusKey, defaultTitle = "Action", defaultDescription = "Click to perform this action") => {
+  if (!statusKey || !STATUS_ACTION_HELP[statusKey]) {
+    return { title: defaultTitle, description: defaultDescription };
+  }
+  return STATUS_ACTION_HELP[statusKey];
+};
 import { parseListString, formatBulletedList, formatNumberedList } from '@/utils/listParser';
 import { POPOVER_POSITIONS } from '@/constants/ui';
+import { TASK_STATUSES, STATUS_ACTION_HELP, STATUS_ACTION_TEXT, STATUS_COACHING } from '@/constants/taskStatus';
 
 interface TaskCardProps {
   task: Task;
@@ -548,42 +557,472 @@ function TaskCard({
   const renderStageActions = () => {
     const actions = [];
 
-    // Move to next stage button with popover
-    if (task.status === 'proposed') {
+    // Import coaching message from constants if expanded view
+    const renderCoachingMessage = () => {
+      if (expanded && STATUS_COACHING && STATUS_COACHING[task.status]) {
+        return (
+          <div className="mb-3 p-2 bg-blue-50 rounded border border-blue-100 text-sm text-blue-700">
+            {STATUS_COACHING[task.status]}
+          </div>
+        );
+      }
+      return null;
+    };
+
+    // Inbox actions
+    if (task.status === 'inbox') {
+      // Primary actions
       actions.push(
         <Popover
-          key="move-to-todo-popover"
+          key="mark-actionable-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">Ready to work on this?</h4>
-              <p className="text-sm text-gray-600">
-                Click this button to accept this task proposal and move it to your todo list.
-                This way your team knows you're planning to work on it soon.
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MARK_ACTIONABLE.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MARK_ACTIONABLE.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
         >
           <button
-            key="move-to-todo"
+            key="mark-actionable"
             onClick={handleStatusChange('todo')}
             className="btn-outline-primary"
           >
             <FaArrowRight className="mr-1" size={12} />
-            Move to Todo
+            Mark Actionable
           </button>
         </Popover>
       );
-    } else if (task.status === 'todo') {
+      
+      actions.push(
+        <Popover
+          key="move-to-brainstorm-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_BRAINSTORM.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_BRAINSTORM.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-brainstorm"
+            onClick={handleStatusChange('brainstorm')}
+            className="btn-outline-primary"
+          >
+            <FaArrowRight className="mr-1" size={12} />
+            Move to Brainstorm
+          </button>
+        </Popover>
+      );
+      
+      actions.push(
+        <Popover
+          key="move-to-someday-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-someday"
+            onClick={handleStatusChange('maybe')}
+            className="btn-outline-secondary"
+          >
+            <FaArrowRight className="mr-1" size={12} />
+            Move to Someday/Maybe
+          </button>
+        </Popover>
+      );
+    }
+    
+    // Brainstorm actions
+    else if (task.status === 'brainstorm') {
+      actions.push(
+        <Popover
+          key="mark-actionable-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MARK_ACTIONABLE.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MARK_ACTIONABLE.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="mark-actionable"
+            onClick={handleStatusChange('todo')}
+            className="btn-outline-primary"
+          >
+            <FaArrowRight className="mr-1" size={12} />
+            Mark Actionable
+          </button>
+        </Popover>
+      );
+      
+      actions.push(
+        <Popover
+          key="move-to-proposed-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_PROPOSED.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_PROPOSED.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-proposed"
+            onClick={handleStatusChange('proposed')}
+            className="btn-outline-primary"
+          >
+            <FaArrowRight className="mr-1" size={12} />
+            Move to Proposed
+          </button>
+        </Popover>
+      );
+      
+      // Add move to Someday/Maybe option
+      actions.push(
+        <Popover
+          key="move-to-someday-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-someday"
+            onClick={handleStatusChange('maybe')}
+            className="btn-outline-secondary"
+          >
+            <FaArrowRight className="mr-1" size={12} />
+            Move to Someday/Maybe
+          </button>
+        </Popover>
+      );
+      
+      // Secondary action - Move to Inbox
+      actions.push(
+        <Popover
+          key="move-to-inbox-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_INBOX.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_INBOX.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-inbox"
+            onClick={handleStatusChange('inbox')}
+            className="btn-outline-secondary"
+          >
+            <FaArrowLeft className="mr-1" size={12} />
+            Move to Inbox
+          </button>
+        </Popover>
+      );
+    }
+    
+    // Proposed actions
+    else if (task.status === 'proposed') {
+      actions.push(
+        <Popover
+          key="mark-actionable-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MARK_ACTIONABLE.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MARK_ACTIONABLE.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="mark-actionable"
+            onClick={handleStatusChange('todo')}
+            className="btn-outline-primary"
+          >
+            <FaArrowRight className="mr-1" size={12} />
+            Mark Actionable
+          </button>
+        </Popover>
+      );
+      
+      // Add To Backlog button
+      actions.push(
+        <Popover
+          key="move-to-backlog-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.TO_BACKLOG.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.TO_BACKLOG.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-backlog"
+            onClick={handleStatusChange('backlog')}
+            className="btn-outline-primary"
+          >
+            <FaListAlt className="mr-1" size={12} />
+            To Backlog
+          </button>
+        </Popover>
+      );
+      
+      // Add reject button
+      actions.push(
+        <Popover
+          key="reject-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.REJECT.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.REJECT.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="reject"
+            onClick={handleDelete}
+            className="btn-outline-danger"
+          >
+            <FaTrash className="mr-1" size={12} />
+            Reject
+          </button>
+        </Popover>
+      );
+      
+      // Secondary action - Move to Someday/Maybe
+      actions.push(
+        <Popover
+          key="move-to-someday-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-someday"
+            onClick={handleStatusChange('maybe')}
+            className="btn-outline-secondary"
+          >
+            <FaArrowRight className="mr-1" size={12} />
+            Move to Someday/Maybe
+          </button>
+        </Popover>
+      );
+    }
+    
+    // Backlog actions
+    else if (task.status === 'backlog') {
+      actions.push(
+        <Popover
+          key="mark-actionable-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MARK_ACTIONABLE.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MARK_ACTIONABLE.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="mark-actionable"
+            onClick={handleStatusChange('todo')}
+            className="btn-outline-primary"
+          >
+            <FaArrowRight className="mr-1" size={12} />
+            Mark Actionable
+          </button>
+        </Popover>
+      );
+      
+      // Add Move to Someday/Maybe button
+      actions.push(
+        <Popover
+          key="move-to-someday-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-someday"
+            onClick={handleStatusChange('maybe')}
+            className="btn-outline-primary"
+          >
+            <FaArrowRight className="mr-1" size={12} />
+            Move to Someday/Maybe
+          </button>
+        </Popover>
+      );
+      
+      // Add Archive button
+      actions.push(
+        <Popover
+          key="move-to-archived-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.ARCHIVE.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.ARCHIVE.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-archived"
+            onClick={handleStatusChange('archived')}
+            className="btn-outline-secondary"
+          >
+            <FaArchive className="mr-1" size={12} />
+            Archive
+          </button>
+        </Popover>
+      );
+      
+      // Secondary action - Move to Proposed
+      actions.push(
+        <Popover
+          key="move-to-proposed-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_PROPOSED.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_PROPOSED.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-proposed"
+            onClick={handleStatusChange('proposed')}
+            className="btn-outline-secondary"
+          >
+            <FaArrowLeft className="mr-1" size={12} />
+            Move to Proposed
+          </button>
+        </Popover>
+      );
+    }
+    
+    // Maybe (Someday/Maybe) actions
+    else if (task.status === 'maybe') {
+      actions.push(
+        <Popover
+          key="mark-actionable-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MARK_ACTIONABLE.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MARK_ACTIONABLE.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="mark-actionable"
+            onClick={handleStatusChange('todo')}
+            className="btn-outline-primary"
+          >
+            <FaArrowRight className="mr-1" size={12} />
+            Mark Actionable
+          </button>
+        </Popover>
+      );
+      
+      // Add Move to Backlog button
+      actions.push(
+        <Popover
+          key="move-to-backlog-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.TO_BACKLOG.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.TO_BACKLOG.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-backlog"
+            onClick={handleStatusChange('backlog')}
+            className="btn-outline-primary"
+          >
+            <FaListAlt className="mr-1" size={12} />
+            To Backlog
+          </button>
+        </Popover>
+      );
+      
+      // Add Archive button
+      actions.push(
+        <Popover
+          key="move-to-archived-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.ARCHIVE.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.ARCHIVE.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-archived"
+            onClick={handleStatusChange('archived')}
+            className="btn-outline-secondary"
+          >
+            <FaArchive className="mr-1" size={12} />
+            Archive
+          </button>
+        </Popover>
+      );
+      
+      // Secondary action - Move to Brainstorm
+      actions.push(
+        <Popover
+          key="move-to-brainstorm-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_BRAINSTORM.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_BRAINSTORM.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-brainstorm"
+            onClick={handleStatusChange('brainstorm')}
+            className="btn-outline-secondary"
+          >
+            <FaArrowLeft className="mr-1" size={12} />
+            Move to Brainstorm
+          </button>
+        </Popover>
+      );
+    }
+    
+    // Todo actions
+    else if (task.status === 'todo') {
       actions.push(
         <Popover
           key="move-to-in-progress-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">Starting work on this?</h4>
-              <p className="text-sm text-gray-600">
-                Click this button when you begin working on this task so your team knows it's actively being worked on.
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{getActionHelp(TASK_STATUSES.TODO, "Starting work on this?").title}</h4>
+              <p className="text-sm text-gray-600">{getActionHelp(TASK_STATUSES.TODO, "Starting work on this?", "Click this button when you begin working on this task so your team knows it's actively being worked on.").description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -599,16 +1038,37 @@ function TaskCard({
         </Popover>
       );
       
+      // Add On Hold button
+      actions.push(
+        <Popover
+          key="move-to-on-hold-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.ON_HOLD.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.ON_HOLD.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-on-hold"
+            onClick={handleStatusChange('on-hold')}
+            className="btn-outline-primary"
+          >
+            <FaPause className="mr-1" size={12} />
+            Put On Hold
+          </button>
+        </Popover>
+      );
+      
       // Add To Backlog button
       actions.push(
         <Popover
           key="move-to-backlog-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">Move to backlog?</h4>
-              <p className="text-sm text-gray-600">
-                This will move the task to your backlog for future consideration, keeping it in your system but out of your active workflow.
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.TO_BACKLOG.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.TO_BACKLOG.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -623,41 +1083,40 @@ function TaskCard({
           </button>
         </Popover>
       );
-    } else if (task.status === 'backlog') {
+      
+      // Secondary action - Move to Someday/Maybe
       actions.push(
         <Popover
-          key="backlog-to-todo-popover"
+          key="move-to-someday-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">Ready to work on this backlog item?</h4>
-              <p className="text-sm text-gray-600">
-                Click this button to move this task from your backlog to your todo list, indicating it's now ready to be worked on.
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
         >
           <button
-            key="backlog-to-todo"
-            onClick={handleStatusChange('todo')}
-            className="btn-outline-primary"
+            key="move-to-someday"
+            onClick={handleStatusChange('maybe')}
+            className="btn-outline-secondary"
           >
             <FaArrowRight className="mr-1" size={12} />
-            Move to Todo
+            Move to Someday/Maybe
           </button>
         </Popover>
       );
-    } else if (task.status === 'in-progress') {
+    }
+    
+    // In Progress actions
+    else if (task.status === 'in-progress') {
       actions.push(
         <Popover
           key="move-to-done-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">Finished the work?</h4>
-              <p className="text-sm text-gray-600">
-                Click this button when you've completed all the work for this task and it's ready for
-                someone to review it.
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{getActionHelp(TASK_STATUSES.IN_PROGRESS, "Finished the work?").title}</h4>
+              <p className="text-sm text-gray-600">{getActionHelp(TASK_STATUSES.IN_PROGRESS, "Finished the work?", "Click this button when you've completed all the work for this task and it's ready for someone to review it.").description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -673,16 +1132,37 @@ function TaskCard({
         </Popover>
       );
       
+      // Add Move to Review button
+      actions.push(
+        <Popover
+          key="move-to-review-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_REVIEW.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_REVIEW.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-review"
+            onClick={handleStatusChange('done')}
+            className="btn-outline-primary"
+          >
+            <FaArrowRight className="mr-1" size={12} />
+            Move to Review
+          </button>
+        </Popover>
+      );
+      
       // Add On Hold button
       actions.push(
         <Popover
           key="move-to-on-hold-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">Put on hold?</h4>
-              <p className="text-sm text-gray-600">
-                This will temporarily pause work on this task, indicating that it's not being actively worked on but hasn't been abandoned.
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.ON_HOLD.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.ON_HOLD.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -690,23 +1170,49 @@ function TaskCard({
           <button
             key="move-to-on-hold"
             onClick={handleStatusChange('on-hold')}
-            className="btn-outline-secondary"
+            className="btn-outline-primary"
           >
             <FaPause className="mr-1" size={12} />
             Put On Hold
           </button>
         </Popover>
       );
-    } else if (task.status === 'on-hold') {
+      
+      // Secondary action - Move to Todo
+      actions.push(
+        <Popover
+          key="move-to-todo-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">Move back to Todo?</h4>
+              <p className="text-sm text-gray-600">
+                If you need to reprioritize this task, move it back to Todo status.
+              </p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-todo"
+            onClick={handleStatusChange('todo')}
+            className="btn-outline-secondary"
+          >
+            <FaArrowLeft className="mr-1" size={12} />
+            Move to Todo
+          </button>
+        </Popover>
+      );
+    }
+    
+    // On Hold actions
+    else if (task.status === 'on-hold') {
       actions.push(
         <Popover
           key="resume-progress-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">Ready to resume work?</h4>
-              <p className="text-sm text-gray-600">
-                Click this button to resume work on this task that was previously put on hold.
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{getActionHelp(TASK_STATUSES.ON_HOLD, "Ready to resume work?").title}</h4>
+              <p className="text-sm text-gray-600">{getActionHelp(TASK_STATUSES.ON_HOLD, "Ready to resume work?", "Click this button to resume work on this task that was previously put on hold.").description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -721,116 +1227,63 @@ function TaskCard({
           </button>
         </Popover>
       );
-    } else if (task.status === 'done') {
+      
+      // Add Move to Backlog button
       actions.push(
         <Popover
-          key="move-to-reviewed-popover"
+          key="move-to-backlog-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">Reviewed this work?</h4>
-              <p className="text-sm text-gray-600">
-                After checking this completed task and confirming everything looks good, click this button to mark it as reviewed.
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.TO_BACKLOG.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.TO_BACKLOG.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
         >
           <button
-            key="move-to-reviewed"
-            onClick={handleStatusChange('reviewed')}
+            key="move-to-backlog"
+            onClick={handleStatusChange('backlog')}
             className="btn-outline-primary"
           >
-            <FaCheck className="mr-1" size={12} />
-            Mark Reviewed
-          </button>
-        </Popover>
-      );
-
-      // Move back to in-progress
-      actions.push(
-        <Popover
-          key="move-to-in-progress-popover"
-          content={
-            <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">Need more work?</h4>
-              <p className="text-sm text-gray-600">
-                If this task isn't actually complete and needs more work, click this button to move it back to in-progress.
-              </p>
-            </div>
-          }
-          position={POPOVER_POSITIONS.TOP}
-        >
-          <button
-            key="move-to-in-progress"
-            onClick={handleStatusChange('in-progress')}
-            className="btn-outline-secondary"
-          >
-            <FaArrowLeft className="mr-1" size={12} />
-            Still Working
-          </button>
-        </Popover>
-      );
-    } else if (task.status === 'archived') {
-      // Add ability to unarchive a task
-      actions.push(
-        <Popover
-          key="unarchive-popover"
-          content={
-            <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">Unarchive this task?</h4>
-              <p className="text-sm text-gray-600">
-                This will move the task back to the reviewed state, making it visible in the active task lists again.
-              </p>
-            </div>
-          }
-          position={POPOVER_POSITIONS.TOP}
-        >
-          <button
-            key="unarchive"
-            onClick={handleStatusChange('reviewed')}
-            className="btn-outline-secondary"
-          >
-            <FaArrowLeft className="mr-1" size={12} />
-            Unarchive
-          </button>
-        </Popover>
-      );
-    } else if (task.status === 'reviewed') {
-      // Add ability to reopen a reviewed task
-      actions.push(
-        <Popover
-          key="move-to-done-popover"
-          content={
-            <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">Need another look?</h4>
-              <p className="text-sm text-gray-600">
-                If this task needs to be reviewed again or requires adjustments, click this button to reopen it.
-              </p>
-            </div>
-          }
-          position={POPOVER_POSITIONS.TOP}
-        >
-          <button
-            key="move-to-done"
-            onClick={handleStatusChange('done')}
-            className="btn-outline-secondary"
-          >
-            <FaArrowLeft className="mr-1" size={12} />
-            Reopen Task
+            <FaListAlt className="mr-1" size={12} />
+            Move to Backlog
           </button>
         </Popover>
       );
       
-      // Add Archive button for reviewed tasks
+      // Add Move to Todo button
+      actions.push(
+        <Popover
+          key="move-to-todo-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">Move to Todo?</h4>
+              <p className="text-sm text-gray-600">
+                Move this task back to Todo status if it's no longer blocked but you're not ready to work on it yet.
+              </p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-todo"
+            onClick={handleStatusChange('todo')}
+            className="btn-outline-primary"
+          >
+            <FaArrowRight className="mr-1" size={12} />
+            Move to Todo
+          </button>
+        </Popover>
+      );
+      
+      // Secondary action - Archive
       actions.push(
         <Popover
           key="move-to-archived-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">Archive this task?</h4>
-              <p className="text-sm text-gray-600">
-                This will move the task to the archived state, keeping it for reference but removing it from your active task list.
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.ARCHIVE.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.ARCHIVE.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -846,18 +1299,302 @@ function TaskCard({
         </Popover>
       );
     }
+    
+    // Done actions (For Review)
+    else if (task.status === 'done') {
+      actions.push(
+        <Popover
+          key="move-to-reviewed-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{getActionHelp(TASK_STATUSES.DONE, "Reviewed this work?").title}</h4>
+              <p className="text-sm text-gray-600">{getActionHelp(TASK_STATUSES.DONE, "Reviewed this work?", "After checking this completed task and confirming everything looks good, click this button to mark it as reviewed.").description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-reviewed"
+            onClick={handleStatusChange('reviewed')}
+            className="btn-outline-primary"
+          >
+            <FaCheck className="mr-1" size={12} />
+            Mark Reviewed
+          </button>
+        </Popover>
+      );
+
+      // Add Archive button
+      actions.push(
+        <Popover
+          key="archive-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.ARCHIVE.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.ARCHIVE.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="archive"
+            onClick={handleStatusChange('archived')}
+            className="btn-outline-primary"
+          >
+            <FaArchive className="mr-1" size={12} />
+            Archive
+          </button>
+        </Popover>
+      );
+      
+      // Move back to Todo
+      actions.push(
+        <Popover
+          key="reopen-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.REOPEN.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.REOPEN.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="reopen"
+            onClick={handleStatusChange('todo')}
+            className="btn-outline-secondary"
+          >
+            <FaArrowLeft className="mr-1" size={12} />
+            Reopen Task
+          </button>
+        </Popover>
+      );
+
+      // Move back to in-progress
+      actions.push(
+        <Popover
+          key="move-to-in-progress-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.STILL_WORKING.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.STILL_WORKING.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-in-progress"
+            onClick={handleStatusChange('in-progress')}
+            className="btn-outline-secondary"
+          >
+            <FaArrowLeft className="mr-1" size={12} />
+            Still Working
+          </button>
+        </Popover>
+      );
+    }
+    
+    // Reviewed (Done) actions
+    else if (task.status === 'reviewed') {
+      // Add Archive button for reviewed tasks
+      actions.push(
+        <Popover
+          key="move-to-archived-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.ARCHIVE.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.ARCHIVE.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-archived"
+            onClick={handleStatusChange('archived')}
+            className="btn-outline-primary"
+          >
+            <FaArchive className="mr-1" size={12} />
+            Archive Task
+          </button>
+        </Popover>
+      );
+      
+      // Add ability to reopen a reviewed task
+      actions.push(
+        <Popover
+          key="reopen-task-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.REOPEN.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.REOPEN.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="reopen-task"
+            onClick={handleStatusChange('todo')}
+            className="btn-outline-primary"
+          >
+            <FaArrowLeft className="mr-1" size={12} />
+            Reopen Task
+          </button>
+        </Popover>
+      );
+      
+      // Move back to done
+      actions.push(
+        <Popover
+          key="move-to-done-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_DONE.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_DONE.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-done"
+            onClick={handleStatusChange('done')}
+            className="btn-outline-secondary"
+          >
+            <FaArrowLeft className="mr-1" size={12} />
+            Move to Done
+          </button>
+        </Popover>
+      );
+      
+      // Add Move to For Review
+      actions.push(
+        <Popover
+          key="move-to-review-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_REVIEW.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_REVIEW.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-review"
+            onClick={handleStatusChange('done')}
+            className="btn-outline-secondary"
+          >
+            <FaArrowLeft className="mr-1" size={12} />
+            Move to For Review
+          </button>
+        </Popover>
+      );
+    }
+    
+    // Archived actions
+    else if (task.status === 'archived') {
+      // Add ability to unarchive a task
+      actions.push(
+        <Popover
+          key="unarchive-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.UNARCHIVE.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.UNARCHIVE.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="unarchive"
+            onClick={handleStatusChange('backlog')}
+            className="btn-outline-primary"
+          >
+            <FaArrowLeft className="mr-1" size={12} />
+            Unarchive
+          </button>
+        </Popover>
+      );
+      
+      // Move to Reviewed
+      actions.push(
+        <Popover
+          key="move-to-reviewed-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">Move to Reviewed?</h4>
+              <p className="text-sm text-gray-600">
+                This will move the task back to the reviewed state, making it visible in the active task lists again.
+              </p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-reviewed"
+            onClick={handleStatusChange('reviewed')}
+            className="btn-outline-primary"
+          >
+            <FaArrowLeft className="mr-1" size={12} />
+            Move to Reviewed
+          </button>
+        </Popover>
+      );
+      
+      // Move to Done
+      actions.push(
+        <Popover
+          key="move-to-done-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_DONE.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_DONE.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="move-to-done"
+            onClick={handleStatusChange('done')}
+            className="btn-outline-primary"
+          >
+            <FaArrowLeft className="mr-1" size={12} />
+            Move to Done
+          </button>
+        </Popover>
+      );
+      
+      // Delete Permanently
+      actions.push(
+        <Popover
+          key="delete-permanently-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.DELETE_PERMANENTLY.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.DELETE_PERMANENTLY.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button
+            key="delete-permanently"
+            onClick={handleDelete}
+            className="btn-outline-danger"
+          >
+            <FaTrash className="mr-1" size={12} />
+            Delete Permanently
+          </button>
+        </Popover>
+      );
+    }
 
     // Mark tested button for tasks that aren't done or reviewed
-    if (task.status !== 'done' && task.status !== 'reviewed') {
+    if (task.status !== 'done' && task.status !== 'reviewed' && task.status !== 'archived') {
       actions.push(
         <Popover
           key="mark-tested-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">Tested and done?</h4>
-              <p className="text-sm text-gray-600">
-                If you've completed this task and verified it works correctly, click this button to mark it as tested and complete in one step.
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MARK_TESTED.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MARK_TESTED.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -870,28 +1607,33 @@ function TaskCard({
       );
     }
 
-    // Always show delete button
-    actions.push(
-      <Popover
-        key="delete-popover"
-        content={
-          <div className="w-64">
-            <h4 className="font-medium text-gray-900 mb-1">Delete this task?</h4>
-            <p className="text-sm text-gray-600">
-              This will permanently remove the task from your system. This action cannot be undone.
-            </p>
-          </div>
-        }
-        position={POPOVER_POSITIONS.TOP}
-      >
-        <button key="delete" onClick={handleDelete} className="btn-outline-danger">
-          <FaTrash className="mr-1" size={12} />
-          Delete
-        </button>
-      </Popover>
-    );
+    // Always show delete button except for archived tasks (which have Delete Permanently)
+    if (task.status !== 'archived') {
+      actions.push(
+        <Popover
+          key="delete-popover"
+          content={
+            <div className="w-64">
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.DELETE.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.DELETE.description}</p>
+            </div>
+          }
+          position={POPOVER_POSITIONS.TOP}
+        >
+          <button key="delete" onClick={handleDelete} className="btn-outline-danger">
+            <FaTrash className="mr-1" size={12} />
+            Delete
+          </button>
+        </Popover>
+      );
+    }
 
-    return <div className="mt-3 flex flex-wrap gap-2 justify-end">{actions}</div>;
+    return (
+      <>
+        {expanded && renderCoachingMessage()}
+        <div className="mt-3 flex flex-wrap gap-2 justify-end">{actions}</div>
+      </>
+    );
   };
 
   return (
