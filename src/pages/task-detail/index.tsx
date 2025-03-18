@@ -96,11 +96,55 @@ export default function SingleTaskPage() {
           <div className="task-single-view">
             <TaskCard 
               task={task}
-              onStatusChange={() => {}} // Read-only view
-              onMarkTested={() => {}}   // Read-only view
-              onDelete={() => {}}       // Read-only view
-              onUpdateDate={() => {}}   // Read-only view
-              onUpdateTask={() => {}}   // Read-only view
+              onStatusChange={async (taskId, project, status) => {
+                try {
+                  const updatedTask = await getTask(taskId);
+                  setTask({...updatedTask, id: updatedTask._id || updatedTask.id});
+                  return Promise.resolve();
+                } catch (error) {
+                  console.error('Error updating task status:', error);
+                  return Promise.reject(error);
+                }
+              }}
+              onMarkTested={async (taskId, project) => {
+                try {
+                  const updatedTask = await getTask(taskId);
+                  setTask({...updatedTask, id: updatedTask._id || updatedTask.id});
+                  return Promise.resolve();
+                } catch (error) {
+                  console.error('Error marking task as tested:', error);
+                  return Promise.reject(error);
+                }
+              }}
+              onDelete={async (taskId, project) => {
+                try {
+                  router.push('/tasks');
+                  return Promise.resolve();
+                } catch (error) {
+                  console.error('Error deleting task:', error);
+                  return Promise.reject(error);
+                }
+              }}
+              onUpdateDate={async (taskId, project, newDate) => {
+                try {
+                  const updatedTask = await getTask(taskId);
+                  setTask({...updatedTask, id: updatedTask._id || updatedTask.id});
+                  return Promise.resolve();
+                } catch (error) {
+                  console.error('Error updating task date:', error);
+                  return Promise.reject(error);
+                }
+              }}
+              onUpdateTask={async (taskId, project, updates) => {
+                try {
+                  const updatedTask = await getTask(taskId);
+                  setTask({...updatedTask, id: updatedTask._id || updatedTask.id, ...updates});
+                  return Promise.resolve();
+                } catch (error) {
+                  console.error('Error updating task:', error);
+                  return Promise.reject(error);
+                }
+              }}
               expanded={true}           // Always show expanded
               hideExpand={true}         // Hide expand button
             />
