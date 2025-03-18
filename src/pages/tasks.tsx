@@ -33,6 +33,8 @@ export default function TasksPage() {
     projectFilter,
     sortBy,
     sortDirection,
+    searchTerm,
+    setSearchTerm,
     setCompletedFilter,
     setProjectFilter,
     setSortBy,
@@ -147,8 +149,16 @@ export default function TasksPage() {
           <div className="bg-white rounded-lg shadow-sm p-8 text-center">
             <h3 className="text-xl font-semibold text-gray-800 mb-2">No tasks found</h3>
             <p className="text-gray-500 mb-6">
-              {getEmptyStateMessage()}
+              {searchTerm ? `No tasks match the search term "${searchTerm}"` : getEmptyStateMessage()}
             </p>
+            {searchTerm ? (
+              <button 
+                onClick={() => setSearchTerm('')}
+                className="btn btn-outline-primary mr-3"
+              >
+                Clear search
+              </button>
+            ) : null}
             <button 
               onClick={() => setShowAddForm(true)}
               className="btn btn-primary relative overflow-hidden"
@@ -161,8 +171,34 @@ export default function TasksPage() {
           </div>
         ) : (
           <>
-            <div className="mb-4 text-sm text-gray-500 animate-fade-in">
+            <div className="mb-4 text-sm text-gray-500 animate-fade-in flex items-center">
               {filteredTasks.length} {filteredTasks.length === 1 ? 'task' : 'tasks'} found
+              {searchTerm && (
+                <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs flex items-center">
+                  Search: "{searchTerm}"
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="ml-1 text-blue-500 hover:text-blue-700"
+                    aria-label="Clear search"
+                    title="Clear search"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-3 w-3"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </span>
+              )}
             </div>
             
             {/* Always use the same rendering approach regardless of list size to ensure consistency */}
@@ -182,7 +218,7 @@ export default function TasksPage() {
                   />
                 </div>
               ))}
-            </div>}
+            </div>
           </>
         )}
       </div>

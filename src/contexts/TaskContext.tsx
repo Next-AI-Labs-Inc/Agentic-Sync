@@ -28,6 +28,8 @@ interface TaskContextValue {
   projectFilter: ProjectFilterType;
   sortBy: SortOption;
   sortDirection: SortDirection;
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
   refreshTasks: () => Promise<Task[]>;
   setCompletedFilter: (filter: TaskFilterStatus) => void;
   setProjectFilter: (filter: ProjectFilterType) => void;
@@ -36,7 +38,7 @@ interface TaskContextValue {
   updateTaskStatus: (
     taskId: string,
     project: string,
-    status: 'proposed' | 'backlog' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived'
+    status: 'inbox' | 'brainstorm' | 'proposed' | 'backlog' | 'maybe' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived'
   ) => Promise<void>;
   markTaskTested: (taskId: string, project: string) => Promise<void>;
   deleteTask: (taskId: string, project: string) => Promise<void>;
@@ -187,6 +189,8 @@ export function TaskProvider({
   const [sortBy, setSortBy] = useState<SortOption>('created');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [taskCountsByStatus, setTaskCountsByStatus] = useState<Record<string, number>>({});
+  // Search term for filtering tasks
+  const [searchTerm, setSearchTerm] = useState<string>('');
   // Flag to make deduplication optional - default to false for better performance
   const [dedupeEnabled, setDedupeEnabled] = useState<boolean>(false);
 
@@ -638,7 +642,7 @@ export function TaskProvider({
     };
   }, [twoDaysAgoMemo]);
   
-  // Filter tasks by status with optimized memoization
+  // Filter tasks by status and search term with optimized memoization
   const filteredTasks = React.useMemo(() => {
     // Quick return for empty tasks array
     if (!tasks.length) return [];
@@ -659,15 +663,36 @@ export function TaskProvider({
       filterFn = filterPredicates.byStatus(completedFilter);
     }
     
-    // Apply the selected filter predicate
-    return tasks.filter(filterFn);
-  }, [tasks, completedFilter, filterPredicates]);
+    // Apply the selected filter predicate first
+    let filtered = tasks.filter(filterFn);
+    
+    // Apply search term filter if provided
+    if (searchTerm && searchTerm.trim() !== '') {
+      const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+      
+      // Check if search term contains parts that look like task ID (alphanumeric with hyphens)
+      // but don't navigate directly to allow filtering when a non-exact ID is entered
+      filtered = filtered.filter(task => {
+        // Search in title, description, and ID
+        return (
+          task.title.toLowerCase().includes(normalizedSearchTerm) ||
+          (task.description && task.description.toLowerCase().includes(normalizedSearchTerm)) ||
+          task.id.toLowerCase().includes(normalizedSearchTerm) ||
+          (task.initiative && task.initiative.toLowerCase().includes(normalizedSearchTerm)) ||
+          (task.project && task.project.toLowerCase().includes(normalizedSearchTerm)) ||
+          (task.tags && task.tags.some(tag => tag.toLowerCase().includes(normalizedSearchTerm)))
+        );
+      });
+    }
+    
+    return filtered;
+  }, [tasks, completedFilter, filterPredicates, searchTerm]);
 
   // Task operations with optimistic updates
   const updateTaskStatus = async (
     taskId: string,
     project: string,
-    status: 'proposed' | 'backlog' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived'
+    status: 'inbox' | 'brainstorm' | 'proposed' | 'backlog' | 'maybe' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived'
   ) => {
     // Get the current task
     const taskToUpdate = localTaskCache.get(taskId);
@@ -997,6 +1022,8 @@ export function TaskProvider({
     projectFilter,
     sortBy,
     sortDirection,
+    searchTerm,
+    setSearchTerm,
     refreshTasks,
     setCompletedFilter,
     setProjectFilter,
