@@ -4,6 +4,7 @@
 
 // Valid task statuses
 export const TASK_STATUSES = {
+  // Real task statuses
   INBOX: 'inbox',
   BRAINSTORM: 'brainstorm',
   PROPOSED: 'proposed',
@@ -14,7 +15,13 @@ export const TASK_STATUSES = {
   ON_HOLD: 'on-hold',
   DONE: 'done',
   REVIEWED: 'reviewed',
-  ARCHIVED: 'archived'
+  ARCHIVED: 'archived',
+  
+  // Special filter options
+  ALL: 'all',
+  PENDING: 'pending', // All non-completed tasks
+  RECENT_COMPLETED: 'recent-completed',
+  SOURCE_TASKS: 'source-tasks' // Group for backlog/brainstorm tasks
 } as const;
 
 // Status display names (for UI)
@@ -62,6 +69,100 @@ export const STATUS_DESCRIPTIONS = {
   [TASK_STATUSES.REVIEWED]: 'Task has been completed and reviewed',
   [TASK_STATUSES.ARCHIVED]: 'Task has been archived and is no longer active'
 };
+
+// Status display configuration (for UI presentation)
+export const STATUS_DISPLAY = {
+  [TASK_STATUSES.INBOX]: {
+    label: 'Inbox',
+    color: 'bg-indigo-100 text-indigo-800',
+    icon: 'FaInbox',
+    description: 'Initial collection point for new ideas and tasks'
+  },
+  [TASK_STATUSES.MAYBE]: {
+    label: 'Someday/Maybe',
+    color: 'bg-purple-100 text-purple-800',
+    icon: 'FaCalendarAlt',
+    description: 'Items to consider in the future but not actionable now'
+  },
+  [TASK_STATUSES.BRAINSTORM]: {
+    label: 'Brainstorm',
+    color: 'bg-teal-100 text-teal-800',
+    icon: 'FaBrain',
+    description: 'Initial brainstorming phase for task ideas'
+  },
+  [TASK_STATUSES.PROPOSED]: {
+    label: 'Proposed',
+    color: 'bg-purple-100 text-purple-800',
+    icon: 'FaRegLightbulb',
+    description: 'Task has been proposed but not started yet'
+  },
+  [TASK_STATUSES.BACKLOG]: {
+    label: 'Backlog',
+    color: 'bg-slate-100 text-slate-800',
+    icon: 'FaListAlt',
+    description: 'Task is in the backlog for future consideration'
+  },
+  [TASK_STATUSES.TODO]: {
+    label: 'To Do',
+    color: 'bg-blue-100 text-blue-800',
+    icon: 'FaRegCircle',
+    description: 'Task is ready to be worked on'
+  },
+  [TASK_STATUSES.IN_PROGRESS]: {
+    label: 'In Progress',
+    color: 'bg-yellow-100 text-yellow-800',
+    icon: 'FaSpinner',
+    description: 'Task is currently being worked on'
+  },
+  [TASK_STATUSES.ON_HOLD]: {
+    label: 'On Hold',
+    color: 'bg-amber-100 text-amber-800',
+    icon: 'FaPause',
+    description: 'Task is temporarily paused'
+  },
+  [TASK_STATUSES.DONE]: {
+    label: 'For Review',
+    color: 'bg-green-100 text-green-800',
+    icon: 'FaCheckCircle',
+    description: 'Task has been completed and is ready for review'
+  },
+  [TASK_STATUSES.REVIEWED]: {
+    label: 'Done',
+    color: 'bg-indigo-100 text-indigo-800',
+    icon: 'FaCheck',
+    description: 'Task has been completed and reviewed'
+  },
+  [TASK_STATUSES.ARCHIVED]: {
+    label: 'Archived',
+    color: 'bg-gray-100 text-gray-800',
+    icon: 'FaArchive',
+    description: 'Task has been archived and is no longer active'
+  },
+  [TASK_STATUSES.ALL]: {
+    label: 'All Active',
+    color: 'bg-blue-100 text-blue-800',
+    icon: 'FaTasks',
+    description: 'All active tasks (excludes done and reviewed)'
+  },
+  [TASK_STATUSES.PENDING]: {
+    label: 'All Pending',
+    color: 'bg-blue-100 text-blue-800',
+    icon: 'FaHourglass',
+    description: 'All tasks that are not yet complete'
+  },
+  [TASK_STATUSES.RECENT_COMPLETED]: {
+    label: 'Recently Completed',
+    color: 'bg-green-100 text-green-800',
+    icon: 'FaClock',
+    description: 'Tasks completed in the last two days'
+  },
+  [TASK_STATUSES.SOURCE_TASKS]: {
+    label: 'Source Tasks',
+    color: 'bg-slate-100 text-slate-800',
+    icon: 'FaStream',
+    description: 'Source tasks from backlog and brainstorming'
+  }
+} as const;
 
 // Status transition helpers - what status can a task move to from its current status
 export const NEXT_STATUS = {
