@@ -18,6 +18,7 @@ import {
 } from '@/types';
 import * as taskApiService from '@/services/taskApiService';
 import taskSyncService, { SyncEventType } from '@/services/taskSyncService';
+import { TASK_STATUSES } from '@/constants/taskStatus';
 
 interface TaskContextValue {
   tasks: Task[];
@@ -291,14 +292,17 @@ export function TaskProvider({
 
   // Counts tasks by status
   const calculateStatusCounts = (tasks: Task[]): Record<string, number> => {
-    const counts: Record<string, number> = {
-      proposed: 0,
-      todo: 0,
-      'in-progress': 0,
-      done: 0,
-      reviewed: 0
-    };
+    // Initialize counts with all valid task statuses from our constants
+    const counts: Record<string, number> = {};
+    
+    // Get all real task statuses (excluding filter-only statuses)
+    Object.values(TASK_STATUSES)
+      .filter(status => !['all', 'pending', 'recent-completed', 'source-tasks'].includes(status))
+      .forEach(status => {
+        counts[status] = 0;
+      });
 
+    // Count tasks for each status
     tasks.forEach((task) => {
       if (counts[task.status] !== undefined) {
         counts[task.status]++;

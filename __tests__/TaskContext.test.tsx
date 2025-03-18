@@ -2,6 +2,7 @@ import React from 'react';
 import { render, act, renderHook, waitFor } from '@testing-library/react';
 import { TaskProvider, useTasks, deduplicateTasks } from '@/contexts/TaskContext';
 import * as taskApiService from '@/services/taskApiService';
+import { TASK_STATUSES } from '@/constants/taskStatus';
 
 // Mock the task API service
 jest.mock('@/services/taskApiService', () => ({
@@ -198,5 +199,51 @@ describe('TaskContext', () => {
       'done': 0,
       'reviewed': 0,
     });
+    
+    // The test is failing because we're expecting counts only for some statuses,
+    // but we need counts for all statuses defined in TASK_STATUSES
+  });
+  
+  test('should include counts for all valid task statuses', async () => {
+    // Mock a more diverse set of tasks with different statuses
+    const diverseTasks = Object.values(TASK_STATUSES)
+      // Skip special filter statuses that aren't real task statuses
+      .filter(status => !['all', 'pending', 'recent-completed', 'source-tasks'].includes(status))
+      .map((status, index) => ({
+        id: `task-${index}`,
+        title: `Test Task ${index}`,
+        description: `Description for ${status} task`,
+        status,
+        priority: 'medium',
+        project: 'project1',
+        createdAt: `2025-03-0${index + 1}T00:00:00Z`,
+        updatedAt: `2025-03-0${index + 1}T00:00:00Z`,
+      }));
+    
+    // Override the mock to return our diverse task set
+    (taskApiService.getTasks as jest.Mock).mockResolvedValue(diverseTasks);
+    
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <TaskProvider>{children}</TaskProvider>
+    );
+
+    const { result } = renderHook(() => useTasks(), { wrapper });
+
+    // Wait for tasks to load
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+    
+    // Verify we have counts for all real task statuses
+    Object.values(TASK_STATUSES)
+      .filter(status => !['all', 'pending', 'recent-completed', 'source-tasks'].includes(status))
+      .forEach(status => {
+        expect(result.current.taskCountsByStatus).toHaveProperty(status);
+        expect(result.current.taskCountsByStatus[status]).toBe(1);
+      });
+    
+    // Check total tasks matches our expected count
+    const totalTasks = Object.values(result.current.taskCountsByStatus).reduce((sum, count) => sum + count, 0);
+    expect(totalTasks).toBe(diverseTasks.length);
   });
 });
