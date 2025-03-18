@@ -20,11 +20,11 @@ import DropdownMenu from './DropdownMenu';
 import EditableItemList from './EditableItems/EditableItemList';
 
 // Utility function to safely get action help content
-const getActionHelp = (statusKey, defaultTitle = "Action", defaultDescription = "Click to perform this action") => {
-  if (!statusKey || !STATUS_ACTION_HELP[statusKey]) {
+const getActionHelp = (statusKey: keyof typeof STATUS_ACTION_HELP | string, defaultTitle = "Action", defaultDescription = "Click to perform this action") => {
+  if (!statusKey || !(statusKey in STATUS_ACTION_HELP)) {
     return { title: defaultTitle, description: defaultDescription };
   }
-  return STATUS_ACTION_HELP[statusKey];
+  return STATUS_ACTION_HELP[statusKey as keyof typeof STATUS_ACTION_HELP];
 };
 import { parseListString, formatBulletedList, formatNumberedList } from '@/utils/listParser';
 import { POPOVER_POSITIONS } from '@/constants/ui';
@@ -35,7 +35,7 @@ interface TaskCardProps {
   onStatusChange: (
     taskId: string,
     project: string,
-    status: 'proposed' | 'backlog' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived'
+    status: 'inbox' | 'brainstorm' | 'proposed' | 'backlog' | 'maybe' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived'
   ) => Promise<void>;
   onMarkTested: (taskId: string, project: string) => Promise<void>;
   onDelete: (taskId: string, project: string) => Promise<void>;
@@ -486,7 +486,7 @@ function TaskCard({
 
   // Status change handlers with transition effects
   const handleStatusChange =
-    (newStatus: 'proposed' | 'backlog' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived') =>
+    (newStatus: 'inbox' | 'brainstorm' | 'proposed' | 'backlog' | 'maybe' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived') =>
     (e: React.MouseEvent) => {
       e.stopPropagation(); // Prevent card expansion
       
@@ -1698,7 +1698,7 @@ function TaskCard({
               ) : (
                 <h2 
                   className="text-lg font-semibold text-gray-800 font-anthropic group cursor-pointer whitespace-pre-wrap break-words"
-                  onClick={(e) => onUpdateTask && handleInlineEdit('initiative')(e)}
+                  onDoubleClick={(e) => onUpdateTask && handleInlineEdit('initiative')(e)}
                 >
                   {task.initiative}
                   {onUpdateTask && (
@@ -1751,7 +1751,7 @@ function TaskCard({
                   className={`text-lg font-normal font-anthropic group cursor-pointer whitespace-pre-wrap break-words ${
                     task.status === 'reviewed' ? 'text-gray-500' : 'text-gray-800'
                   }`}
-                  onClick={(e) => onUpdateTask && handleInlineEdit('title')(e)}
+                  onDoubleClick={(e) => onUpdateTask && handleInlineEdit('title')(e)}
                 >
                   {task.title}
                   {onUpdateTask && (
@@ -1766,6 +1766,14 @@ function TaskCard({
             {/* Only show gear if no initiative */}
             {!task.initiative && (
               <div className="flex items-center space-x-1">
+                <a 
+                  href={`/task/${task.id}`} 
+                  className="btn-icon" 
+                  title="View task details"
+                  onClick={(e) => e.stopPropagation()} // Prevent card expansion
+                >
+                  <FaEye size={14} />
+                </a>
                 <DropdownMenu 
                   trigger={
                     <button className="btn-icon">
@@ -1787,11 +1795,11 @@ function TaskCard({
             )}
           </div>
 
-          {/* User Impact (takes precedence in collapsed view) or Description */}
+          {/* User Impact (always shown in collapsed view) or Description */}
           {task.userImpact || task.description ? (
             <>
-              {/* If userImpact exists, show it in collapsed view */}
-              {task.userImpact && !expanded ? (
+              {/* Show userImpact in collapsed view when available */}
+              {!expanded ? (
                 <div className="text-base text-gray-600 line-clamp-2">
                   {isEditingUserImpact ? (
                     <div onClick={(e) => e.stopPropagation()} className="w-full">
@@ -1808,9 +1816,9 @@ function TaskCard({
                   ) : (
                     <div 
                       className="group cursor-pointer"
-                      onClick={(e) => onUpdateTask && handleInlineEdit('userImpact')(e)}
+                      onDoubleClick={(e) => onUpdateTask && handleInlineEdit('userImpact')(e)}
                     >
-                      {task.userImpact}
+                      {task.userImpact || task.description || 'No description provided'}
                       {onUpdateTask && (
                         <span className="ml-2 text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
                           edit
@@ -1820,9 +1828,9 @@ function TaskCard({
                   )}
                 </div>
               ) : (
-                /* Show description if no userImpact or view is expanded */
+                /* In expanded view, show description if available */
                 task.description && (
-                  <div className={`text-base text-gray-600 ${expanded ? '' : 'line-clamp-2'}`}>
+                  <div className="text-base text-gray-600">
                     {isEditingDescription ? (
                       <div onClick={(e) => e.stopPropagation()} className="w-full">
                         <textarea
@@ -1838,7 +1846,7 @@ function TaskCard({
                     ) : (
                       <div 
                         className="group cursor-pointer"
-                        onClick={(e) => onUpdateTask && handleInlineEdit('description')(e)}
+                        onDoubleClick={(e) => onUpdateTask && handleInlineEdit('description')(e)}
                       >
                         {task.description}
                         {onUpdateTask && (
@@ -1993,7 +2001,7 @@ function TaskCard({
               ) : (
                 <div 
                   className="text-gray-600 group cursor-pointer"
-                  onClick={(e) => onUpdateTask && handleInlineEdit('userImpact')(e)}
+                  onDoubleClick={(e) => onUpdateTask && handleInlineEdit('userImpact')(e)}
                 >
                   {task.userImpact}
                   {onUpdateTask && (
@@ -2175,6 +2183,7 @@ function TaskCard({
 
           {/* Creation details - all in relative time */}
           <div className="mt-4 text-xs text-gray-500">
+            <p>Task ID: <a href={`/task/${task.id}`} className="text-primary-500 hover:underline" title="View task details">{task.id}</a></p>
             <p>Last updated {formatTimeAgo(task.updatedAt)}</p>
             {task.completedAt && <p>Completed {formatTimeAgo(task.completedAt)}</p>}
             {task.reviewedAt && <p>Reviewed {formatTimeAgo(task.reviewedAt)}</p>}
