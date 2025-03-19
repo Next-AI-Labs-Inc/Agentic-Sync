@@ -1,0 +1,5 @@
+#!/bin/bash
+# gsync - Shorthand for git sync-remotes
+
+# Run the sync-remotes.sh script
+"$(dirname "$0")/sync-remotes.sh"
