@@ -53,7 +53,7 @@
     "updater": {
       "active": true,
       "endpoints": [
-        "https://github.com/jryanhaber/ix/releases/latest/download/latest.json"
+        "https://github.com/Next-AI-Labs-Inc/tasks/releases/latest/download/latest.json"
       ],
       "dialog": true,
       "pubkey": ""

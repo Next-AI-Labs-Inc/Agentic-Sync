@@ -8,8 +8,8 @@ const packageJson = require('../package.json');
 const version = packageJson.version;
 
 // GitHub repo information
-const owner = 'jryanhaber';
-const repo = 'ix';
+const owner = 'Next-AI-Labs-Inc';
+const repo = 'tasks';
 const releaseTag = `v${version}`;
 
 // Build paths for different platforms
