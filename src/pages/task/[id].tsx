@@ -4,6 +4,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { getTask } from '@/services/taskApiService';
 import TaskCard from '@/components/TaskCard';
+import BuildDocumentation from '@/components/BuildDocumentation';
 import { Task } from '@/types';
 import { TaskProvider } from '@/contexts/TaskContext';
 
@@ -104,6 +105,14 @@ export default function SingleTaskPage() {
               expanded={true}           // Always show expanded
               hideExpand={true}         // Hide expand button
             />
+            
+            {/* Build Documentation Section */}
+            <div className="mt-6">
+              <BuildDocumentation 
+                taskId={task.id} 
+                className="bg-white"
+              />
+            </div>
           </div>
         </TaskProvider>
       )}

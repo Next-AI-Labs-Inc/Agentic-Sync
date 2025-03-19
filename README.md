@@ -143,8 +143,8 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## License
 
-This project is part of the IX platform and is proprietary software.
+This project is licensed under the [Next AI Labs Inc Proprietary License](../LICENSE.md). All rights reserved. This codebase is proprietary and confidential, and usage is strictly governed by the terms outlined in the license agreement.
 
 ---
 
-© 2025 IX Project
+© 2025 Next AI Labs Inc. All rights reserved.

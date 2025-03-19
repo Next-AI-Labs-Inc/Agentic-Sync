@@ -17,6 +17,16 @@ export interface Task {
   files?: string[];
   dependencies?: number[];
   nextSteps?: string[];
+  buildDocumentation?: Array<{
+    id: string;
+    title: string;
+    content: string;
+    format: 'markdown' | 'html' | 'text';
+    createdAt: string;
+    createdBy: string;
+    updatedAt?: string;
+    updatedBy?: string;
+  }>;
   createdAt: string;
   updatedAt: string;
   completedAt?: string | null;
