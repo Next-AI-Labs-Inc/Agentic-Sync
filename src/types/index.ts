@@ -34,6 +34,7 @@ export interface Task {
   files?: string[];
   dependencies?: number[];
   nextSteps?: string[]; // Legacy format - simple array of strings
+  url?: string;        // Full URL to the task (for easy access by AI agents)
   buildDocumentation?: Array<{
     id: string;
     title: string;

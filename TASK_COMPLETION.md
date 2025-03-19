@@ -36,6 +36,18 @@ Those belong in the MongoDB task entry.
 
 ---
 
+## [2025-03-19] Task: Enhanced Task Item Approval System for Structured Review Workflow
+
+**MongoDB Task ID:** task-approval-system-2025-03-19
+
+**User Impact:** Users can now systematically review and approve individual requirements, technical plan items, and next steps, ensuring better quality control and clear accountability in the task planning process.
+
+**Technical Summary:** Implemented a status-tracking system for task items with distinct UI states, API integration, and visual indicators showing which items are approved versus proposed, with specialized interaction patterns for each state.
+
+**Verification:** Navigate to http://localhost:3020/tasks, expand a task, observe the approval buttons on requirement items, click "Approve" to see the item get a green border and the buttons disappear.
+
+---
+
 ## [2025-03-16] Task: Prevent App Crashes with Automated Next.js Verification System 
 
 **MongoDB Task ID:** 2025-03-16-nextjs-verification-system

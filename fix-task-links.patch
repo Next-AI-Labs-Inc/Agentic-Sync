@@ -1,0 +1,32 @@
+--- TaskCard.tsx.orig	2025-03-19 00:00:00
++++ TaskCard.tsx	2025-03-19 00:00:00
+@@ -1883,12 +1883,12 @@
+               )}
+               
+               <div className="flex items-center space-x-1">
+-                <a 
++                <Link 
+                   href={{ pathname: "/task/[id]", query: { id: task.id } }} 
+                   className="btn-icon" 
+                   title="View task details"
+                   onClick={(e) => e.stopPropagation()} // Prevent card expansion
+                 >
+                   <FaEye size={14} />
+-                </Link>
++                </Link>
+                 {/* Star button for Today filter */}
+@@ -1961,12 +1961,12 @@
+             {/* Only show gear if no initiative */}
+             {\!task.initiative && (
+               <div className="flex items-center space-x-1">
+-                <a 
++                <Link 
+                   href={{ pathname: "/task/[id]", query: { id: task.id } }} 
+                   className="btn-icon" 
+                   title="View task details"
+                   onClick={(e) => e.stopPropagation()} // Prevent card expansion
+                 >
+                   <FaEye size={14} />
+-                </Link>
++                </Link>
+                 {/* Star button for Today filter */}

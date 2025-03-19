@@ -1,19 +1,31 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaEdit, FaPlus, FaTrash, FaCheck, FaTimes } from 'react-icons/fa';
 
+// Import API functions for proper integration
+import { updateRequirementItem, deleteRequirementItem } from '@/services/taskApiService';
+
+interface EditableItemWithStatus {
+  content: string;
+  approved?: boolean;
+  id?: string;
+  status?: 'proposed' | 'approved';
+}
+
 interface EditableItemListProps {
   items: string[];
   label: string;
   onUpdate: (newItems: string[]) => void;
+  taskId?: string; // Add taskId for API integration
 }
 
 const EditableItemList: React.FC<EditableItemListProps> = ({
   items = [],
   label,
-  onUpdate
+  onUpdate,
+  taskId
 }) => {
-  // Parse items from string if it's in a list format
-  const [parsedItems, setParsedItems] = useState<string[]>([]);
+  // Convert string items to enhanced items with approval status
+  const [parsedItems, setParsedItems] = useState<EditableItemWithStatus[]>([]);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [editValue, setEditValue] = useState('');
   const [isAddingNew, setIsAddingNew] = useState(false);
@@ -22,10 +34,17 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
   const editInputRef = useRef<HTMLTextAreaElement>(null);
   const newInputRef = useRef<HTMLTextAreaElement>(null);
   
-  // Parse the items on initial render and when items change
+  // Convert string items to items with status on initial render and when items change
   useEffect(() => {
     if (Array.isArray(items)) {
-      setParsedItems(items);
+      // Convert string items to objects with status
+      const enhancedItems = items.map(item => ({
+        content: item,
+        approved: false,
+        status: 'proposed' as const,
+        id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      }));
+      setParsedItems(enhancedItems);
     } else {
       // Default to empty array
       setParsedItems([]);
@@ -49,7 +68,7 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
   // Handle edit start
   const handleEdit = (index: number) => {
     setEditIndex(index);
-    setEditValue(parsedItems[index]);
+    setEditValue(parsedItems[index].content);
   };
   
   // Handle edit save
@@ -62,17 +81,21 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
     if (editIndex === null) return;
     
     // Only update if the content has actually changed - preserve whitespace
-    if (editValue !== parsedItems[editIndex]) {
+    if (editValue !== parsedItems[editIndex].content) {
       const newItems = [...parsedItems];
-      newItems[editIndex] = editValue;
+      newItems[editIndex] = {
+        ...newItems[editIndex],
+        content: editValue
+      };
       
       // Remove if completely empty (allow whitespace-only values)
-      if (newItems[editIndex].length === 0) {
+      if (newItems[editIndex].content.length === 0) {
         newItems.splice(editIndex, 1);
       }
       
       setParsedItems(newItems);
-      onUpdate(newItems);
+      // Convert back to string array for onUpdate
+      onUpdate(newItems.map(item => item.content));
     }
     
     setEditIndex(null);
@@ -107,9 +130,15 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
     }
     
     if (newItemValue.length > 0) {
-      const newItems = [...parsedItems, newItemValue];
+      const newItem = {
+        content: newItemValue,
+        approved: false,
+        id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      };
+      const newItems = [...parsedItems, newItem];
       setParsedItems(newItems);
-      onUpdate(newItems);
+      // Convert back to string array for onUpdate
+      onUpdate(newItems.map(item => item.content));
     }
     setIsAddingNew(false);
     setNewItemValue('');
@@ -207,39 +236,107 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
             ) : (
               <>
                 <div 
-                  className="flex-1 p-2 rounded hover:bg-gray-50 cursor-pointer whitespace-pre-wrap break-words"
-                  onClick={(e) => {
+                  className={`flex-1 p-2 rounded hover:bg-gray-50 cursor-pointer whitespace-pre-wrap break-words ${item.approved ? 'border-l-4 border-green-500 pl-2' : ''}`}
+                  onDoubleClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     handleEdit(index);
                   }}
                 >
-                  {item}
+                  {item.content}
+                  {item.approved && (
+                    <span className="ml-2 text-green-600 text-xs">
+                      (Approved)
+                    </span>
+                  )}
                 </div>
-                <div className="flex ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleEdit(index);
-                    }}
-                    className="p-1 text-gray-600 hover:text-blue-600"
-                    title="Edit item"
-                  >
-                    <FaEdit size={14} />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleDelete(index);
-                    }}
-                    className="p-1 text-gray-600 hover:text-red-600 ml-1"
-                    title="Delete item"
-                  >
-                    <FaTrash size={14} />
-                  </button>
-                </div>
+                {!item.approved && (
+                  <div className="flex ml-2">
+                    <button
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        try {
+                          // Delete locally first
+                          handleDelete(index);
+                          
+                          // If we have a taskId, call the API to persist the change
+                          if (taskId && parsedItems[index]?.id) {
+                            console.log(`Vetoing item ${parsedItems[index].id} for task ${taskId}`);
+                            
+                            // Call the API based on the item type (determined by label)
+                            if (label === 'Requirements') {
+                              await deleteRequirementItem(taskId, parsedItems[index].id);
+                            } else if (label === 'Technical Plan') {
+                              console.log('This would call deleteTechnicalPlanItem API');
+                              // Would call: await deleteTechnicalPlanItem(taskId, parsedItems[index].id);
+                            } else if (label === 'Next Steps') {
+                              console.log('This would call deleteNextStepItem API');
+                              // Would call: await deleteNextStepItem(taskId, parsedItems[index].id);
+                            }
+                          } else {
+                            console.log('No taskId provided - veto is local only');
+                          }
+                        } catch (error) {
+                          console.error('Error vetoing item:', error);
+                          alert('Failed to veto item. Please try again.');
+                          // We'd need to refresh the list from the server to fix the state
+                        }
+                      }}
+                      className="btn-outline-danger"
+                      title="Veto item"
+                    >
+                      Veto
+                    </button>
+                    <button
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        try {
+                          // Apply local state change first for immediate UI feedback
+                          const newItems = [...parsedItems];
+                          newItems[index] = {
+                            ...newItems[index],
+                            approved: true,
+                            status: 'approved'
+                          };
+                          setParsedItems(newItems);
+                          
+                          // If we have a taskId, call the API to persist the change
+                          if (taskId && newItems[index].id) {
+                            console.log(`Approving item ${newItems[index].id} for task ${taskId}`);
+                            
+                            // Call the API based on the item type (determined by label)
+                            if (label === 'Requirements') {
+                              await updateRequirementItem(taskId, newItems[index].id, 'approved');
+                            } else if (label === 'Technical Plan') {
+                              console.log('This would call updateTechnicalPlanItem API');
+                              // Would call: await updateTechnicalPlanItem(taskId, newItems[index].id, 'approved');
+                            } else if (label === 'Next Steps') {
+                              console.log('This would call updateNextStepItem API');
+                              // Would call: await updateNextStepItem(taskId, newItems[index].id, 'approved');
+                            }
+                          } else {
+                            console.log('No taskId provided - approval is local only');
+                          }
+                          
+                          // Convert back to string array for onUpdate
+                          onUpdate(newItems.map(item => item.content));
+                        } catch (error) {
+                          console.error('Error approving item:', error);
+                          // Revert the optimistic update if the API call fails
+                          alert('Failed to approve item. Please try again.');
+                        }
+                      }}
+                      className="ml-1 btn-outline-success"
+                      title="Approve item"
+                    >
+                      Approve
+                    </button>
+                  </div>
+                )}
               </>
             )}
           </li>

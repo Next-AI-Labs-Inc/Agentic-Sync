@@ -28,11 +28,7 @@ import AgentLauncher from './AgentLauncher';
 import FeedbackForm from './FeedbackForm';
 
 // Utility function to safely get action help content
-const getActionHelp = (
-  statusKey: keyof typeof STATUS_ACTION_HELP | string,
-  defaultTitle = 'Action',
-  defaultDescription = 'Click to perform this action'
-) => {
+const getActionHelp = (statusKey: keyof typeof STATUS_ACTION_HELP | string, defaultTitle = "Action", defaultDescription = "Click to perform this action") => {
   if (!statusKey || !(statusKey in STATUS_ACTION_HELP)) {
     return { title: defaultTitle, description: defaultDescription };
   }
@@ -40,30 +36,14 @@ const getActionHelp = (
 };
 import { parseListString, formatBulletedList, formatNumberedList } from '@/utils/listParser';
 import { POPOVER_POSITIONS } from '@/constants/ui';
-import {
-  TASK_STATUSES,
-  STATUS_ACTION_HELP,
-  STATUS_ACTION_TEXT,
-  STATUS_COACHING
-} from '@/constants/taskStatus';
+import { TASK_STATUSES, STATUS_ACTION_HELP, STATUS_ACTION_TEXT, STATUS_COACHING } from '@/constants/taskStatus';
 
 interface TaskCardProps {
   task: Task;
   onStatusChange: (
     taskId: string,
     project: string,
-    status:
-      | 'inbox'
-      | 'brainstorm'
-      | 'proposed'
-      | 'backlog'
-      | 'maybe'
-      | 'todo'
-      | 'in-progress'
-      | 'on-hold'
-      | 'done'
-      | 'reviewed'
-      | 'archived'
+    status: 'inbox' | 'brainstorm' | 'proposed' | 'backlog' | 'maybe' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived'
   ) => Promise<void>;
   onMarkTested: (taskId: string, project: string) => Promise<void>;
   onDelete: (taskId: string, project: string) => Promise<void>;
@@ -82,11 +62,7 @@ interface TaskCardProps {
   onUpdateNextStepItems?: (taskId: string, items: ItemWithStatus[]) => Promise<void>;
   // Agent integration functions
   onAddFeedback?: (taskId: string, content: string) => Promise<void>;
-  onLaunchAgent?: (
-    taskId: string,
-    mode: 'implement' | 'demo' | 'feedback',
-    feedback?: string
-  ) => Promise<void>;
+  onLaunchAgent?: (taskId: string, mode: 'implement' | 'demo' | 'feedback', feedback?: string) => Promise<void>;
   expanded?: boolean; // Whether the card is expanded by default
   hideExpand?: boolean; // Whether to hide the expand/collapse button
 }
@@ -347,12 +323,12 @@ function Popover({ content, position = 'top', children, className = '' }: Popove
   );
 }
 
-function TaskCard({
-  task,
-  onStatusChange,
-  onMarkTested,
-  onDelete,
-  onUpdateDate,
+function TaskCard({ 
+  task, 
+  onStatusChange, 
+  onMarkTested, 
+  onDelete, 
+  onUpdateDate, 
   onUpdateTask,
   onToggleStar,
   // Item approval functions
@@ -373,7 +349,7 @@ function TaskCard({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isEditingDate, setIsEditingDate] = useState(false);
   const [newDateValue, setNewDateValue] = useState('');
-
+  
   // Inline editing states
   const [isEditingInitiative, setIsEditingInitiative] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -383,18 +359,18 @@ function TaskCard({
   const [editedTitle, setEditedTitle] = useState(task.title);
   const [editedDescription, setEditedDescription] = useState(task.description || '');
   const [editedUserImpact, setEditedUserImpact] = useState(task.userImpact || '');
-
+  
   // Copy feedback states
   const [showIdCopied, setShowIdCopied] = useState(false);
   const [showUrlCopied, setShowUrlCopied] = useState(false);
-
+  
   // Initialize date value once when editing starts
   useEffect(() => {
     if (isEditingDate) {
       setNewDateValue(task.createdAt || new Date().toISOString());
     }
   }, [isEditingDate, task.createdAt]);
-
+  
   // Clear the new flag after animation completes
   useEffect(() => {
     if (isNew) {
@@ -418,7 +394,7 @@ function TaskCard({
 
     return projectId.replace(/-/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
   };
-
+  
   // Get task URL for copying
   const getTaskUrl = () => {
     // Use window.location to build the full URL
@@ -429,39 +405,37 @@ function TaskCard({
     // Fallback to relative URL if not in browser context
     return `/task/${task.id}`;
   };
-
+  
   // Copy task ID to clipboard
   const copyTaskId = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation(); // Prevent card expansion
-
-    navigator.clipboard
-      .writeText(task.id)
+    
+    navigator.clipboard.writeText(task.id)
       .then(() => {
         setShowIdCopied(true);
         setTimeout(() => setShowIdCopied(false), 2000);
       })
-      .catch((err) => {
+      .catch(err => {
         console.error('Failed to copy task ID:', err);
       });
   };
-
+  
   // Copy task URL to clipboard
   const copyTaskUrl = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation(); // Prevent card expansion
-
-    navigator.clipboard
-      .writeText(getTaskUrl())
+    
+    navigator.clipboard.writeText(getTaskUrl())
       .then(() => {
         setShowUrlCopied(true);
         setTimeout(() => setShowUrlCopied(false), 2000);
       })
-      .catch((err) => {
+      .catch(err => {
         console.error('Failed to copy task URL:', err);
       });
   };
-
+  
   // Handle date edit
   const handleDateClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -471,7 +445,7 @@ function TaskCard({
       setIsEditingDate(true);
     }
   };
-
+  
   // Submit date change
   const handleDateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -481,12 +455,12 @@ function TaskCard({
       setIsEditingDate(false);
     }
   };
-
+  
   // Handle inline editing
   const handleInlineEdit = (field: string) => (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation(); // Prevent card expansion
-
+    
     switch (field) {
       case 'initiative':
         setIsEditingInitiative(true);
@@ -502,16 +476,16 @@ function TaskCard({
         break;
     }
   };
-
+  
   // Submit inline edits
   const handleInlineSubmit = (field: string) => (e: React.FormEvent | React.FocusEvent) => {
     e.preventDefault();
     e.stopPropagation(); // Prevent card expansion
-
+    
     if (!onUpdateTask) return;
-
+    
     let updates: Partial<Task> = {};
-
+    
     switch (field) {
       case 'initiative':
         updates.initiative = editedInitiative; // Preserve whitespace
@@ -530,12 +504,12 @@ function TaskCard({
         setIsEditingUserImpact(false);
         break;
     }
-
+    
     if (Object.keys(updates).length > 0) {
       onUpdateTask(task.id, task.project, updates);
     }
   };
-
+  
   // Handle keyboard events for inline editing
   const handleInlineKeyDown = (field: string) => (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
@@ -571,43 +545,29 @@ function TaskCard({
   // Handle card click for expansion
   const handleCardClick = (e: React.MouseEvent) => {
     // First check if the click should be ignored
-    if (
-      e.target instanceof HTMLButtonElement ||
-      e.target instanceof HTMLInputElement ||
-      e.target instanceof HTMLTextAreaElement ||
-      e.target instanceof HTMLFormElement ||
-      // Check for editors and interactive elements
-      (e.target instanceof HTMLElement &&
-        (e.target.closest('.popover') ||
+    if (e.target instanceof HTMLButtonElement || 
+        e.target instanceof HTMLInputElement || 
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLFormElement ||
+        // Check for editors and interactive elements
+        (e.target instanceof HTMLElement && 
+         (e.target.closest('.popover') || 
           e.target.closest('.dropdown-menu') ||
           e.target.closest('.editable-item')))
     ) {
       return; // Let interactive elements handle their own clicks
     }
-
+    
     // Toggle expanded state
     setExpanded(!expanded);
   };
 
   // Status change handlers with transition effects
   const handleStatusChange =
-    (
-      newStatus:
-        | 'inbox'
-        | 'brainstorm'
-        | 'proposed'
-        | 'backlog'
-        | 'maybe'
-        | 'todo'
-        | 'in-progress'
-        | 'on-hold'
-        | 'done'
-        | 'reviewed'
-        | 'archived'
-    ) =>
+    (newStatus: 'inbox' | 'brainstorm' | 'proposed' | 'backlog' | 'maybe' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived') =>
     (e: React.MouseEvent) => {
       e.stopPropagation(); // Prevent card expansion
-
+      
       // Apply a subtle flash effect to indicate the change
       const element = e.currentTarget.closest('.task-card');
       if (element) {
@@ -616,7 +576,7 @@ function TaskCard({
           element.classList.remove('status-change-flash');
         }, 500);
       }
-
+      
       // Trigger the status change immediately
       onStatusChange(task.id, task.project, newStatus);
     };
@@ -624,7 +584,7 @@ function TaskCard({
   // Quick action handlers
   const handleMarkTested = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card expansion
-
+    
     // Apply a subtle flash effect to indicate testing
     const element = e.currentTarget.closest('.task-card');
     if (element) {
@@ -633,14 +593,14 @@ function TaskCard({
         element.classList.remove('status-change-flash');
       }, 500);
     }
-
+    
     onMarkTested(task.id, task.project);
   };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card expansion
     setIsDeleting(true); // Start the delete animation
-
+    
     // Wait for animation to start before actually deleting
     setTimeout(() => {
       onDelete(task.id, task.project);
@@ -679,7 +639,7 @@ function TaskCard({
   // Handle feedback submission
   const handleFeedbackSubmit = async (feedbackData: { content: string }) => {
     if (!onAddFeedback) return;
-
+    
     try {
       setIsSubmittingFeedback(true);
       await onAddFeedback(task.id, feedbackData.content);
@@ -695,12 +655,12 @@ function TaskCard({
   // Render agent action buttons
   const renderAgentActions = () => {
     const agentActions = [];
-
+    
     // Don't show agent actions for archived or reviewed tasks
     if (['archived', 'reviewed'].includes(task.status as string)) {
       return [];
     }
-
+    
     // For 'for-review' status, show Give Feedback button
     if (task.status === 'for-review') {
       agentActions.push(
@@ -713,7 +673,7 @@ function TaskCard({
         </button>
       );
     }
-
+    
     // Show Deploy Agent button for all tasks except done/archived/reviewed
     if (task.status !== 'done' && !['archived', 'reviewed'].includes(task.status as string)) {
       agentActions.push(
@@ -726,7 +686,7 @@ function TaskCard({
         />
       );
     }
-
+    
     // Show "Show Me" button for tasks in for-review or done status
     if (task.status === 'for-review' || task.status === 'done') {
       agentActions.push(
@@ -739,7 +699,7 @@ function TaskCard({
         />
       );
     }
-
+    
     // If we have feedback content, add a button to launch agent with feedback
     if (feedbackContent && task.status === 'for-review') {
       agentActions.push(
@@ -753,10 +713,10 @@ function TaskCard({
         />
       );
     }
-
+    
     return agentActions;
   };
-
+  
   // Determine stage-appropriate actions
   const renderStageActions = () => {
     const actions = [];
@@ -781,12 +741,8 @@ function TaskCard({
           key="mark-actionable-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.MARK_ACTIONABLE.title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {STATUS_ACTION_HELP.MARK_ACTIONABLE.description}
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MARK_ACTIONABLE.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MARK_ACTIONABLE.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -801,18 +757,14 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       actions.push(
         <Popover
           key="move-to-brainstorm-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.MOVE_TO_BRAINSTORM.title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {STATUS_ACTION_HELP.MOVE_TO_BRAINSTORM.description}
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_BRAINSTORM.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_BRAINSTORM.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -827,18 +779,14 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       actions.push(
         <Popover
           key="move-to-someday-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.description}
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -854,7 +802,7 @@ function TaskCard({
         </Popover>
       );
     }
-
+    
     // Brainstorm actions
     else if (task.status === 'brainstorm') {
       actions.push(
@@ -862,12 +810,8 @@ function TaskCard({
           key="mark-actionable-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.MARK_ACTIONABLE.title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {STATUS_ACTION_HELP.MARK_ACTIONABLE.description}
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MARK_ACTIONABLE.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MARK_ACTIONABLE.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -882,18 +826,14 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       actions.push(
         <Popover
           key="move-to-proposed-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.MOVE_TO_PROPOSED.title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {STATUS_ACTION_HELP.MOVE_TO_PROPOSED.description}
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_PROPOSED.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_PROPOSED.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -908,19 +848,15 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Add move to Someday/Maybe option
       actions.push(
         <Popover
           key="move-to-someday-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.description}
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -935,19 +871,15 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Secondary action - Move to Inbox
       actions.push(
         <Popover
           key="move-to-inbox-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.MOVE_TO_INBOX.title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {STATUS_ACTION_HELP.MOVE_TO_INBOX.description}
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_INBOX.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_INBOX.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -963,7 +895,7 @@ function TaskCard({
         </Popover>
       );
     }
-
+    
     // Proposed actions
     else if (task.status === 'proposed') {
       actions.push(
@@ -971,12 +903,8 @@ function TaskCard({
           key="mark-actionable-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.MARK_ACTIONABLE.title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {STATUS_ACTION_HELP.MARK_ACTIONABLE.description}
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MARK_ACTIONABLE.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MARK_ACTIONABLE.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -991,16 +919,14 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Add To Backlog button
       actions.push(
         <Popover
           key="move-to-backlog-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.TO_BACKLOG.title}
-              </h4>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.TO_BACKLOG.title}</h4>
               <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.TO_BACKLOG.description}</p>
             </div>
           }
@@ -1016,21 +942,17 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Reject button removed per requirements
-
+      
       // Secondary action - Move to Someday/Maybe
       actions.push(
         <Popover
           key="move-to-someday-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.description}
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -1046,7 +968,7 @@ function TaskCard({
         </Popover>
       );
     }
-
+    
     // Backlog actions
     else if (task.status === 'backlog') {
       actions.push(
@@ -1054,12 +976,8 @@ function TaskCard({
           key="mark-actionable-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.MARK_ACTIONABLE.title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {STATUS_ACTION_HELP.MARK_ACTIONABLE.description}
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MARK_ACTIONABLE.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MARK_ACTIONABLE.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -1074,19 +992,15 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Add Move to Someday/Maybe button
       actions.push(
         <Popover
           key="move-to-someday-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.description}
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -1101,7 +1015,7 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Add Archive button
       actions.push(
         <Popover
@@ -1124,19 +1038,15 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Secondary action - Move to Proposed
       actions.push(
         <Popover
           key="move-to-proposed-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.MOVE_TO_PROPOSED.title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {STATUS_ACTION_HELP.MOVE_TO_PROPOSED.description}
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_PROPOSED.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_PROPOSED.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -1152,7 +1062,7 @@ function TaskCard({
         </Popover>
       );
     }
-
+    
     // Maybe (Someday/Maybe) actions
     else if (task.status === 'maybe') {
       actions.push(
@@ -1160,12 +1070,8 @@ function TaskCard({
           key="mark-actionable-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.MARK_ACTIONABLE.title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {STATUS_ACTION_HELP.MARK_ACTIONABLE.description}
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MARK_ACTIONABLE.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MARK_ACTIONABLE.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -1180,16 +1086,14 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Add Move to Backlog button
       actions.push(
         <Popover
           key="move-to-backlog-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.TO_BACKLOG.title}
-              </h4>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.TO_BACKLOG.title}</h4>
               <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.TO_BACKLOG.description}</p>
             </div>
           }
@@ -1205,7 +1109,7 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Add Archive button
       actions.push(
         <Popover
@@ -1228,19 +1132,15 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Secondary action - Move to Brainstorm
       actions.push(
         <Popover
           key="move-to-brainstorm-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.MOVE_TO_BRAINSTORM.title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {STATUS_ACTION_HELP.MOVE_TO_BRAINSTORM.description}
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_BRAINSTORM.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_BRAINSTORM.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -1256,7 +1156,7 @@ function TaskCard({
         </Popover>
       );
     }
-
+    
     // Todo actions
     else if (task.status === 'todo') {
       actions.push(
@@ -1264,18 +1164,8 @@ function TaskCard({
           key="move-to-in-progress-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {getActionHelp(TASK_STATUSES.TODO, 'Starting work on this?').title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {
-                  getActionHelp(
-                    TASK_STATUSES.TODO,
-                    'Starting work on this?',
-                    "Click this button when you begin working on this task so your team knows it's actively being worked on."
-                  ).description
-                }
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{getActionHelp(TASK_STATUSES.TODO, "Starting work on this?").title}</h4>
+              <p className="text-sm text-gray-600">{getActionHelp(TASK_STATUSES.TODO, "Starting work on this?", "Click this button when you begin working on this task so your team knows it's actively being worked on.").description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -1290,7 +1180,7 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Add On Hold button
       actions.push(
         <Popover
@@ -1313,16 +1203,14 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Add To Backlog button
       actions.push(
         <Popover
           key="move-to-backlog-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.TO_BACKLOG.title}
-              </h4>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.TO_BACKLOG.title}</h4>
               <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.TO_BACKLOG.description}</p>
             </div>
           }
@@ -1338,19 +1226,15 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Secondary action - Move to Someday/Maybe
       actions.push(
         <Popover
           key="move-to-someday-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.description}
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_SOMEDAY.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -1366,7 +1250,7 @@ function TaskCard({
         </Popover>
       );
     }
-
+    
     // In Progress actions
     else if (task.status === 'in-progress') {
       actions.push(
@@ -1374,18 +1258,8 @@ function TaskCard({
           key="move-to-done-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {getActionHelp(TASK_STATUSES.IN_PROGRESS, 'Finished the work?').title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {
-                  getActionHelp(
-                    TASK_STATUSES.IN_PROGRESS,
-                    'Finished the work?',
-                    "Click this button when you've completed all the work for this task and it's ready for someone to review it."
-                  ).description
-                }
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{getActionHelp(TASK_STATUSES.IN_PROGRESS, "Finished the work?").title}</h4>
+              <p className="text-sm text-gray-600">{getActionHelp(TASK_STATUSES.IN_PROGRESS, "Finished the work?", "Click this button when you've completed all the work for this task and it's ready for someone to review it.").description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -1400,19 +1274,15 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Add Move to Review button
       actions.push(
         <Popover
           key="move-to-review-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.MOVE_TO_REVIEW.title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {STATUS_ACTION_HELP.MOVE_TO_REVIEW.description}
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_REVIEW.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_REVIEW.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -1427,7 +1297,7 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Add On Hold button
       actions.push(
         <Popover
@@ -1450,7 +1320,7 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Secondary action - Move to Todo
       actions.push(
         <Popover
@@ -1476,7 +1346,7 @@ function TaskCard({
         </Popover>
       );
     }
-
+    
     // On Hold actions
     else if (task.status === 'on-hold') {
       actions.push(
@@ -1484,18 +1354,8 @@ function TaskCard({
           key="resume-progress-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {getActionHelp(TASK_STATUSES.ON_HOLD, 'Ready to resume work?').title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {
-                  getActionHelp(
-                    TASK_STATUSES.ON_HOLD,
-                    'Ready to resume work?',
-                    'Click this button to resume work on this task that was previously put on hold.'
-                  ).description
-                }
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{getActionHelp(TASK_STATUSES.ON_HOLD, "Ready to resume work?").title}</h4>
+              <p className="text-sm text-gray-600">{getActionHelp(TASK_STATUSES.ON_HOLD, "Ready to resume work?", "Click this button to resume work on this task that was previously put on hold.").description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -1510,16 +1370,14 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Add Move to Backlog button
       actions.push(
         <Popover
           key="move-to-backlog-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.TO_BACKLOG.title}
-              </h4>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.TO_BACKLOG.title}</h4>
               <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.TO_BACKLOG.description}</p>
             </div>
           }
@@ -1535,7 +1393,7 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Add Move to Todo button
       actions.push(
         <Popover
@@ -1544,8 +1402,7 @@ function TaskCard({
             <div className="w-64">
               <h4 className="font-medium text-gray-900 mb-1">Move to Todo?</h4>
               <p className="text-sm text-gray-600">
-                Move this task back to Todo status if it's no longer blocked but you're not ready to
-                work on it yet.
+                Move this task back to Todo status if it's no longer blocked but you're not ready to work on it yet.
               </p>
             </div>
           }
@@ -1561,7 +1418,7 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Secondary action - Archive
       actions.push(
         <Popover
@@ -1585,7 +1442,7 @@ function TaskCard({
         </Popover>
       );
     }
-
+    
     // Done actions (For Review)
     else if (task.status === 'done') {
       actions.push(
@@ -1593,18 +1450,8 @@ function TaskCard({
           key="move-to-reviewed-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {getActionHelp(TASK_STATUSES.DONE, 'Reviewed this work?').title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {
-                  getActionHelp(
-                    TASK_STATUSES.DONE,
-                    'Reviewed this work?',
-                    'After checking this completed task and confirming everything looks good, click this button to mark it as reviewed.'
-                  ).description
-                }
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{getActionHelp(TASK_STATUSES.DONE, "Reviewed this work?").title}</h4>
+              <p className="text-sm text-gray-600">{getActionHelp(TASK_STATUSES.DONE, "Reviewed this work?", "After checking this completed task and confirming everything looks good, click this button to mark it as reviewed.").description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -1642,7 +1489,7 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Move back to Todo
       actions.push(
         <Popover
@@ -1672,12 +1519,8 @@ function TaskCard({
           key="move-to-in-progress-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.STILL_WORKING.title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {STATUS_ACTION_HELP.STILL_WORKING.description}
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.STILL_WORKING.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.STILL_WORKING.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -1693,7 +1536,7 @@ function TaskCard({
         </Popover>
       );
     }
-
+    
     // Reviewed (Done) actions
     else if (task.status === 'reviewed') {
       // Add Archive button for reviewed tasks
@@ -1718,7 +1561,7 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Add ability to reopen a reviewed task
       actions.push(
         <Popover
@@ -1741,16 +1584,14 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Move back to done
       actions.push(
         <Popover
           key="move-to-done-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.MOVE_TO_DONE.title}
-              </h4>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_DONE.title}</h4>
               <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_DONE.description}</p>
             </div>
           }
@@ -1766,19 +1607,15 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Add Move to For Review
       actions.push(
         <Popover
           key="move-to-review-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.MOVE_TO_REVIEW.title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {STATUS_ACTION_HELP.MOVE_TO_REVIEW.description}
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_REVIEW.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_REVIEW.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
@@ -1794,7 +1631,7 @@ function TaskCard({
         </Popover>
       );
     }
-
+    
     // Archived actions
     else if (task.status === 'archived') {
       // Add ability to unarchive a task
@@ -1803,9 +1640,7 @@ function TaskCard({
           key="unarchive-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.UNARCHIVE.title}
-              </h4>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.UNARCHIVE.title}</h4>
               <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.UNARCHIVE.description}</p>
             </div>
           }
@@ -1821,7 +1656,7 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Move to Reviewed
       actions.push(
         <Popover
@@ -1830,8 +1665,7 @@ function TaskCard({
             <div className="w-64">
               <h4 className="font-medium text-gray-900 mb-1">Move to Reviewed?</h4>
               <p className="text-sm text-gray-600">
-                This will move the task back to the reviewed state, making it visible in the active
-                task lists again.
+                This will move the task back to the reviewed state, making it visible in the active task lists again.
               </p>
             </div>
           }
@@ -1847,16 +1681,14 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Move to Done
       actions.push(
         <Popover
           key="move-to-done-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.MOVE_TO_DONE.title}
-              </h4>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MOVE_TO_DONE.title}</h4>
               <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MOVE_TO_DONE.description}</p>
             </div>
           }
@@ -1872,24 +1704,24 @@ function TaskCard({
           </button>
         </Popover>
       );
-
+      
       // Delete Permanently
       actions.push(
         <Popover
           key="delete-permanently-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.DELETE_PERMANENTLY.title}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {STATUS_ACTION_HELP.DELETE_PERMANENTLY.description}
-              </p>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.DELETE_PERMANENTLY.title}</h4>
+              <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.DELETE_PERMANENTLY.description}</p>
             </div>
           }
           position={POPOVER_POSITIONS.TOP}
         >
-          <button key="delete-permanently" onClick={handleDelete} className="btn-outline-danger">
+          <button
+            key="delete-permanently"
+            onClick={handleDelete}
+            className="btn-outline-danger"
+          >
             <FaTrash className="mr-1" size={12} />
             Delete Permanently
           </button>
@@ -1904,9 +1736,7 @@ function TaskCard({
           key="mark-tested-popover"
           content={
             <div className="w-64">
-              <h4 className="font-medium text-gray-900 mb-1">
-                {STATUS_ACTION_HELP.MARK_TESTED.title}
-              </h4>
+              <h4 className="font-medium text-gray-900 mb-1">{STATUS_ACTION_HELP.MARK_TESTED.title}</h4>
               <p className="text-sm text-gray-600">{STATUS_ACTION_HELP.MARK_TESTED.description}</p>
             </div>
           }
@@ -1943,7 +1773,7 @@ function TaskCard({
 
     // Get agent actions
     const agentActionButtons = renderAgentActions();
-
+    
     return (
       <>
         {expanded && renderCoachingMessage()}
@@ -1952,7 +1782,7 @@ function TaskCard({
           {/* Add agent actions after regular actions */}
           {agentActionButtons.length > 0 && agentActionButtons}
         </div>
-
+        
         {/* Feedback form when expanded and show form is true */}
         {expanded && showFeedbackForm && (
           <div className="mt-4">
@@ -1964,7 +1794,7 @@ function TaskCard({
             />
           </div>
         )}
-
+        
         {/* Display feedback content if available */}
         {expanded && feedbackContent && !showFeedbackForm && (
           <div className="mt-4 text-base">
@@ -1981,33 +1811,26 @@ function TaskCard({
   return (
     <div
       data-testid="task-card"
-      className={`task-card ${task.status === 'reviewed' ? 'bg-gray-50' : 'bg-white'} ${
-        isNew ? 'animate-fade-in border-l-4 border-l-blue-500' : ''
-      } 
+      className={`task-card ${
+        task.status === 'reviewed' ? 'bg-gray-50' : 'bg-white'
+      } ${isNew ? 'animate-fade-in border-l-4 border-l-blue-500' : ''} 
       ${isDeleting ? 'fade-out pointer-events-none' : ''}
       ${expanded ? 'expanded' : ''}
       rounded-lg shadow-sm border border-gray-200 transition-all duration-200`}
     >
-      <div
-        className={`p-4 ${hideExpand ? '' : 'cursor-pointer'}`}
-        onClick={(e) => {
+      <div className={`p-4 ${hideExpand ? '' : 'cursor-pointer'}`} onClick={(e) => {
           // Skip if expand button is hidden
           if (hideExpand) return;
-
+          
           // Allow toggling expanded state when clicking the card,
           // unless it's inside an interactive element
-          if (
-            e.target === e.currentTarget ||
-            (e.target instanceof HTMLElement &&
-              !e.target.closest('.editable-item') &&
-              !e.target.closest('button') &&
-              !e.target.closest('input') &&
-              !e.target.closest('textarea'))
-          ) {
+          if (e.target === e.currentTarget || 
+              (e.target instanceof HTMLElement && !e.target.closest('.editable-item') && 
+               !e.target.closest('button') && !e.target.closest('input') && 
+               !e.target.closest('textarea'))) {
             handleCardClick(e);
           }
-        }}
-      >
+        }}>
         {/* Close button (top right) */}
         <div className="flex justify-end mb-1">
           {!hideExpand && (
@@ -2020,24 +1843,14 @@ function TaskCard({
               className={`text-gray-400 hover:text-gray-600 ${!expanded ? 'hidden' : ''}`}
               aria-label="Close details"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
           )}
         </div>
-
+        
         {/* Header row with initiative, title, badges */}
         <div className="flex flex-col gap-1">
           {/* Initiative at the top (if exists) - with inline editing */}
@@ -2056,7 +1869,7 @@ function TaskCard({
                   />
                 </div>
               ) : (
-                <h2
+                <h2 
                   className="text-lg font-semibold text-gray-800 font-anthropic group cursor-pointer whitespace-pre-wrap break-words"
                   onDoubleClick={(e) => onUpdateTask && handleInlineEdit('initiative')(e)}
                 >
@@ -2068,21 +1881,20 @@ function TaskCard({
                   )}
                 </h2>
               )}
-
+              
               <div className="flex items-center space-x-1">
-                <Link
-                  href={{ pathname: '/task/[id]', query: { id: task.id } }}
-                  className="btn-icon"
+                <a 
+                  href={{ pathname: "/task/[id]", query: { id: task.id } }} 
+                  className="btn-icon" 
                   title="View task details"
                   onClick={(e) => e.stopPropagation()} // Prevent card expansion
                 >
                   <FaEye size={14} />
                 </Link>
-
                 {/* Star button for Today filter */}
-                <button
-                  className="btn-icon"
-                  title={task.starred ? 'Remove from Today' : 'Add to Today'}
+                <button 
+                  className="btn-icon" 
+                  title={task.starred ? "Remove from Today" : "Add to Today"}
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent card expansion
                     if (onToggleStar) {
@@ -2090,13 +1902,9 @@ function TaskCard({
                     }
                   }}
                 >
-                  {task.starred ? (
-                    <FaStar size={14} className="text-rose-500" />
-                  ) : (
-                    <FaRegStar size={14} />
-                  )}
+                  {task.starred ? <FaStar size={14} className="text-rose-500" /> : <FaRegStar size={14} />}
                 </button>
-                <DropdownMenu
+                <DropdownMenu 
                   trigger={
                     <button className="btn-icon">
                       <FaCog size={14} />
@@ -2116,7 +1924,7 @@ function TaskCard({
               </div>
             </div>
           )}
-
+          
           {/* Title row - with inline editing */}
           <div className={`flex items-start justify-between ${!task.initiative ? 'mb-1' : ''}`}>
             <div className="flex items-start w-full">
@@ -2149,23 +1957,22 @@ function TaskCard({
                 </h3>
               )}
             </div>
-
+            
             {/* Only show gear if no initiative */}
             {!task.initiative && (
               <div className="flex items-center space-x-1">
-                <Link
-                  href={{ pathname: '/task/[id]', query: { id: task.id } }}
-                  className="btn-icon"
+                <a 
+                  href={{ pathname: "/task/[id]", query: { id: task.id } }} 
+                  className="btn-icon" 
                   title="View task details"
                   onClick={(e) => e.stopPropagation()} // Prevent card expansion
                 >
                   <FaEye size={14} />
                 </Link>
-
                 {/* Star button for Today filter */}
-                <button
-                  className="btn-icon"
-                  title={task.starred ? 'Remove from Today' : 'Add to Today'}
+                <button 
+                  className="btn-icon" 
+                  title={task.starred ? "Remove from Today" : "Add to Today"}
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent card expansion
                     if (onToggleStar) {
@@ -2173,13 +1980,9 @@ function TaskCard({
                     }
                   }}
                 >
-                  {task.starred ? (
-                    <FaStar size={14} className="text-rose-500" />
-                  ) : (
-                    <FaRegStar size={14} />
-                  )}
+                  {task.starred ? <FaStar size={14} className="text-rose-500" /> : <FaRegStar size={14} />}
                 </button>
-                <DropdownMenu
+                <DropdownMenu 
                   trigger={
                     <button className="btn-icon">
                       <FaCog size={14} />
@@ -2219,7 +2022,7 @@ function TaskCard({
                       />
                     </div>
                   ) : (
-                    <div
+                    <div 
                       className="group cursor-pointer whitespace-pre-wrap break-words"
                       onDoubleClick={(e) => onUpdateTask && handleInlineEdit('userImpact')(e)}
                     >
@@ -2249,7 +2052,7 @@ function TaskCard({
                         />
                       </div>
                     ) : (
-                      <div
+                      <div 
                         className="group cursor-pointer whitespace-pre-wrap break-words"
                         onDoubleClick={(e) => onUpdateTask && handleInlineEdit('description')(e)}
                       >
@@ -2266,7 +2069,7 @@ function TaskCard({
               )}
             </>
           ) : null}
-
+          
           {/* Project name and status badges */}
           <div className="flex items-center justify-between mt-1">
             <div className="flex items-center">
@@ -2275,22 +2078,15 @@ function TaskCard({
                   {formatProjectName(task.project)}
                 </div>
               )}
-              <Link
-                href={{ pathname: '/task/[id]', query: { id: task.id } }}
-                onClick={(e) => e.stopPropagation()}
-                className="text-xs text-primary-500 hover:underline"
-                title="View task details"
-              >
+              <Link href={{ pathname: "/task/[id]", query: { id: task.id } }} onClick={(e) => e.stopPropagation()} className="text-xs text-primary-500 hover:underline" title="View task details">
                 {task.id.substring(0, 8)}...
               </Link>
             </div>
-
+            
             <div className="flex items-center space-x-1">
               {/* Status badge */}
-              <span data-testid="task-status" className={`badge ${getStatusColor(task.status)}`}>
-                {task.status}
-              </span>
-
+              <span data-testid="task-status" className={`badge ${getStatusColor(task.status)}`}>{task.status}</span>
+              
               {/* Tested badge with popover */}
               {task.tested && (
                 <Popover
@@ -2324,14 +2120,14 @@ function TaskCard({
                     className="px-2 py-1 border border-blue-300 rounded text-xs w-64"
                     autoFocus
                   />
-                  <button
-                    type="submit"
+                  <button 
+                    type="submit" 
                     className="ml-1 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs"
                   >
                     Save
                   </button>
-                  <button
-                    type="button"
+                  <button 
+                    type="button" 
                     className="ml-1 px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
                     onClick={() => setIsEditingDate(false)}
                   >
@@ -2375,7 +2171,7 @@ function TaskCard({
                   {task.priority}
                 </span>
               </div>
-
+              
               {!hideExpand && (
                 <button
                   onClick={(e) => {
@@ -2390,7 +2186,7 @@ function TaskCard({
               )}
             </div>
           )}
-
+          
           {/* Stage-appropriate action buttons (always visible) */}
           {renderStageActions()}
         </div>
@@ -2416,7 +2212,7 @@ function TaskCard({
                   />
                 </div>
               ) : (
-                <div
+                <div 
                   className="text-gray-600 group cursor-pointer whitespace-pre-wrap break-words"
                   onDoubleClick={(e) => onUpdateTask && handleInlineEdit('userImpact')(e)}
                 >
@@ -2430,7 +2226,7 @@ function TaskCard({
               )}
             </div>
           )}
-
+          
           {/* Description (when no user impact is shown in collapsed view) */}
           {task.userImpact && task.description && (
             <div className="mt-4 text-base">
@@ -2448,7 +2244,7 @@ function TaskCard({
                   />
                 </div>
               ) : (
-                <div
+                <div 
                   className="text-gray-600 group cursor-pointer whitespace-pre-wrap break-words"
                   onClick={(e) => onUpdateTask && handleInlineEdit('description')(e)}
                 >
@@ -2510,15 +2306,9 @@ function TaskCard({
 
           {/* Requirements - With Approval Status */}
           {/* Show new structured items if they exist, otherwise show the legacy format */}
-          {((task.requirementItems && task.requirementItems.length > 0) ||
-            task.requirements ||
-            onUpdateTask) && (
+          {((task.requirementItems && task.requirementItems.length > 0) || task.requirements || onUpdateTask) && (
             <div className="mt-4 text-base" onClick={(e) => e.stopPropagation()}>
-              {onUpdateTask &&
-              onApproveRequirementItem &&
-              onVetoRequirementItem &&
-              onUpdateRequirementItems &&
-              task.requirementItems ? (
+              {onUpdateTask && onApproveRequirementItem && onVetoRequirementItem && onUpdateRequirementItems && task.requirementItems ? (
                 <ApprovalItemList
                   label="Requirements"
                   items={task.requirementItems}
@@ -2543,7 +2333,7 @@ function TaskCard({
                 <EditableItemList
                   label="Requirements"
                   items={parseListString(task.requirements)}
-                  taskId={task.id}
+                  taskId={task.id} 
                   onUpdate={(newItems) => {
                     if (onUpdateTask) {
                       onUpdateTask(task.id, task.project, {
@@ -2558,17 +2348,17 @@ function TaskCard({
                   {task.requirementItems ? (
                     <ul className="space-y-2">
                       {task.requirementItems.map((item) => (
-                        <li
-                          key={item.id}
+                        <li 
+                          key={item.id} 
                           className={`p-2 rounded ${
-                            item.status === 'approved'
-                              ? 'border-l-4 border-green-500 pl-2 bg-green-50'
-                              : ''
+                            item.status === 'approved' ? 'border-l-4 border-green-500 pl-2 bg-green-50' : ''
                           }`}
                         >
                           {item.content}
                           {item.status === 'approved' && (
-                            <span className="ml-2 text-green-600 text-xs">(Approved)</span>
+                            <span className="ml-2 text-green-600 text-xs">
+                              (Approved)
+                            </span>
                           )}
                         </li>
                       ))}
@@ -2583,15 +2373,9 @@ function TaskCard({
 
           {/* Technical Plan - With Approval Status */}
           {/* Show new structured items if they exist, otherwise show the legacy format */}
-          {((task.technicalPlanItems && task.technicalPlanItems.length > 0) ||
-            task.technicalPlan ||
-            onUpdateTask) && (
+          {((task.technicalPlanItems && task.technicalPlanItems.length > 0) || task.technicalPlan || onUpdateTask) && (
             <div className="mt-4 text-base" onClick={(e) => e.stopPropagation()}>
-              {onUpdateTask &&
-              onApproveTechnicalPlanItem &&
-              onVetoTechnicalPlanItem &&
-              onUpdateTechnicalPlanItems &&
-              task.technicalPlanItems ? (
+              {onUpdateTask && onApproveTechnicalPlanItem && onVetoTechnicalPlanItem && onUpdateTechnicalPlanItems && task.technicalPlanItems ? (
                 <ApprovalItemList
                   label="Technical Plan"
                   items={task.technicalPlanItems}
@@ -2630,17 +2414,17 @@ function TaskCard({
                   {task.technicalPlanItems ? (
                     <ol className="space-y-2 pl-5 list-decimal">
                       {task.technicalPlanItems.map((item) => (
-                        <li
-                          key={item.id}
+                        <li 
+                          key={item.id} 
                           className={`p-2 rounded ${
-                            item.status === 'approved'
-                              ? 'border-l-4 border-green-500 pl-2 bg-green-50'
-                              : ''
+                            item.status === 'approved' ? 'border-l-4 border-green-500 pl-2 bg-green-50' : ''
                           }`}
                         >
                           {item.content}
                           {item.status === 'approved' && (
-                            <span className="ml-2 text-green-600 text-xs">(Approved)</span>
+                            <span className="ml-2 text-green-600 text-xs">
+                              (Approved)
+                            </span>
                           )}
                         </li>
                       ))}
@@ -2655,15 +2439,9 @@ function TaskCard({
 
           {/* Next Steps - With Approval Status */}
           {/* Show new structured items if they exist, otherwise show the legacy format */}
-          {((task.nextStepItems && task.nextStepItems.length > 0) ||
-            (task.nextSteps && task.nextSteps.length > 0) ||
-            onUpdateTask) && (
+          {((task.nextStepItems && task.nextStepItems.length > 0) || (task.nextSteps && task.nextSteps.length > 0) || onUpdateTask) && (
             <div className="mt-4 text-base" onClick={(e) => e.stopPropagation()}>
-              {onUpdateTask &&
-              onApproveNextStepItem &&
-              onVetoNextStepItem &&
-              onUpdateNextStepItems &&
-              task.nextStepItems ? (
+              {onUpdateTask && onApproveNextStepItem && onVetoNextStepItem && onUpdateNextStepItems && task.nextStepItems ? (
                 <ApprovalItemList
                   label="Next Steps"
                   items={task.nextStepItems}
@@ -2697,20 +2475,18 @@ function TaskCard({
                         "Review implementation and provide feedback with 'Give Feedback' form",
                         "Address feedback with agent using 'Address Feedback' button"
                       ];
-
+                      
                       // Filter out any agent-related steps that might already exist to avoid duplicates
-                      const filteredNewItems = newItems.filter(
-                        (item) =>
-                          !agentNextSteps.some(
-                            (agentStep) =>
-                              item.toLowerCase().includes('agent') ||
-                              item.toLowerCase().includes('feedback')
-                          )
+                      const filteredNewItems = newItems.filter(item => 
+                        !agentNextSteps.some(agentStep => 
+                          item.toLowerCase().includes('agent') || 
+                          item.toLowerCase().includes('feedback')
+                        )
                       );
-
+                      
                       // Combine filtered items with agent next steps
                       const combinedItems = [...filteredNewItems, ...agentNextSteps];
-
+                      
                       onUpdateTask(task.id, task.project, {
                         nextSteps: combinedItems
                       });
@@ -2723,17 +2499,17 @@ function TaskCard({
                   {task.nextStepItems ? (
                     <ul className="space-y-2 pl-5 list-disc">
                       {task.nextStepItems.map((item) => (
-                        <li
-                          key={item.id}
+                        <li 
+                          key={item.id} 
                           className={`p-2 rounded ${
-                            item.status === 'approved'
-                              ? 'border-l-4 border-green-500 pl-2 bg-green-50'
-                              : ''
+                            item.status === 'approved' ? 'border-l-4 border-green-500 pl-2 bg-green-50' : ''
                           }`}
                         >
                           {item.content}
                           {item.status === 'approved' && (
-                            <span className="ml-2 text-green-600 text-xs">(Approved)</span>
+                            <span className="ml-2 text-green-600 text-xs">
+                              (Approved)
+                            </span>
                           )}
                         </li>
                       ))}
@@ -2767,18 +2543,9 @@ function TaskCard({
           {/* Creation details - all in relative time */}
           <div className="mt-4 text-xs text-gray-500">
             <div className="flex items-center mb-1">
-              <p className="mr-2">
-                Task ID:{' '}
-                <Link
-                  href={{ pathname: '/task/[id]', query: { id: task.id } }}
-                  className="text-primary-500 hover:underline"
-                  title="View task details"
-                >
-                  {task.id}
-                </Link>
-              </p>
-
-              <button
+              <p className="mr-2">Task ID: <Link href={{ pathname: '/task/[id]', query: { id: task.id } }} className="text-primary-500 hover:underline" title="View task details">{task.id}</Link></p>
+              
+              <button 
                 onClick={copyTaskId}
                 className="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded hover:bg-gray-100"
                 title="Copy task ID"
@@ -2786,8 +2553,8 @@ function TaskCard({
                 <FaCopy size={12} />
                 {showIdCopied && <span className="ml-1 text-green-600">Copied!</span>}
               </button>
-
-              <button
+              
+              <button 
                 onClick={copyTaskUrl}
                 className="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded hover:bg-gray-100 ml-1"
                 title="Copy task URL"
@@ -2818,10 +2585,8 @@ export default React.memo(TaskCard, (prevProps, nextProps) => {
     prevProps.task.userImpact === nextProps.task.userImpact &&
     prevProps.task.initiative === nextProps.task.initiative &&
     // Check item collections for changes
-    JSON.stringify(prevProps.task.requirementItems) ===
-      JSON.stringify(nextProps.task.requirementItems) &&
-    JSON.stringify(prevProps.task.technicalPlanItems) ===
-      JSON.stringify(nextProps.task.technicalPlanItems) &&
+    JSON.stringify(prevProps.task.requirementItems) === JSON.stringify(nextProps.task.requirementItems) &&
+    JSON.stringify(prevProps.task.technicalPlanItems) === JSON.stringify(nextProps.task.technicalPlanItems) &&
     JSON.stringify(prevProps.task.nextStepItems) === JSON.stringify(nextProps.task.nextStepItems) &&
     // Compare handlers
     prevProps.onStatusChange === nextProps.onStatusChange &&

@@ -146,6 +146,19 @@ export async function createTask(taskData: TaskFormData) {
       createdTask.updatedAt = createdTask.updatedAt || now;
     }
     
+    // Add URL for easy access by AI agents
+    if (createdTask && createdTask.id && typeof window !== 'undefined') {
+      const baseUrl = window.location.origin;
+      createdTask.url = `${baseUrl}/task/${createdTask.id}`;
+      
+      // Update the task with the URL
+      try {
+        await apiClient.put(`/api/developer/tasks/${createdTask.id}`, { url: createdTask.url });
+      } catch (urlError) {
+        console.warn('Failed to update task with URL, but continuing:', urlError);
+      }
+    }
+    
     return createdTask;
   } catch (error: any) {
     console.error('Error creating task:', error);

@@ -234,7 +234,7 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
                 <div 
                   className={`flex-1 p-2 rounded hover:bg-gray-50 cursor-pointer whitespace-pre-wrap break-words ${
                     item.status === 'approved' ? 'text-gray-800' : 'text-gray-600'
-                  }`}
+                  } ${selectedItemId === item.id ? 'bg-gray-100' : ''}`}
                   onClick={handleSelectItem(item.id)}
                   onDoubleClick={handleEdit(index)}
                 >
@@ -251,17 +251,17 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
                     <>
                       <button
                         onClick={handleApprove(item.id)}
-                        className="p-1 text-green-600 hover:text-green-800 bg-white border border-green-500 rounded-md hover:bg-green-50 transition-colors"
+                        className="btn-outline-primary"
                         title="Approve item"
                       >
-                        <FaCheckCircle size={14} />
+                        Approve
                       </button>
                       <button
                         onClick={handleVeto(item.id)}
-                        className="p-1 ml-1 text-red-600 hover:text-red-800 bg-white border border-gray-300 rounded-md hover:bg-red-50 transition-colors"
+                        className="ml-1 btn-outline-danger"
                         title="Veto (remove) item"
                       >
-                        <FaBan size={14} />
+                        Veto
                       </button>
                     </>
                   )}
