@@ -5,9 +5,13 @@ A comprehensive task management system aligned with the Getting Things Done (GTD
 ## Project Status
 
 - **Active Development**: This project is currently under active development
-- **Tasks View**: Fully functional with inline editing and optimistic updates
+- **Tasks View**: Fully functional with inline editing, optimistic updates, and item approval workflow
 - **Initiatives View**: Functional but being updated to match Tasks UI pattern
 - **Documentation**: Currently only the home page is available. Sub-pages have been temporarily disabled due to routing issues and will be reimplemented in a future update.
+
+## Repository Setup
+
+This repository is configured to sync with both personal and organization remotes automatically through git hooks. When pushing to main, changes are propagated to both repositories.
 
 ## Task Status Workflow
 
