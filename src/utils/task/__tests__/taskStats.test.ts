@@ -95,10 +95,10 @@ describe('taskStats utilities', () => {
       const mockDate = new Date('2025-01-15T12:00:00Z');
       global.Date = class extends Date {
         constructor(date) {
-          if (date) {
-            return super(date);
+          super(date);
+          if (!date) {
+            return mockDate;
           }
-          return mockDate;
         }
         static now() {
           return mockDate.getTime();
@@ -124,10 +124,10 @@ describe('taskStats utilities', () => {
       const mockDate = new Date('2025-01-15T12:00:00Z');
       global.Date = class extends Date {
         constructor(date) {
-          if (date) {
-            return super(date);
+          super(date);
+          if (!date) {
+            return mockDate;
           }
-          return mockDate;
         }
         static now() {
           return mockDate.getTime();

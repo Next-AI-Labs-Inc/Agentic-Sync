@@ -47,7 +47,7 @@ export const sortTasks = (
       });
       break;
     
-    case SORT_OPTIONS.PRIORITY:
+    case SORT_OPTIONS.PRIORITY: {
       // Sort by priority (high > medium > low)
       const priorityValues = { high: 3, medium: 2, low: 1 };
       sortedTasks.sort((a, b) => {
@@ -58,8 +58,9 @@ export const sortTasks = (
           : aPriority - bPriority;
       });
       break;
+    }
     
-    case SORT_OPTIONS.STATUS:
+    case SORT_OPTIONS.STATUS: {
       // Order by status progression (earlier statuses first)
       const statusOrder = [
         'inbox', 'brainstorm', 'proposed', 'backlog', 'maybe',
@@ -73,6 +74,7 @@ export const sortTasks = (
           : aIndex - bIndex;
       });
       break;
+    }
   }
 
   return sortedTasks;
