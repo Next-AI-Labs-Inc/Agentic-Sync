@@ -89,10 +89,8 @@ export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps
       newErrors.project = 'Project is required';
     }
     
-    // Require verification steps
-    if (!formData.verificationSteps || formData.verificationSteps.trim().length === 0) {
-      newErrors.verificationSteps = 'Verification steps are required';
-    }
+    // Verification steps are not required
+    // Removed requirement for verification steps to match API
     
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);

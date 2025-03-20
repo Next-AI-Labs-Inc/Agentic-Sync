@@ -31,6 +31,7 @@ export interface Task {
   branch?: string;
   tags?: string[];
   verificationSteps?: string[];
+  verificationStepItems?: ItemWithStatus[];
   files?: string[];
   dependencies?: number[];
   nextSteps?: string[]; // Legacy format - simple array of strings

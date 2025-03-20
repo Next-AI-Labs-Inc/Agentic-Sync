@@ -42,7 +42,7 @@
  */
 export const FeatureFlags = {
   // Task Card Features
-  ApproveAndVetoButtonsOperational: false,
+  ApproveAndVetoButtonsOperational: true,
 
   // Add other feature flags here as needed
 };

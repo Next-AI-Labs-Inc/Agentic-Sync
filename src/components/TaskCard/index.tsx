@@ -184,10 +184,17 @@ function TaskCard({
             />
           )}
           
-          {/* Verification steps section */}
+          {/* Verification steps section with approval controls */}
           <TaskVerificationSteps
             task={task}
             isExpanded={expanded}
+            onApproveItem={onApproveRequirementItem} 
+            onVetoItem={onVetoRequirementItem}
+            onUpdateItems={(taskId, items) => {
+              if (onUpdateTask) {
+                onUpdateTask(taskId, task.project, { verificationStepItems: items });
+              }
+            }}
           />
         </>
       )}
