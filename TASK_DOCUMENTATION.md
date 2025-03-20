@@ -15,7 +15,13 @@ When creating or updating tasks and initiatives, always focus on user impact and
    - Include technical specifications, architecture considerations, and implementation notes
    - This information helps AI agents or developers continue work on the task
 
-3. **Initiative Titles**: Should clearly communicate strategic purpose
+3. **Verification Steps**: Always include specific steps to verify the task has been completed correctly
+   - These steps should be clear enough for anyone to follow and confirm the work
+   - Each step should be a concrete action with an expected result
+   - Include edge cases or specific scenarios to test
+   - Format as a numbered list of individual steps
+
+4. **Initiative Titles**: Should clearly communicate strategic purpose
    - Initiatives group related tasks toward a particular aim
    - Titles should reflect the business outcome, not technical implementation
 

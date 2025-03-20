@@ -7,6 +7,7 @@ import TaskActions from './TaskActions';
 import TaskRequirements from './TaskRequirements';
 import TaskTechnicalPlan from './TaskTechnicalPlan';
 import TaskNextSteps from './TaskNextSteps';
+import TaskVerificationSteps from './TaskVerificationSteps';
 import AgentIntegration from './AgentIntegration';
 import ItemSection from './ItemSection';
 import PopoverComponent from './PopoverComponent';
@@ -22,6 +23,7 @@ export {
   TaskRequirements,
   TaskTechnicalPlan,
   TaskNextSteps,
+  TaskVerificationSteps,
   AgentIntegration,
   PopoverComponent
 };
@@ -181,6 +183,12 @@ function TaskCard({
               onUpdateNextStepItems={onUpdateNextStepItems}
             />
           )}
+          
+          {/* Verification steps section */}
+          <TaskVerificationSteps
+            task={task}
+            isExpanded={expanded}
+          />
         </>
       )}
 

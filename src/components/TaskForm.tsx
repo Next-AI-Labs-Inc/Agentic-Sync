@@ -48,6 +48,7 @@ export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps
   const [errors, setErrors] = useState<{
     title?: string;
     project?: string;
+    verificationSteps?: string;
   }>({});
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,7 +58,7 @@ export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps
     setFormData(prev => ({ ...prev, [name]: value }));
     
     // Clear validation errors as user types
-    if (name === 'title' || name === 'project') {
+    if (name === 'title' || name === 'project' || name === 'verificationSteps') {
       setErrors(prev => ({ ...prev, [name]: undefined }));
     }
   };
@@ -76,6 +77,7 @@ export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps
     const newErrors: {
       title?: string;
       project?: string;
+      verificationSteps?: string;
     } = {};
     
     if (!formData.title || formData.title.length === 0) {
@@ -85,6 +87,11 @@ export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps
     // Only require project if it's not 'none'
     if (!formData.project && formData.project !== 'none') {
       newErrors.project = 'Project is required';
+    }
+    
+    // Require verification steps
+    if (!formData.verificationSteps || formData.verificationSteps.trim().length === 0) {
+      newErrors.verificationSteps = 'Verification steps are required';
     }
     
     if (Object.keys(newErrors).length > 0) {
@@ -363,16 +370,22 @@ export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps
         {/* Verification Steps */}
         <div className="mb-4">
           <label htmlFor="verificationSteps" className="form-label">
-            Verification Steps
+            Verification Steps <span className="text-red-500">*</span>
           </label>
           <textarea
             id="verificationSteps"
             name="verificationSteps"
             value={formData.verificationSteps}
             onChange={handleChange}
-            className="form-textarea h-24"
-            placeholder="Enter steps to verify the task (one per line)"
+            className={`form-textarea h-24 ${errors.verificationSteps ? 'border-red-500' : ''}`}
+            placeholder="List the steps to verify this task has been implemented correctly (one step per line)"
           />
+          <div className="mt-1 text-xs text-gray-500">
+            Always include verification steps - they're essential for ensuring the task can be properly tested
+          </div>
+          {errors.verificationSteps && (
+            <p className="mt-1 text-sm text-red-500">{errors.verificationSteps}</p>
+          )}
         </div>
         
         {/* Next Steps */}
