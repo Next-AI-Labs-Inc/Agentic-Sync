@@ -2486,7 +2486,7 @@ function TaskCard({
 
           {/* Verification Steps - Editable Item List */}
           {((task.verificationSteps && task.verificationSteps.length > 0) || onUpdateTask) && (
-            <div className="mt-4 text-base" onClick={(e) => e.stopPropagation()}>
+            <div className="mt-4 text-base block" style={{display: 'block'}} onClick={(e) => e.stopPropagation()}>
               {onUpdateTask ? (
                 <EditableItemList
                   label="Verification Steps"
@@ -2506,8 +2506,8 @@ function TaskCard({
                   }}
                 />
               ) : (
-                <div className="text-gray-600">
-                  <h4 className="font-medium text-gray-700 mb-1">Verification Steps</h4>
+                <div className="text-gray-600 block" style={{display: 'block'}}>
+                  <h4 className="font-medium text-gray-700 mb-1 block" style={{display: 'block'}}>Verification Steps</h4>
                   <ul className="list-disc pl-5 text-gray-600 block">
                     {task.verificationSteps?.map((step, index) => (
                       <li key={index} className="block">{step}</li>
@@ -2523,7 +2523,7 @@ function TaskCard({
           {((task.requirementItems && task.requirementItems.length > 0) ||
             task.requirements ||
             onUpdateTask) && (
-            <div className="mt-4 text-base" onClick={(e) => e.stopPropagation()}>
+            <div className="mt-4 text-base block" style={{display: 'block'}} onClick={(e) => e.stopPropagation()}>
               {onUpdateTask &&
               onApproveRequirementItem &&
               onVetoRequirementItem &&
@@ -2552,19 +2552,24 @@ function TaskCard({
                 // Legacy format - for backward compatibility
                 <EditableItemList
                   label="Requirements"
-                  items={parseListString(task.requirements)}
-                  taskId={task.id}
+                  items={parseListString(task.requirements).map(content => ({
+                    id: `req-${Math.random().toString(36).substr(2, 9)}`,
+                    content,
+                    status: 'proposed',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                  }))}
                   onUpdate={(newItems) => {
                     if (onUpdateTask) {
                       onUpdateTask(task.id, task.project, {
-                        requirements: formatBulletedList(newItems)
+                        requirements: formatBulletedList(newItems.map(item => item.content))
                       });
                     }
                   }}
                 />
               ) : (
-                <div className="text-gray-600">
-                  <h4 className="font-medium text-gray-700 mb-1">Requirements</h4>
+                <div className="text-gray-600 block" style={{display: 'block'}}>
+                  <h4 className="font-medium text-gray-700 mb-1 block" style={{display: 'block'}}>Requirements</h4>
                   {task.requirementItems ? (
                     <ul className="space-y-2 block">
                       {task.requirementItems.map((item) => (
@@ -2598,7 +2603,7 @@ function TaskCard({
           {((task.technicalPlanItems && task.technicalPlanItems.length > 0) ||
             task.technicalPlan ||
             onUpdateTask) && (
-            <div className="mt-4 text-base" onClick={(e) => e.stopPropagation()}>
+            <div className="mt-4 text-base block" style={{display: 'block'}} onClick={(e) => e.stopPropagation()}>
               {onUpdateTask &&
               onApproveTechnicalPlanItem &&
               onVetoTechnicalPlanItem &&
@@ -2627,18 +2632,24 @@ function TaskCard({
                 // Legacy format - for backward compatibility
                 <EditableItemList
                   label="Technical Plan"
-                  items={parseListString(task.technicalPlan)}
+                  items={parseListString(task.technicalPlan).map(content => ({
+                    id: `tech-${Math.random().toString(36).substr(2, 9)}`,
+                    content,
+                    status: 'proposed',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                  }))}
                   onUpdate={(newItems) => {
                     if (onUpdateTask) {
                       onUpdateTask(task.id, task.project, {
-                        technicalPlan: formatNumberedList(newItems)
+                        technicalPlan: formatNumberedList(newItems.map(item => item.content))
                       });
                     }
                   }}
                 />
               ) : (
-                <div className="text-gray-600">
-                  <h4 className="font-medium text-gray-700 mb-1">Technical Plan</h4>
+                <div className="text-gray-600 block" style={{display: 'block'}}>
+                  <h4 className="font-medium text-gray-700 mb-1 block" style={{display: 'block'}}>Technical Plan</h4>
                   {task.technicalPlanItems ? (
                     <ol className="space-y-2 pl-5 list-decimal block">
                       {task.technicalPlanItems.map((item) => (
@@ -2672,7 +2683,7 @@ function TaskCard({
           {((task.nextStepItems && task.nextStepItems.length > 0) ||
             (task.nextSteps && task.nextSteps.length > 0) ||
             onUpdateTask) && (
-            <div className="mt-4 text-base" onClick={(e) => e.stopPropagation()}>
+            <div className="mt-4 text-base block" style={{display: 'block'}} onClick={(e) => e.stopPropagation()}>
               {onUpdateTask &&
               onApproveNextStepItem &&
               onVetoNextStepItem &&
@@ -2701,9 +2712,18 @@ function TaskCard({
                 // Legacy format - for backward compatibility
                 <EditableItemList
                   label="Next Steps"
-                  items={task.nextSteps || []}
+                  items={(task.nextSteps || []).map(content => ({
+                    id: `next-${Math.random().toString(36).substr(2, 9)}`,
+                    content,
+                    status: 'proposed',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                  }))}
                   onUpdate={(newItems) => {
                     if (onUpdateTask) {
+                      // Convert ItemWithStatus objects back to strings
+                      const stringItems = newItems.map(item => item.content);
+                      
                       // Add the agent integration next steps if they don't already exist
                       const agentNextSteps = [
                         "Launch agent with 'Deploy Agent' button to implement feature",
@@ -2713,7 +2733,7 @@ function TaskCard({
                       ];
 
                       // Filter out any agent-related steps that might already exist to avoid duplicates
-                      const filteredNewItems = newItems.filter(
+                      const filteredNewItems = stringItems.filter(
                         (item) =>
                           !agentNextSteps.some(
                             (agentStep) =>
@@ -2732,8 +2752,8 @@ function TaskCard({
                   }}
                 />
               ) : (
-                <div className="text-gray-600">
-                  <h4 className="font-medium text-gray-700 mb-1">Next Steps</h4>
+                <div className="text-gray-600 block" style={{display: 'block'}}>
+                  <h4 className="font-medium text-gray-700 mb-1 block" style={{display: 'block'}}>Next Steps</h4>
                   {task.nextStepItems ? (
                     <ul className="space-y-2 pl-5 list-disc block">
                       {task.nextStepItems.map((item) => (
@@ -2766,8 +2786,8 @@ function TaskCard({
 
           {/* Files */}
           {task.files && task.files.length > 0 && (
-            <div className="mt-4 text-base">
-              <h4 className="font-medium text-gray-700 mb-1">Files</h4>
+            <div className="mt-4 text-base block" style={{display: 'block'}}>
+              <h4 className="font-medium text-gray-700 mb-1 block" style={{display: 'block'}}>Files</h4>
               <ul className="list-disc pl-5 text-gray-600 block">
                 {task.files.map((file, index) => (
                   <li key={index} className="truncate block">
