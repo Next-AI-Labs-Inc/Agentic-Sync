@@ -47,6 +47,7 @@ interface TaskContextValue {
   deleteTask: (taskId: string, project: string) => Promise<void>;
   toggleTaskStar: (taskId: string, project: string) => Promise<void>;
   markTaskTested: (taskId: string, project: string) => Promise<void>;
+  markTaskActionable: (taskId: string, project: string) => Promise<void>;
   updateTaskDate: (taskId: string, project: string, newDate: string) => Promise<void>;
   
   // Item operations
@@ -121,6 +122,7 @@ export function TaskProvider({
     deleteTask,
     toggleTaskStar,
     markTaskTested,
+    markTaskActionable,
     updateTaskDate,
     approveRequirementItem,
     vetoRequirementItem,
@@ -175,6 +177,7 @@ export function TaskProvider({
     deleteTask,
     toggleTaskStar,
     markTaskTested,
+    markTaskActionable,
     updateTaskDate,
     
     // Item management

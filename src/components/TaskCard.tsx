@@ -2490,11 +2490,17 @@ function TaskCard({
               {onUpdateTask ? (
                 <EditableItemList
                   label="Verification Steps"
-                  items={task.verificationSteps || []}
+                  items={task.verificationSteps?.map(step => ({
+                    id: `step-${Math.random().toString(36).substr(2, 9)}`,
+                    content: step,
+                    status: 'proposed',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                  })) || []}
                   onUpdate={(newItems) => {
                     if (onUpdateTask) {
                       onUpdateTask(task.id, task.project, {
-                        verificationSteps: newItems
+                        verificationSteps: newItems.map(item => item.content)
                       });
                     }
                   }}
@@ -2502,9 +2508,9 @@ function TaskCard({
               ) : (
                 <div className="text-gray-600">
                   <h4 className="font-medium text-gray-700 mb-1">Verification Steps</h4>
-                  <ul className="list-disc pl-5 text-gray-600">
+                  <ul className="list-disc pl-5 text-gray-600 block">
                     {task.verificationSteps?.map((step, index) => (
-                      <li key={index}>{step}</li>
+                      <li key={index} className="block">{step}</li>
                     ))}
                   </ul>
                 </div>
@@ -2560,11 +2566,11 @@ function TaskCard({
                 <div className="text-gray-600">
                   <h4 className="font-medium text-gray-700 mb-1">Requirements</h4>
                   {task.requirementItems ? (
-                    <ul className="space-y-2">
+                    <ul className="space-y-2 block">
                       {task.requirementItems.map((item) => (
                         <li
                           key={item.id}
-                          className={`p-2 rounded ${
+                          className={`p-2 rounded block ${
                             item.status === 'approved'
                               ? 'border-l-4 border-green-500 pl-2 bg-green-50'
                               : ''
@@ -2578,7 +2584,9 @@ function TaskCard({
                       ))}
                     </ul>
                   ) : (
-                    <ReactMarkdown>{task.requirements}</ReactMarkdown>
+                    <div className="block">
+                      <ReactMarkdown>{task.requirements}</ReactMarkdown>
+                    </div>
                   )}
                 </div>
               )}
@@ -2632,11 +2640,11 @@ function TaskCard({
                 <div className="text-gray-600">
                   <h4 className="font-medium text-gray-700 mb-1">Technical Plan</h4>
                   {task.technicalPlanItems ? (
-                    <ol className="space-y-2 pl-5 list-decimal">
+                    <ol className="space-y-2 pl-5 list-decimal block">
                       {task.technicalPlanItems.map((item) => (
                         <li
                           key={item.id}
-                          className={`p-2 rounded ${
+                          className={`p-2 rounded block ${
                             item.status === 'approved'
                               ? 'border-l-4 border-green-500 pl-2 bg-green-50'
                               : ''
@@ -2650,7 +2658,9 @@ function TaskCard({
                       ))}
                     </ol>
                   ) : (
-                    <ReactMarkdown>{task.technicalPlan}</ReactMarkdown>
+                    <div className="block">
+                      <ReactMarkdown>{task.technicalPlan}</ReactMarkdown>
+                    </div>
                   )}
                 </div>
               )}
@@ -2725,11 +2735,11 @@ function TaskCard({
                 <div className="text-gray-600">
                   <h4 className="font-medium text-gray-700 mb-1">Next Steps</h4>
                   {task.nextStepItems ? (
-                    <ul className="space-y-2 pl-5 list-disc">
+                    <ul className="space-y-2 pl-5 list-disc block">
                       {task.nextStepItems.map((item) => (
                         <li
                           key={item.id}
-                          className={`p-2 rounded ${
+                          className={`p-2 rounded block ${
                             item.status === 'approved'
                               ? 'border-l-4 border-green-500 pl-2 bg-green-50'
                               : ''
@@ -2743,9 +2753,9 @@ function TaskCard({
                       ))}
                     </ul>
                   ) : (
-                    <ul className="list-disc pl-5 text-gray-600">
+                    <ul className="list-disc pl-5 text-gray-600 block">
                       {task.nextSteps?.map((step, index) => (
-                        <li key={index}>{step}</li>
+                        <li key={index} className="block">{step}</li>
                       ))}
                     </ul>
                   )}
@@ -2758,9 +2768,9 @@ function TaskCard({
           {task.files && task.files.length > 0 && (
             <div className="mt-4 text-base">
               <h4 className="font-medium text-gray-700 mb-1">Files</h4>
-              <ul className="list-disc pl-5 text-gray-600">
+              <ul className="list-disc pl-5 text-gray-600 block">
                 {task.files.map((file, index) => (
-                  <li key={index} className="truncate">
+                  <li key={index} className="truncate block">
                     {file}
                   </li>
                 ))}

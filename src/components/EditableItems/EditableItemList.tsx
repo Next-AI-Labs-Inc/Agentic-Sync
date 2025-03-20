@@ -360,7 +360,7 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
       </ul>
       
       {/* Help text */}
-      <div className="mt-2 text-xs text-gray-500">
+      <div className="mt-2 text-xs text-gray-500 block">
         <p>• Single click to select an item</p>
         <p>• Double click to edit an item</p>
         <p>• Press Ctrl+Enter to save while editing</p>
