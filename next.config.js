@@ -36,7 +36,7 @@ const nextConfig = {
     
     return config;
   },
-  // Use environment variable to determine if we're in Tauri build mode
+  // Use environment variables to determine if we're in Tauri build mode or Vercel production
   ...(process.env.TAURI_BUILD === 'true'
     ? {
         output: 'export', // Static export for Tauri
@@ -46,9 +46,13 @@ const nextConfig = {
         }
       }
     : {
-        // For development with API routes
+        // For development with API routes or Vercel deployment
         images: {
-          domains: ['localhost'],
+          domains: ['localhost', 'api.ixcoach.com'],
+        },
+        env: {
+          // Make sure Vercel knows when it's in production
+          VERCEL_ENV: process.env.VERCEL_ENV || 'development'
         }
       }
   )

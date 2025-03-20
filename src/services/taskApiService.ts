@@ -4,13 +4,16 @@ import { Task, TaskFormData, Initiative, SystemPrompt, AgentOptions } from '@/ty
 // Task API configuration
 // For Tauri production builds, use the production API URL
 const isTauriBuild = process.env.TAURI_BUILD === 'true';
+const isVercelProduction = process.env.VERCEL_ENV === 'production';
 const PRODUCTION_API_URL = 'https://api.ixcoach.com';
-const API_URL = isTauriBuild ? PRODUCTION_API_URL : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002');
+
+// Use production API URL for both Tauri builds and Vercel production deployments
+const API_URL = (isTauriBuild || isVercelProduction) ? PRODUCTION_API_URL : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002');
 const API_KEY = process.env.NEXT_PUBLIC_TASK_API_KEY || 'dev-api-key';
 
 // Log API configuration
 console.log(`📡 Task API Configuration:
-- Environment: ${isTauriBuild ? 'PRODUCTION (Tauri Build)' : 'DEVELOPMENT'}
+- Environment: ${isTauriBuild ? 'PRODUCTION (Tauri Build)' : isVercelProduction ? 'PRODUCTION (Vercel)' : 'DEVELOPMENT'}
 - API URL: ${API_URL}
 - API Key: ${API_KEY.substring(0, 3)}...`);
 
