@@ -1,3 +1,10 @@
+/**
+ * TaskCard component displays a task with all its details and interactions
+ * 
+ * IMPORTANT: This is the ACTIVE implementation currently used by the application.
+ * Any changes made here will be immediately reflected in the UI.
+ * The modular components in the TaskCard/ directory are for future use.
+ */
 import React, { useState, useRef, useEffect } from 'react';
 import { format, formatDistanceToNow } from 'date-fns';
 import {
@@ -383,6 +390,10 @@ function TaskCard({
   const [editedTitle, setEditedTitle] = useState(task.title);
   const [editedDescription, setEditedDescription] = useState(task.description || '');
   const [editedUserImpact, setEditedUserImpact] = useState(task.userImpact || '');
+  
+  // Markdown content editing states
+  const [isEditingMarkdown, setIsEditingMarkdown] = useState(false);
+  const [editedMarkdown, setEditedMarkdown] = useState(task.markdown || '');
 
   // Copy feedback states
   const [showIdCopied, setShowIdCopied] = useState(false);
@@ -500,6 +511,9 @@ function TaskCard({
       case 'userImpact':
         setIsEditingUserImpact(true);
         break;
+      case 'markdown':
+        setIsEditingMarkdown(true);
+        break;
     }
   };
 
@@ -529,6 +543,10 @@ function TaskCard({
         updates.userImpact = editedUserImpact; // Preserve whitespace
         setIsEditingUserImpact(false);
         break;
+      case 'markdown':
+        updates.markdown = editedMarkdown; // Preserve whitespace
+        setIsEditingMarkdown(false);
+        break;
     }
 
     if (Object.keys(updates).length > 0) {
@@ -557,12 +575,16 @@ function TaskCard({
           setEditedUserImpact(task.userImpact || '');
           setIsEditingUserImpact(false);
           break;
+        case 'markdown':
+          setEditedMarkdown(task.markdown || '');
+          setIsEditingMarkdown(false);
+          break;
       }
       e.preventDefault();
       e.stopPropagation();
     } else if (e.key === 'Enter' && !e.shiftKey) {
       // Submit on Enter but not with Shift (for multiline text areas)
-      if (field !== 'description' && field !== 'userImpact') {
+      if (field !== 'description' && field !== 'userImpact' && field !== 'markdown') {
         handleInlineSubmit(field)(e as unknown as React.FormEvent);
       }
     }
@@ -1993,17 +2015,17 @@ function TaskCard({
         onClick={(e) => {
           // Skip if expand button is hidden
           if (hideExpand) return;
-
-          // Allow toggling expanded state when clicking the card,
-          // unless it's inside an interactive element
-          if (
+          
+          // Only expand the card if it's not already expanded
+          // This prevents clicking anywhere on the card from collapsing it
+          if (!expanded && (
             e.target === e.currentTarget ||
             (e.target instanceof HTMLElement &&
               !e.target.closest('.editable-item') &&
               !e.target.closest('button') &&
               !e.target.closest('input') &&
               !e.target.closest('textarea'))
-          ) {
+          )) {
             handleCardClick(e);
           }
         }}
@@ -2200,7 +2222,7 @@ function TaskCard({
             )}
           </div>
 
-          {/* User Impact (always shown in collapsed view) or Description */}
+          {/* User Impact 2 (always shown in collapsed view) or Description */}
           {task.userImpact || task.description ? (
             <>
               {/* Show userImpact in collapsed view when available */}
@@ -2406,7 +2428,7 @@ function TaskCard({
           {/* User Impact (when expanded and it exists) */}
           {(task.userImpact || isEditingUserImpact) && (
             <div className="mt-4 text-base">
-              <h4 className="font-medium text-gray-700 mb-1">User Impact</h4>
+              <h4 className="font-medium text-gray-700 mb-1">User Impact 2</h4>
               {isEditingUserImpact ? (
                 <div onClick={(e) => e.stopPropagation()} className="w-full">
                   <textarea
