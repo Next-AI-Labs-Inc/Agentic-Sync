@@ -3,6 +3,7 @@ import TaskCardHeader from './TaskCardHeader';
 import TaskStatusBadge from './TaskStatusBadge';
 import TaskMetadata from './TaskMetadata';
 import TaskContent from './TaskContent';
+import TaskMarkdown from './TaskMarkdown';
 import TaskActions from './TaskActions';
 import TaskRequirements from './TaskRequirements';
 import TaskTechnicalPlan from './TaskTechnicalPlan';
@@ -19,6 +20,7 @@ export {
   TaskStatusBadge,
   TaskMetadata,
   TaskContent,
+  TaskMarkdown,
   TaskActions,
   TaskRequirements,
   TaskTechnicalPlan,
@@ -60,6 +62,15 @@ export interface TaskCardProps {
 /**
  * TaskCard component displays a task with all its details and interactions
  * This is a refactored version that uses smaller, focused sub-components
+ * 
+ * IMPORTANT: These modular components are not currently being used by the application.
+ * The main TaskCard.tsx file in the parent directory is being used instead.
+ * Any changes made here will not be reflected in the UI until the application
+ * is migrated to use these modular components.
+ * 
+ * When implementing new features, make sure to add them to both places:
+ * 1. Here in the modular component structure (for future use)
+ * 2. In the main TaskCard.tsx file in the parent directory (for current use)
  */
 function TaskCard({
   task,
@@ -154,6 +165,13 @@ function TaskCard({
       {/* Only show detailed content in expanded state */}
       {expanded && (
         <>
+          {/* Markdown content */}
+          <TaskMarkdown
+            task={task}
+            onUpdateTask={onUpdateTask}
+            isExpanded={expanded}
+          />
+
           {/* Requirements section with approval controls */}
           {(task.requirements || task.requirementItems?.length > 0 || onUpdateRequirementItems) && (
             <TaskRequirements

@@ -17,6 +17,11 @@ export interface TaskContentProps {
 /**
  * Component for displaying and editing task content
  * Includes description, user impact, etc., with markdown support
+ * 
+ * IMPORTANT: This modular component is not currently being used by the application.
+ * The main TaskCard.tsx file in the parent directory is being used instead.
+ * Any changes made here will not be reflected in the UI until the application
+ * is migrated to use these modular components.
  */
 function TaskContent({
   task,
@@ -156,7 +161,7 @@ function TaskContent({
             <div className="user-impact mb-3">
               {isEditing.userImpact ? (
                 <div onClick={e => e.stopPropagation()}>
-                  <h4 className="text-sm font-semibold mb-1">User Impact</h4>
+                  <h4 className="text-sm font-semibold mb-1">User Impact 2</h4>
                   <textarea
                     value={editValues.userImpact}
                     onChange={e => handleChange('userImpact', e.target.value)}
@@ -187,7 +192,7 @@ function TaskContent({
                   }) : undefined}
                 >
                   <h4 className="text-sm font-semibold mb-1 flex items-center">
-                    User Impact
+                    User Impact 2
                     {onUpdateTask && (
                       <button
                         className="ml-2 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"

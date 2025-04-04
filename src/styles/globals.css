@@ -76,6 +76,59 @@
 }
 
 @layer components {
+  /* Add styling for the prose class to make markdown look good */
+  .prose {
+    @apply text-gray-700 max-w-none;
+  }
+
+  .prose h1 {
+    @apply text-2xl font-bold mb-4 mt-6;
+  }
+
+  .prose h2 {
+    @apply text-xl font-bold mb-3 mt-5;
+  }
+
+  .prose h3 {
+    @apply text-lg font-bold mb-2 mt-4;
+  }
+
+  .prose p {
+    @apply mb-4;
+  }
+
+  .prose ul {
+    @apply list-disc pl-6 mb-4;
+  }
+
+  .prose ol {
+    @apply list-decimal pl-6 mb-4;
+  }
+
+  .prose li {
+    @apply mb-1;
+  }
+
+  .prose code {
+    @apply bg-gray-100 px-1 rounded font-mono text-sm;
+  }
+
+  .prose pre {
+    @apply bg-gray-100 p-3 rounded mb-4 overflow-auto;
+  }
+
+  .prose a {
+    @apply text-blue-600 underline;
+  }
+
+  .prose blockquote {
+    @apply border-l-4 border-gray-300 pl-4 italic my-4;
+  }
+
+  .prose hr {
+    @apply my-6 border-gray-300;
+  }
+
   .btn {
     @apply px-5 py-2 rounded-md transition-all duration-200;
   }

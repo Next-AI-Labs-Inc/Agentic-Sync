@@ -2446,7 +2446,7 @@ function TaskCard({
                   className="text-gray-600 group cursor-pointer whitespace-pre-wrap break-words"
                   onDoubleClick={(e) => onUpdateTask && handleInlineEdit('userImpact')(e)}
                 >
-                  {task.userImpact}
+                  <ReactMarkdown>{task.userImpact || ''}</ReactMarkdown>
                   {onUpdateTask && (
                     <span className="ml-2 text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
                       edit
@@ -2535,6 +2535,42 @@ function TaskCard({
                       <li key={index} className="block">{step}</li>
                     ))}
                   </ul>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Markdown Content (when expanded and it exists) */}
+          {(task.markdown || isEditingMarkdown) && (
+            <div className="mt-4 text-base">
+              <h4 className="font-medium text-gray-700 mb-1">Markdown Content</h4>
+              {isEditingMarkdown ? (
+                <div onClick={(e) => e.stopPropagation()} className="w-full">
+                  <textarea
+                    value={editedMarkdown}
+                    onChange={(e) => setEditedMarkdown(e.target.value)}
+                    onBlur={handleInlineSubmit('markdown')}
+                    onKeyDown={handleInlineKeyDown('markdown')}
+                    className="w-full px-2 py-1 text-base border border-blue-300 rounded font-mono text-sm"
+                    rows={10}
+                    autoFocus
+                  />
+                </div>
+              ) : (
+                <div
+                  className="prose prose-sm max-w-none bg-gray-50 border border-gray-200 p-4 rounded-md group cursor-pointer"
+                  onDoubleClick={(e) => onUpdateTask && handleInlineEdit('markdown')(e)}
+                >
+                  {task.markdown ? (
+                    <ReactMarkdown>{task.markdown}</ReactMarkdown>
+                  ) : (
+                    <p className="text-gray-500 italic">No markdown content available</p>
+                  )}
+                  {onUpdateTask && (
+                    <span className="ml-2 text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                      edit
+                    </span>
+                  )}
                 </div>
               )}
             </div>
