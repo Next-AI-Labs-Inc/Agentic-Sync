@@ -34,8 +34,10 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
             // This is a temporary fallback that should only happen if the API fails completely
             // We want to show any new projects in the DB as they're created
             const fallbackProjects = [
-              { id: 'tasks', name: 'Tasks' },
-              { id: 'task-management', name: 'Task Management' }
+              { id: 'gptcoach2', name: 'GPTCoach2 (IXC)' },
+              { id: 'ixcoach-api', name: 'IXCoach API' },
+              { id: 'ixcoach-landing', name: 'IXCoach Landing' },
+              { id: 'tasks', name: 'Tasks' }
             ];
             setProjects(fallbackProjects);
           }
@@ -49,8 +51,10 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
         // Only use fallback if we have absolutely no projects
         if (projects.length === 0) {
           const fallbackProjects = [
-            { id: 'tasks', name: 'Tasks' },
-            { id: 'task-management', name: 'Task Management' }
+            { id: 'gptcoach2', name: 'GPTCoach2 (IXC)' },
+            { id: 'ixcoach-api', name: 'IXCoach API' },
+            { id: 'ixcoach-landing', name: 'IXCoach Landing' },
+            { id: 'tasks', name: 'Tasks' }
           ];
           setProjects(fallbackProjects);
         }
