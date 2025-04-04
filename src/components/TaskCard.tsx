@@ -2071,7 +2071,7 @@ function TaskCard({
 
               <div className="flex items-center space-x-1">
                 <Link
-                  href={{ pathname: '/task/[id]', query: { id: task.id } }}
+                  href={`/task/${task.id}`}
                   className="btn-icon"
                   title="View task details"
                   onClick={(e) => e.stopPropagation()} // Prevent card expansion
@@ -2154,7 +2154,7 @@ function TaskCard({
             {!task.initiative && (
               <div className="flex items-center space-x-1">
                 <Link
-                  href={{ pathname: '/task/[id]', query: { id: task.id } }}
+                  href={`/task/${task.id}`}
                   className="btn-icon"
                   title="View task details"
                   onClick={(e) => e.stopPropagation()} // Prevent card expansion
@@ -2277,7 +2277,7 @@ function TaskCard({
               )}
               {task?.id ? (
                 <Link
-                  href={{ pathname: '/task/[id]', query: { id: task.id } }}
+                  href={`/task/${task.id}`}
                   onClick={(e) => e.stopPropagation()}
                   className="text-xs text-primary-500 hover:underline"
                   title="View task details"
@@ -2804,7 +2804,7 @@ function TaskCard({
               <p className="mr-2">
                 Task ID:{' '}
                 <Link
-                  href={{ pathname: '/task/[id]', query: { id: task.id } }}
+                  href={`/task/${task.id}`}
                   className="text-primary-500 hover:underline"
                   title="View task details"
                 >
