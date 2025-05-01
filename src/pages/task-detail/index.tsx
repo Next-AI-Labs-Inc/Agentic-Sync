@@ -7,6 +7,11 @@ import TaskCard from '@/components/TaskCard';
 import { Task } from '@/types';
 import { TaskProvider } from '@/contexts/TaskContext';
 
+// Helper function to open task detail (same as in tasks.tsx)
+const openTaskDetail = (taskId: string) => {
+  window.location.href = `/task-detail?id=${taskId}`;
+};
+
 /**
  * Individual task view page
  * This page displays a single task by ID passed as a query parameter

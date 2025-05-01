@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, KeyboardEvent } from 'react';
 import { Project, TaskFormData } from '@/types';
 import { ClickableId } from '@/utils/clickable-id';
-import taskSyncService from '@/services/taskSyncService';
 
 interface TaskFormProps {
   projects: Project[];
@@ -239,19 +238,11 @@ export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps
               onChange={(e) => {
                 const inputValue = e.target.value;
                 if (inputValue) {
-                  // Create a unique project ID and name
+                  // Create a unique project ID 
                   const projectId = `${inputValue.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
-                  const projectName = inputValue;
                   
                   // Set the project ID in the form data
                   setFormData(prev => ({ ...prev, project: projectId }));
-                  
-                  // Emit a project created event to update the projects list
-                  taskSyncService.emitProjectCreated({
-                    id: projectId,
-                    name: projectName,
-                    _isNew: true
-                  });
                 }
               }}
             />

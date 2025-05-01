@@ -10,6 +10,11 @@ import { ClickableId } from "@/utils/clickable-id";
 import { Task } from "@/types";
 // import { withAuth } from '@/utils/withAuth';
 
+// Helper function to open task detail
+const openTaskDetail = (taskId: string) => {
+  window.location.href = `/task-detail?id=${taskId}`;
+};
+
 // CompactTaskItem Component - Shows a single task in one-line format
 const CompactTaskItem = ({ 
   task, 
@@ -78,9 +83,7 @@ const CompactTaskItem = ({
       {/* Task title - takes most of the space */}
       <div 
         className="flex-grow font-medium truncate cursor-pointer" 
-        onClick={() => {
-          window.location.href = `/task-detail?id=${task.id}`;
-        }}
+        onClick={() => openTaskDetail(task.id)}
         title="Open task details"
       >
         {task.title}
@@ -156,7 +159,18 @@ function TasksPage() {
     runManualDedupe,
   } = useTasks();
 
-  const { projects, loading: projectsLoading } = useProjects();
+  const { projects, loading: projectsLoading, updateProjectsFromTasks } = useProjects();
+  
+  // Update project list from task data when tasks change
+  useEffect(() => {
+    if (filteredTasks && filteredTasks.length > 0) {
+      // Extract all unique project IDs from tasks
+      const projectIds = [...new Set(filteredTasks.map(task => task.project))].filter(Boolean);
+      
+      // Update projects context with these IDs
+      updateProjectsFromTasks(projectIds);
+    }
+  }, [filteredTasks, updateProjectsFromTasks]);
 
   // Format project name for display in empty state
   const getProjectName = (projectId: string) => {
