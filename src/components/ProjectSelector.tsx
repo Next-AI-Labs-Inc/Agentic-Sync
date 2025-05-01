@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Project, ProjectFilterType } from '@/types';
 import { PROJECT_FILTERS } from '@/config/constants';
 import { ClickableId } from '@/utils/clickable-id';
@@ -22,6 +22,62 @@ export default function ProjectSelector({
   updateGlobalFilter
 }: ProjectSelectorProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Load saved project selection on initial render
+  useEffect(() => {
+    const savedSelection = localStorage.getItem('selectedProjects');
+    if (savedSelection && (!selectedProjects || selectedProjects.length === 0)) {
+      try {
+        const parsedSelection = JSON.parse(savedSelection);
+        // Verify all projects in saved selection exist in current projects
+        const validProjectIds = projects.map(p => p.id);
+        const validSavedSelection = Array.isArray(parsedSelection) ? 
+          parsedSelection.filter(id => validProjectIds.includes(id)) : [];
+        
+        if (validSavedSelection.length > 0) {
+          onChange(validSavedSelection);
+          
+          // Update the global filter based on selection
+          if (validSavedSelection.length === projects.length) {
+            updateGlobalFilter(PROJECT_FILTERS.ALL);
+          } else if (validSavedSelection.length === 1) {
+            updateGlobalFilter(validSavedSelection[0]);
+          } else {
+            updateGlobalFilter(validSavedSelection);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading saved project selection:', error);
+      }
+    }
+  }, [projects, selectedProjects, onChange, updateGlobalFilter]);
+  
+  // Save selection to localStorage when it changes
+  useEffect(() => {
+    if (selectedProjects) {
+      localStorage.setItem('selectedProjects', JSON.stringify(selectedProjects));
+    }
+  }, [selectedProjects]);
+  
+  // Handle clicking outside the component
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node) && isExpanded) {
+        setIsExpanded(false);
+      }
+    }
+    
+    // Add event listener when expanded
+    if (isExpanded) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    // Clean up the event listener
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isExpanded]);
   
   // Sort projects alphabetically by name
   const sortedProjects = [...projects].sort((a, b) => 
@@ -100,7 +156,7 @@ export default function ProjectSelector({
   };
   
   return (
-    <div>
+    <div ref={containerRef}>
       <div>
         <div className="flex items-center mb-1">
           <label className="form-label mr-2 text-lg font-medium">Areas of Concern</label>
@@ -113,52 +169,50 @@ export default function ProjectSelector({
         
         {/* Collapsed view */}
         <div 
-          className="border border-gray-300 rounded-md p-3 flex justify-between items-center cursor-pointer hover:bg-gray-50 transition-colors"
+          className="border border-gray-300 rounded-md p-2 flex justify-between items-center cursor-pointer hover:bg-gray-50"
           onClick={() => setIsExpanded(!isExpanded)}
         >
-          <div className="text-base font-medium text-gray-700">{getSelectionSummary()}</div>
-          <div className="text-sm text-blue-600 font-medium px-2 py-1 rounded hover:bg-blue-50">{isExpanded ? 'Collapse' : 'Edit'}</div>
+          <div className="text-sm text-gray-700">{getSelectionSummary()}</div>
+          <div className="text-xs text-blue-600">{isExpanded ? 'Collapse' : 'Edit'}</div>
         </div>
       </div>
       
       {/* Expanded view */}
       {isExpanded && (
-        <div className="border border-gray-300 border-t-0 rounded-b-md p-4 bg-gray-50 shadow-inner">
+        <div className="border border-gray-300 border-t-0 rounded-b-md p-2 bg-gray-50">
           {/* Quick selection buttons */}
-          <div className="flex flex-wrap gap-3 mb-3">
+          <div className="flex flex-wrap gap-2 mb-2">
             <button
               type="button"
               onClick={handleSelectAll}
-              className={`px-3 py-1.5 text-sm rounded-md font-medium transition-colors ${
+              className={`px-2 py-1 text-xs rounded ${
                 selectedProjects.length === projects.length 
-                  ? 'bg-blue-100 text-blue-800 border border-blue-300' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-blue-100 text-blue-800' 
+                  : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
               }`}
             >
-              Select All
+              All
             </button>
             
             <button
               type="button"
               onClick={handleSelectNone}
-              className={`px-3 py-1.5 text-sm rounded-md font-medium transition-colors ${
+              className={`px-2 py-1 text-xs rounded ${
                 selectedProjects.length === 0 
-                  ? 'bg-blue-100 text-blue-800 border border-blue-300' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-blue-100 text-blue-800' 
+                  : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
               }`}
             >
-              Clear Selection
+              None
             </button>
           </div>
           
-          {/* Project checkboxes */}
-          <div className="max-h-72 overflow-y-auto space-y-2 pr-2 pb-1">
+          {/* Project checkboxes - no max height limit */}
+          <div className="overflow-visible space-y-1">
             {sortedProjects.map((project, index) => (
               <div 
                 key={project.id} 
-                className={`flex items-center p-2 hover:bg-white rounded-md transition-colors ${
-                  selectedProjects.includes(project.id) ? 'bg-blue-50' : ''
-                } ${project._isNew ? 'animate-fade-in' : ''}`}
+                className={`flex items-center ${project._isNew ? 'animate-fade-in' : ''}`}
                 style={project._isNew ? { animationDelay: `${index * 50}ms` } : {}}
               >
                 <input
@@ -166,12 +220,9 @@ export default function ProjectSelector({
                   id={`project-${project.id}`}
                   checked={selectedProjects.includes(project.id)}
                   onChange={() => handleProjectSelection(project.id)}
-                  className="mr-3 h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+                  className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <label 
-                  htmlFor={`project-${project.id}`} 
-                  className="text-base text-gray-700 cursor-pointer font-medium flex-grow truncate"
-                >
+                <label htmlFor={`project-${project.id}`} className="text-sm text-gray-700">
                   {project.name}
                 </label>
               </div>

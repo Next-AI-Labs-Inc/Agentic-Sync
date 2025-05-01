@@ -12,7 +12,7 @@ import { Task } from "@/types";
 
 // Helper function to open task detail
 const openTaskDetail = (taskId: string) => {
-  window.location.href = `/task-detail?id=${taskId}`;
+  window.location.href = `/task/${taskId}`;
 };
 
 // CompactTaskItem Component - Shows a single task in one-line format
@@ -106,7 +106,23 @@ function TasksPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [windowHeight, setWindowHeight] = useState(800); // Default height for SSR
   const [isClient, setIsClient] = useState(false);
-  const [viewMode, setViewMode] = useState<'card' | 'compact'>('card'); // New state for view toggle
+  // Get saved view mode from localStorage, only once on initial render
+  const getSavedViewMode = () => {
+    if (typeof window !== 'undefined') {
+      const savedMode = localStorage.getItem('ix_tasks_view_mode');
+      return (savedMode === 'card' || savedMode === 'compact') ? savedMode : 'card';
+    }
+    return 'card';
+  };
+  
+  const [viewMode, setViewMode] = useState<'card' | 'compact'>(getSavedViewMode());
+  
+  // Save view mode to localStorage when it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('ix_tasks_view_mode', viewMode);
+    }
+  }, [viewMode]);
 
   // Handle window size calculation after client-side mount
   useEffect(() => {
@@ -164,11 +180,24 @@ function TasksPage() {
   // Update project list from task data when tasks change
   useEffect(() => {
     if (filteredTasks && filteredTasks.length > 0) {
-      // Extract all unique project IDs from tasks
-      const projectIds = [...new Set(filteredTasks.map(task => task.project))].filter(Boolean);
+      // Use a ref to keep track of previous project IDs to avoid unnecessary updates
+      const projectIdsJson = JSON.stringify(
+        [...new Set(filteredTasks.map(task => task.project))].filter(Boolean)
+      );
       
-      // Update projects context with these IDs
-      updateProjectsFromTasks(projectIds);
+      // Store the JSON in a data attribute to avoid re-renders
+      const prevProjectIds = document.documentElement.getAttribute('data-project-ids');
+      
+      // Only update if the project IDs have changed
+      if (projectIdsJson !== prevProjectIds) {
+        document.documentElement.setAttribute('data-project-ids', projectIdsJson);
+        
+        // Extract all unique project IDs from tasks
+        const projectIds = JSON.parse(projectIdsJson);
+        
+        // Update projects context with these IDs
+        updateProjectsFromTasks(projectIds);
+      }
     }
   }, [filteredTasks, updateProjectsFromTasks]);
 

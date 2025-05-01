@@ -1,10 +1,12 @@
 /**
  * TaskSyncService - Handles real-time updates for tasks via an event-driven approach
  * This implements a custom event system for real-time updates without relying on polling
+ * Now integrated with React Query for immediate cache updates
  */
 
 import { Task, Project } from '@/types';
 import eventBus, { Event } from './eventBus';
+import { QueryClient } from '@tanstack/react-query';
 
 // Event types for task sync
 export enum SyncEventType {
@@ -36,11 +38,13 @@ export interface TaskDeletePayload {
 /**
  * TaskSyncService - Manages real-time task synchronization
  * Uses the EventBus for efficient pub/sub with memory leak prevention
+ * Now integrates with React Query for immediate cache updates
  */
 class TaskSyncService {
   private eventSource: EventSource | null = null;
   private reconnectTimer: NodeJS.Timeout | null = null;
   private isConnected: boolean = false;
+  private queryClient: QueryClient | null = null;
   
   // Static instance for singleton pattern
   private static instance: TaskSyncService;
@@ -51,6 +55,12 @@ class TaskSyncService {
       TaskSyncService.instance = new TaskSyncService();
     }
     return TaskSyncService.instance;
+  }
+  
+  // Connect to React Query client
+  public connectQueryClient(client: QueryClient): void {
+    this.queryClient = client;
+    console.log('TaskSyncService connected to React Query client');
   }
   
   // Private constructor for singleton
@@ -116,11 +126,24 @@ class TaskSyncService {
    * @param task The created task
    */
   public emitTaskCreated(task: Task): void {
+    // Emit event via EventBus
     this.emit({
       type: SyncEventType.TASK_CREATED,
       payload: task,
       timestamp: Date.now()
     });
+    
+    // Also update React Query cache if available
+    if (this.queryClient) {
+      this.queryClient.setQueryData(['tasks'], (oldTasks: Task[] = []) => {
+        // Add task to the cache if it doesn't already exist
+        const exists = oldTasks.some(t => t.id === task.id);
+        if (!exists) {
+          return [...oldTasks, task];
+        }
+        return oldTasks;
+      });
+    }
   }
   
   /**
@@ -128,11 +151,20 @@ class TaskSyncService {
    * @param task The updated task
    */
   public emitTaskUpdated(task: Task): void {
+    // Emit event via EventBus
     this.emit({
       type: SyncEventType.TASK_UPDATED,
       payload: task,
       timestamp: Date.now()
     });
+    
+    // Also update React Query cache if available
+    if (this.queryClient) {
+      this.queryClient.setQueryData(['tasks'], (oldTasks: Task[] = []) => {
+        // Update the task in the cache
+        return oldTasks.map(t => t.id === task.id ? task : t);
+      });
+    }
   }
   
   /**
@@ -141,11 +173,20 @@ class TaskSyncService {
    * @param projectId The project ID the task belonged to
    */
   public emitTaskDeleted(taskId: string, projectId: string): void {
+    // Emit event via EventBus
     this.emit({
       type: SyncEventType.TASK_DELETED,
       payload: { id: taskId, project: projectId },
       timestamp: Date.now()
     });
+    
+    // Also update React Query cache if available
+    if (this.queryClient) {
+      this.queryClient.setQueryData(['tasks'], (oldTasks: Task[] = []) => {
+        // Remove the task from the cache
+        return oldTasks.filter(t => t.id !== taskId);
+      });
+    }
   }
   
   /**

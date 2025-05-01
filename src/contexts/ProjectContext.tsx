@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { Project } from '@/types';
 import taskSyncService, { SyncEventType } from '@/services/taskSyncService';
 
@@ -20,7 +20,22 @@ const fallbackProjects = [
 ];
 
 export function ProjectProvider({ children }: { children: ReactNode }) {
-  const [projects, setProjects] = useState<Project[]>(fallbackProjects);
+  // Load saved projects from localStorage if available
+  const getSavedProjects = (): Project[] => {
+    if (typeof window !== 'undefined') {
+      const savedProjects = localStorage.getItem('ix_projects');
+      if (savedProjects) {
+        try {
+          return JSON.parse(savedProjects);
+        } catch (e) {
+          console.error('Error parsing saved projects:', e);
+        }
+      }
+    }
+    return fallbackProjects;
+  };
+
+  const [projects, setProjects] = useState<Project[]>(getSavedProjects());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -59,6 +74,21 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       return newProjects;
     });
   };
+  
+  // Save projects to localStorage whenever they change
+  // Using a ref to track previous projects to avoid unnecessary updates
+  const prevProjectsRef = useRef<string>('');
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined' && projects.length > 0) {
+      const projectsJson = JSON.stringify(projects);
+      // Only update localStorage if projects have actually changed
+      if (projectsJson !== prevProjectsRef.current) {
+        localStorage.setItem('ix_projects', projectsJson);
+        prevProjectsRef.current = projectsJson;
+      }
+    }
+  }, [projects]);
 
   useEffect(() => {
     // Track unsubscribe functions

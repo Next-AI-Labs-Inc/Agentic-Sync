@@ -47,6 +47,8 @@
     "@ix/loading-spinner": "file:../shared-tools/packages/loading-spinner",
     "@ix/popover": "file:../shared-tools/packages/popover",
     "@ix/route-transition": "file:../shared-tools/packages/route-transition",
+    "@tanstack/react-query": "^5.75.0",
+    "@tanstack/react-query-devtools": "^5.75.0",
     "@tauri-apps/cli": "^1.5.9",
     "@types/js-cookie": "^3.0.6",
     "@types/react-window": "^1.8.8",

@@ -3,6 +3,7 @@ import { Task, TaskFormData, ItemWithStatus } from '@/types';
 import * as taskApiService from '@/services/taskApiService';
 import taskSyncService, { SyncEventType } from '@/services/taskSyncService';
 import { sortByNewestFirst, deduplicateTasks } from '@/utils/task';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface UseTaskOperationsProps {
   tasks: Task[];
@@ -60,6 +61,9 @@ export function useTaskOperations({
   setTasks,
   refreshTasks
 }: UseTaskOperationsProps): UseTaskOperationsResult {
+  // Get the query client for cache operations
+  const queryClient = useQueryClient();
+  
   // Local task cache for optimistic updates
   const [localTaskCache, setLocalTaskCache] = useState<Map<string, Task>>(new Map());
   
@@ -178,46 +182,86 @@ export function useTaskOperations({
   }, [tasks, localTaskCache, setTasks]);
 
   /**
-   * Update an existing task
+   * Update task mutation with React Query
+   */
+  const updateTaskMutation = useMutation({
+    mutationFn: ({id, data}: {id: string, data: Partial<Task>}) => 
+      taskApiService.updateTask(id, data),
+    onMutate: async ({id, data}) => {
+      // Cancel any outgoing refetches so they don't overwrite our optimistic update
+      await queryClient.cancelQueries({queryKey: ['tasks']});
+      
+      // Snapshot the previous tasks for potential rollback
+      const previousTasks = queryClient.getQueryData<Task[]>(['tasks']) || [];
+      
+      // Get task from cache if available
+      let taskToUpdate = localTaskCache.get(id);
+      if (!taskToUpdate) {
+        taskToUpdate = previousTasks.find(task => task.id === id);
+        if (!taskToUpdate) {
+          console.error(`Task with ID ${id} not found for optimistic update`);
+          return { previousTasks };
+        }
+      }
+      
+      // Create updated task for optimistic update
+      const updatedTask = { ...taskToUpdate, ...data, updatedAt: new Date().toISOString() };
+      
+      // Update local cache optimistically
+      const newCache = new Map(localTaskCache);
+      newCache.set(id, updatedTask);
+      setLocalTaskCache(newCache);
+      
+      // Update React Query cache optimistically
+      queryClient.setQueryData(['tasks'], (oldTasks: Task[] = []) => {
+        return oldTasks.map(task => task.id === id ? updatedTask : task);
+      });
+      
+      // Return context with previous tasks and updated task
+      return { previousTasks, updatedTask };
+    },
+    onSuccess: (serverTask, {id}, context) => {
+      if (!context || !context.updatedTask) return;
+      
+      console.log(`Task ${id} updated successfully:`, serverTask);
+      
+      // Emit event for real-time sync to other clients
+      taskSyncService.emitTaskUpdated(serverTask);
+    },
+    onError: (error, {id}, context) => {
+      console.error(`Error updating task ${id}:`, error);
+      setError(`Failed to update task: ${error.message}`);
+      
+      // Revert to previous tasks if we have context
+      if (context) {
+        queryClient.setQueryData(['tasks'], context.previousTasks);
+        
+        // Also revert local cache if needed
+        const taskToRevert = context.previousTasks.find(t => t.id === id);
+        if (taskToRevert) {
+          const revertedCache = new Map(localTaskCache);
+          revertedCache.set(id, taskToRevert);
+          setLocalTaskCache(revertedCache);
+        }
+      }
+    },
+    onSettled: () => {
+      // Always refetch to ensure we have the latest server state
+      queryClient.invalidateQueries({queryKey: ['tasks']});
+    }
+  });
+  
+  /**
+   * Update an existing task - wrapper around mutation
    */
   const updateTask = useCallback(async (taskId: string, updateData: Partial<Task>) => {
     try {
-      const updatedTask = await taskApiService.updateTask(taskId, updateData);
-      
-      // Update the task in local state with memory-efficient approach
-      setTasks(currentTasks => {
-        // Find the index of the task to update
-        const index = currentTasks.findIndex(t => t.id === taskId);
-        if (index === -1) return currentTasks; // Not found, no change needed
-        
-        // Create a new array with just the specific task updated
-        const newTasks = [...currentTasks];
-        newTasks[index] = { ...newTasks[index], ...updateData };
-        return newTasks;
-      });
-      
-      // Update the task in local cache
-      setLocalTaskCache(cache => {
-        const newCache = new Map(cache);
-        const existingTask = newCache.get(taskId);
-        if (existingTask) {
-          newCache.set(taskId, { ...existingTask, ...updateData });
-        }
-        return newCache;
-      });
-      
-      // Emit update event
-      if (updatedTask) {
-        taskSyncService.emitTaskUpdated(updatedTask);
-      }
-      
-      return updatedTask;
+      return await updateTaskMutation.mutateAsync({id: taskId, data: updateData});
     } catch (error) {
-      console.error(`Error updating task ${taskId}:`, error);
-      setError(`Failed to update task: ${error.message}`);
+      // Error is already handled in mutation
       throw error;
     }
-  }, [setTasks]);
+  }, [updateTaskMutation]);
 
   /**
    * Update a task's status

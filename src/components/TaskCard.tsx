@@ -21,15 +21,6 @@ import {
 import ReactMarkdown from 'react-markdown';
 import Link from 'next/link';
 import { Task, ItemWithStatus } from '@/types';
-
-// Helper function to open task detail (same as in tasks.tsx)
-const openTaskDetail = (taskId: string, e?: React.MouseEvent) => {
-  if (e) {
-    e.stopPropagation(); // Prevent card expansion
-    e.preventDefault();
-  }
-  window.location.href = `/task-detail?id=${taskId}`;
-};
 import DropdownMenu from './DropdownMenu';
 import EditableItemList from './EditableItems/EditableItemList';
 import ApprovalItemList from './EditableItems/ApprovalItemList';
@@ -2064,14 +2055,14 @@ function TaskCard({
               )}
 
               <div className="flex items-center space-x-1">
-                <a
-                  href="#"
+                <Link
+                  href={`/task/${task.id}`}
                   className="btn-icon"
                   title="View task details"
-                  onClick={(e) => openTaskDetail(task.id, e)}
+                  onClick={(e) => e.stopPropagation()} // Prevent card expansion
                 >
                   <FaEye size={14} />
-                </a>
+                </Link>
 
                 {/* Star button for Today filter */}
                 <button
@@ -2147,14 +2138,14 @@ function TaskCard({
             {/* Only show gear if no initiative */}
             {!task.initiative && (
               <div className="flex items-center space-x-1">
-                <a
-                  href="#"
+                <Link
+                  href={`/task/${task.id}`}
                   className="btn-icon"
                   title="View task details"
-                  onClick={(e) => openTaskDetail(task.id, e)}
+                  onClick={(e) => e.stopPropagation()} // Prevent card expansion
                 >
                   <FaEye size={14} />
-                </a>
+                </Link>
 
                 {/* Star button for Today filter */}
                 <button
@@ -2270,14 +2261,14 @@ function TaskCard({
                 </div>
               )}
               {task?.id ? (
-                <a
-                  href="#"
-                  onClick={(e) => openTaskDetail(task.id, e)}
+                <Link
+                  href={`/task/${task.id}`}
+                  onClick={(e) => e.stopPropagation()}
                   className="text-xs text-primary-500 hover:underline"
                   title="View task details"
                 >
                   {task.id.substring(0, 8)}...
-                </a>
+                </Link>
               ) : (
                 <span className="text-xs text-gray-400">ID unavailable</span>
               )}
@@ -2797,14 +2788,13 @@ function TaskCard({
             <div className="flex items-center mb-1">
               <p className="mr-2">
                 Task ID:{' '}
-                <a
-                  href="#"
-                  onClick={(e) => openTaskDetail(task.id, e)}
+                <Link
+                  href={`/task/${task.id}`}
                   className="text-primary-500 hover:underline"
                   title="View task details"
                 >
                   {task.id}
-                </a>
+                </Link>
               </p>
 
               <button
