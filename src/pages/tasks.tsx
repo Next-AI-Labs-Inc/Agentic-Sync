@@ -76,7 +76,13 @@ const CompactTaskItem = ({
       </button>
       
       {/* Task title - takes most of the space */}
-      <div className="flex-grow font-medium truncate">
+      <div 
+        className="flex-grow font-medium truncate cursor-pointer" 
+        onClick={() => {
+          window.location.href = `/task-detail?id=${task.id}`;
+        }}
+        title="Open task details"
+      >
         {task.title}
       </div>
       
@@ -283,11 +289,44 @@ function TasksPage() {
                 {filteredTasks.length}{" "}
                 {filteredTasks.length === 1 ? "task" : "tasks"} found
               </div>
-              <ClickableId
-                id="CO_9104"
-                filePath="/src/pages/tasks.tsx"
-                className="px-3"
-              />
+              <div className="flex items-center">
+                {/* View Mode Toggle */}
+                <div className="mr-3 flex items-center gap-2 bg-white p-1 rounded-md border border-gray-200">
+                  <button
+                    onClick={() => setViewMode('card')}
+                    className={`px-2 py-1 rounded text-sm ${
+                      viewMode === 'card' 
+                        ? 'bg-blue-100 text-blue-700' 
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                    aria-label="Card view"
+                    title="Card view"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setViewMode('compact')}
+                    className={`px-2 py-1 rounded text-sm ${
+                      viewMode === 'compact' 
+                        ? 'bg-blue-100 text-blue-700' 
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                    aria-label="Compact view"
+                    title="Compact view"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  </button>
+                </div>
+                <ClickableId
+                  id="CO_9104"
+                  filePath="/src/pages/tasks.tsx"
+                  className="px-3"
+                />
+              </div>
             </div>
             <div className="mb-4 text-sm flex">
               {searchTerm && (
@@ -318,35 +357,59 @@ function TasksPage() {
               )}
             </div>
 
-            {/* Always use the same rendering approach regardless of list size to ensure consistency */}
-            <div className="space-y-4">
-              {filteredTasks.map((task) => (
-                <div
-                  key={`${task.id}-${task.project}`}
-                  className="task-card-container relative"
-                >
-                  <TaskCard
-                    task={task}
-                    onStatusChange={updateTaskStatus}
-                    onMarkTested={markTaskTested}
-                    onDelete={deleteTask}
-                    onUpdateDate={updateTaskDate}
-                    onUpdateTask={(taskId, project, updates) => updateTask(taskId, updates)}
-                    onToggleStar={toggleTaskStar}
-                    // Item approval functions
-                    onApproveRequirementItem={(taskId, itemId) => approveRequirementItem(taskId, itemId)}
-                    onVetoRequirementItem={(taskId, itemId) => vetoRequirementItem(taskId, itemId)}
-                    onUpdateRequirementItems={(taskId, items) => updateRequirementItems(taskId, items)}
-                    onApproveTechnicalPlanItem={(taskId, itemId) => approveTechnicalPlanItem(taskId, itemId)}
-                    onVetoTechnicalPlanItem={(taskId, itemId) => vetoTechnicalPlanItem(taskId, itemId)}
-                    onUpdateTechnicalPlanItems={(taskId, items) => updateTechnicalPlanItems(taskId, items)}
-                    onApproveNextStepItem={(taskId, itemId) => approveNextStepItem(taskId, itemId)}
-                    onVetoNextStepItem={(taskId, itemId) => vetoNextStepItem(taskId, itemId)}
-                    onUpdateNextStepItems={(taskId, items) => updateNextStepItems(taskId, items)}
-                  />
+            {viewMode === 'card' ? (
+              // Card View - Original layout
+              <div className="space-y-4">
+                {filteredTasks.map((task) => (
+                  <div
+                    key={`${task.id}-${task.project}`}
+                    className="task-card-container relative"
+                  >
+                    <TaskCard
+                      task={task}
+                      onStatusChange={updateTaskStatus}
+                      onMarkTested={markTaskTested}
+                      onDelete={deleteTask}
+                      onUpdateDate={updateTaskDate}
+                      onUpdateTask={(taskId, project, updates) => updateTask(taskId, updates)}
+                      onToggleStar={toggleTaskStar}
+                      // Item approval functions
+                      onApproveRequirementItem={(taskId, itemId) => approveRequirementItem(taskId, itemId)}
+                      onVetoRequirementItem={(taskId, itemId) => vetoRequirementItem(taskId, itemId)}
+                      onUpdateRequirementItems={(taskId, items) => updateRequirementItems(taskId, items)}
+                      onApproveTechnicalPlanItem={(taskId, itemId) => approveTechnicalPlanItem(taskId, itemId)}
+                      onVetoTechnicalPlanItem={(taskId, itemId) => vetoTechnicalPlanItem(taskId, itemId)}
+                      onUpdateTechnicalPlanItems={(taskId, items) => updateTechnicalPlanItems(taskId, items)}
+                      onApproveNextStepItem={(taskId, itemId) => approveNextStepItem(taskId, itemId)}
+                      onVetoNextStepItem={(taskId, itemId) => vetoNextStepItem(taskId, itemId)}
+                      onUpdateNextStepItems={(taskId, items) => updateNextStepItems(taskId, items)}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              // Compact View - One line per task
+              <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
+                {/* Compact view header */}
+                <div className="bg-gray-50 py-2 px-3 border-b border-gray-200 flex items-center text-sm font-medium text-gray-500">
+                  <div className="w-8"></div> {/* Star column */}
+                  <div className="flex-grow">Title</div>
+                  <div className="w-24 text-right">Status</div>
                 </div>
-              ))}
-            </div>
+                
+                {/* Compact task list */}
+                <div className="compact-task-list">
+                  {filteredTasks.map((task) => (
+                    <CompactTaskItem
+                      key={`${task.id}-${task.project}-compact`}
+                      task={task}
+                      onStatusChange={updateTaskStatus}
+                      onToggleStar={toggleTaskStar}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
