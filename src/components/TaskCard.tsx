@@ -12,12 +12,17 @@ import {
   FaCog,
   FaPause,
   FaListAlt,
-  FaArchive
+  FaArchive,
+  FaStar,
+  FaRegStar
 } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
-import { Task } from '@/types';
+import { Task, ItemWithStatus } from '@/types';
 import DropdownMenu from './DropdownMenu';
 import EditableItemList from './EditableItems/EditableItemList';
+import ApprovalItemList from './EditableItems/ApprovalItemList';
+import AgentLauncher from './AgentLauncher';
+import FeedbackForm from './FeedbackForm';
 
 // Utility function to safely get action help content
 const getActionHelp = (statusKey: keyof typeof STATUS_ACTION_HELP | string, defaultTitle = "Action", defaultDescription = "Click to perform this action") => {
@@ -41,6 +46,20 @@ interface TaskCardProps {
   onDelete: (taskId: string, project: string) => Promise<void>;
   onUpdateDate?: (taskId: string, project: string, newDate: string) => Promise<void>;
   onUpdateTask?: (taskId: string, project: string, updates: Partial<Task>) => Promise<void>;
+  onToggleStar?: (taskId: string, project: string) => Promise<void>;
+  // Item approval functions
+  onApproveRequirementItem?: (taskId: string, itemId: string) => Promise<void>;
+  onVetoRequirementItem?: (taskId: string, itemId: string) => Promise<void>;
+  onUpdateRequirementItems?: (taskId: string, items: ItemWithStatus[]) => Promise<void>;
+  onApproveTechnicalPlanItem?: (taskId: string, itemId: string) => Promise<void>;
+  onVetoTechnicalPlanItem?: (taskId: string, itemId: string) => Promise<void>;
+  onUpdateTechnicalPlanItems?: (taskId: string, items: ItemWithStatus[]) => Promise<void>;
+  onApproveNextStepItem?: (taskId: string, itemId: string) => Promise<void>;
+  onVetoNextStepItem?: (taskId: string, itemId: string) => Promise<void>;
+  onUpdateNextStepItems?: (taskId: string, items: ItemWithStatus[]) => Promise<void>;
+  // Agent integration functions
+  onAddFeedback?: (taskId: string, content: string) => Promise<void>;
+  onLaunchAgent?: (taskId: string, mode: 'implement' | 'demo' | 'feedback', feedback?: string) => Promise<void>;
   expanded?: boolean; // Whether the card is expanded by default
   hideExpand?: boolean; // Whether to hide the expand/collapse button
 }
@@ -308,6 +327,17 @@ function TaskCard({
   onDelete, 
   onUpdateDate, 
   onUpdateTask,
+  onToggleStar,
+  // Item approval functions
+  onApproveRequirementItem,
+  onVetoRequirementItem,
+  onUpdateRequirementItems,
+  onApproveTechnicalPlanItem,
+  onVetoTechnicalPlanItem,
+  onUpdateTechnicalPlanItems,
+  onApproveNextStepItem,
+  onVetoNextStepItem,
+  onUpdateNextStepItems,
   expanded: defaultExpanded = false,
   hideExpand = false
 }: TaskCardProps) {
@@ -553,6 +583,92 @@ function TaskCard({
     }
   };
 
+  // State for agent integration
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+  const [feedbackContent, setFeedbackContent] = useState('');
+
+  // Handle feedback submission
+  const handleFeedbackSubmit = async (feedbackData: { content: string }) => {
+    if (!onAddFeedback) return;
+    
+    try {
+      setIsSubmittingFeedback(true);
+      await onAddFeedback(task.id, feedbackData.content);
+      setFeedbackContent(feedbackData.content);
+      setShowFeedbackForm(false);
+    } catch (error) {
+      console.error('Error adding feedback:', error);
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
+  };
+
+  // Render agent action buttons
+  const renderAgentActions = () => {
+    const agentActions = [];
+    
+    // Don't show agent actions for archived or reviewed tasks
+    if (['archived', 'reviewed'].includes(task.status as string)) {
+      return [];
+    }
+    
+    // For 'for-review' status, show Give Feedback button
+    if (task.status === 'for-review') {
+      agentActions.push(
+        <button
+          key="give-feedback"
+          onClick={() => setShowFeedbackForm(true)}
+          className="btn-outline-primary ml-2"
+        >
+          Give Feedback
+        </button>
+      );
+    }
+    
+    // Show Deploy Agent button for all tasks except done/archived/reviewed
+    if (task.status !== 'done' && !['archived', 'reviewed'].includes(task.status as string)) {
+      agentActions.push(
+        <AgentLauncher
+          key="deploy-agent"
+          taskId={task.id}
+          mode="implement"
+          buttonText="Deploy Agent"
+          buttonClass="ml-2 btn-outline-secondary"
+        />
+      );
+    }
+    
+    // Show "Show Me" button for tasks in for-review or done status
+    if (task.status === 'for-review' || task.status === 'done') {
+      agentActions.push(
+        <AgentLauncher
+          key="show-me"
+          taskId={task.id}
+          mode="demo"
+          buttonText="Show Me"
+          buttonClass="ml-2 btn-outline-secondary"
+        />
+      );
+    }
+    
+    // If we have feedback content, add a button to launch agent with feedback
+    if (feedbackContent && task.status === 'for-review') {
+      agentActions.push(
+        <AgentLauncher
+          key="address-feedback"
+          taskId={task.id}
+          mode="feedback"
+          feedback={feedbackContent}
+          buttonText="Address Feedback"
+          buttonClass="ml-2 btn-outline-secondary"
+        />
+      );
+    }
+    
+    return agentActions;
+  };
+  
   // Determine stage-appropriate actions
   const renderStageActions = () => {
     const actions = [];
@@ -1628,16 +1744,46 @@ function TaskCard({
       );
     }
 
+    // Get agent actions
+    const agentActionButtons = renderAgentActions();
+    
     return (
       <>
         {expanded && renderCoachingMessage()}
-        <div className="mt-3 flex flex-wrap gap-2 justify-end">{actions}</div>
+        <div className="mt-3 flex flex-wrap gap-2 justify-end">
+          {actions}
+          {/* Add agent actions after regular actions */}
+          {agentActionButtons.length > 0 && agentActionButtons}
+        </div>
+        
+        {/* Feedback form when expanded and show form is true */}
+        {expanded && showFeedbackForm && (
+          <div className="mt-4">
+            <FeedbackForm
+              taskId={task.id}
+              onSubmit={handleFeedbackSubmit}
+              onCancel={() => setShowFeedbackForm(false)}
+              isSubmitting={isSubmittingFeedback}
+            />
+          </div>
+        )}
+        
+        {/* Display feedback content if available */}
+        {expanded && feedbackContent && !showFeedbackForm && (
+          <div className="mt-4 text-base">
+            <h4 className="font-medium text-gray-700 mb-1">Feedback</h4>
+            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded text-gray-800">
+              {feedbackContent}
+            </div>
+          </div>
+        )}
       </>
     );
   };
 
   return (
     <div
+      data-testid="task-card"
       className={`task-card ${
         task.status === 'reviewed' ? 'bg-gray-50' : 'bg-white'
       } ${isNew ? 'animate-fade-in border-l-4 border-l-blue-500' : ''} 
@@ -1710,6 +1856,27 @@ function TaskCard({
               )}
               
               <div className="flex items-center space-x-1">
+                <a 
+                  href={`/task/${task.id}`} 
+                  className="btn-icon" 
+                  title="View task details"
+                  onClick={(e) => e.stopPropagation()} // Prevent card expansion
+                >
+                  <FaEye size={14} />
+                </a>
+                {/* Star button for Today filter */}
+                <button 
+                  className="btn-icon" 
+                  title={task.starred ? "Remove from Today" : "Add to Today"}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent card expansion
+                    if (onToggleStar) {
+                      onToggleStar(task.id, task.project);
+                    }
+                  }}
+                >
+                  {task.starred ? <FaStar size={14} className="text-rose-500" /> : <FaRegStar size={14} />}
+                </button>
                 <DropdownMenu 
                   trigger={
                     <button className="btn-icon">
@@ -1748,6 +1915,7 @@ function TaskCard({
                 </div>
               ) : (
                 <h3
+                  data-testid="task-title"
                   className={`text-lg font-normal font-anthropic group cursor-pointer whitespace-pre-wrap break-words ${
                     task.status === 'reviewed' ? 'text-gray-500' : 'text-gray-800'
                   }`}
@@ -1774,6 +1942,19 @@ function TaskCard({
                 >
                   <FaEye size={14} />
                 </a>
+                {/* Star button for Today filter */}
+                <button 
+                  className="btn-icon" 
+                  title={task.starred ? "Remove from Today" : "Add to Today"}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent card expansion
+                    if (onToggleStar) {
+                      onToggleStar(task.id, task.project);
+                    }
+                  }}
+                >
+                  {task.starred ? <FaStar size={14} className="text-rose-500" /> : <FaRegStar size={14} />}
+                </button>
                 <DropdownMenu 
                   trigger={
                     <button className="btn-icon">
@@ -1815,7 +1996,7 @@ function TaskCard({
                     </div>
                   ) : (
                     <div 
-                      className="group cursor-pointer"
+                      className="group cursor-pointer whitespace-pre-wrap break-words"
                       onDoubleClick={(e) => onUpdateTask && handleInlineEdit('userImpact')(e)}
                     >
                       {task.userImpact || task.description || 'No description provided'}
@@ -1845,7 +2026,7 @@ function TaskCard({
                       </div>
                     ) : (
                       <div 
-                        className="group cursor-pointer"
+                        className="group cursor-pointer whitespace-pre-wrap break-words"
                         onDoubleClick={(e) => onUpdateTask && handleInlineEdit('description')(e)}
                       >
                         {task.description}
@@ -1872,7 +2053,7 @@ function TaskCard({
             
             <div className="flex items-center space-x-1">
               {/* Status badge */}
-              <span className={`badge ${getStatusColor(task.status)}`}>{task.status}</span>
+              <span data-testid="task-status" className={`badge ${getStatusColor(task.status)}`}>{task.status}</span>
               
               {/* Tested badge with popover */}
               {task.tested && (
@@ -2091,10 +2272,32 @@ function TaskCard({
             </div>
           )}
 
-          {/* Requirements - Editable Item List */}
-          {(task.requirements || onUpdateTask) && (
+          {/* Requirements - With Approval Status */}
+          {/* Show new structured items if they exist, otherwise show the legacy format */}
+          {((task.requirementItems && task.requirementItems.length > 0) || task.requirements || onUpdateTask) && (
             <div className="mt-4 text-base" onClick={(e) => e.stopPropagation()}>
-              {onUpdateTask ? (
+              {onUpdateTask && onApproveRequirementItem && onVetoRequirementItem && onUpdateRequirementItems && task.requirementItems ? (
+                <ApprovalItemList
+                  label="Requirements"
+                  items={task.requirementItems}
+                  onUpdate={(newItems) => {
+                    if (onUpdateRequirementItems) {
+                      onUpdateRequirementItems(task.id, newItems);
+                    }
+                  }}
+                  onApprove={(itemId) => {
+                    if (onApproveRequirementItem) {
+                      onApproveRequirementItem(task.id, itemId);
+                    }
+                  }}
+                  onVeto={(itemId) => {
+                    if (onVetoRequirementItem) {
+                      onVetoRequirementItem(task.id, itemId);
+                    }
+                  }}
+                />
+              ) : onUpdateTask ? (
+                // Legacy format - for backward compatibility
                 <EditableItemList
                   label="Requirements"
                   items={parseListString(task.requirements)}
@@ -2109,16 +2312,58 @@ function TaskCard({
               ) : (
                 <div className="text-gray-600">
                   <h4 className="font-medium text-gray-700 mb-1">Requirements</h4>
-                  <ReactMarkdown>{task.requirements}</ReactMarkdown>
+                  {task.requirementItems ? (
+                    <ul className="space-y-2">
+                      {task.requirementItems.map((item) => (
+                        <li 
+                          key={item.id} 
+                          className={`p-2 rounded ${
+                            item.status === 'approved' ? 'border-l-4 border-green-500 pl-2 bg-green-50' : ''
+                          }`}
+                        >
+                          {item.content}
+                          {item.status === 'approved' && (
+                            <span className="ml-2 text-green-600 text-xs">
+                              (Approved)
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <ReactMarkdown>{task.requirements}</ReactMarkdown>
+                  )}
                 </div>
               )}
             </div>
           )}
 
-          {/* Technical Plan - Editable Item List */}
-          {(task.technicalPlan || onUpdateTask) && (
+          {/* Technical Plan - With Approval Status */}
+          {/* Show new structured items if they exist, otherwise show the legacy format */}
+          {((task.technicalPlanItems && task.technicalPlanItems.length > 0) || task.technicalPlan || onUpdateTask) && (
             <div className="mt-4 text-base" onClick={(e) => e.stopPropagation()}>
-              {onUpdateTask ? (
+              {onUpdateTask && onApproveTechnicalPlanItem && onVetoTechnicalPlanItem && onUpdateTechnicalPlanItems && task.technicalPlanItems ? (
+                <ApprovalItemList
+                  label="Technical Plan"
+                  items={task.technicalPlanItems}
+                  onUpdate={(newItems) => {
+                    if (onUpdateTechnicalPlanItems) {
+                      onUpdateTechnicalPlanItems(task.id, newItems);
+                    }
+                  }}
+                  onApprove={(itemId) => {
+                    if (onApproveTechnicalPlanItem) {
+                      onApproveTechnicalPlanItem(task.id, itemId);
+                    }
+                  }}
+                  onVeto={(itemId) => {
+                    if (onVetoTechnicalPlanItem) {
+                      onVetoTechnicalPlanItem(task.id, itemId);
+                    }
+                  }}
+                />
+              ) : onUpdateTask ? (
+                // Legacy format - for backward compatibility
                 <EditableItemList
                   label="Technical Plan"
                   items={parseListString(task.technicalPlan)}
@@ -2133,23 +2378,84 @@ function TaskCard({
               ) : (
                 <div className="text-gray-600">
                   <h4 className="font-medium text-gray-700 mb-1">Technical Plan</h4>
-                  <ReactMarkdown>{task.technicalPlan}</ReactMarkdown>
+                  {task.technicalPlanItems ? (
+                    <ol className="space-y-2 pl-5 list-decimal">
+                      {task.technicalPlanItems.map((item) => (
+                        <li 
+                          key={item.id} 
+                          className={`p-2 rounded ${
+                            item.status === 'approved' ? 'border-l-4 border-green-500 pl-2 bg-green-50' : ''
+                          }`}
+                        >
+                          {item.content}
+                          {item.status === 'approved' && (
+                            <span className="ml-2 text-green-600 text-xs">
+                              (Approved)
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ol>
+                  ) : (
+                    <ReactMarkdown>{task.technicalPlan}</ReactMarkdown>
+                  )}
                 </div>
               )}
             </div>
           )}
 
-          {/* Next Steps - Editable Item List */}
-          {((task.nextSteps && task.nextSteps.length > 0) || onUpdateTask) && (
+          {/* Next Steps - With Approval Status */}
+          {/* Show new structured items if they exist, otherwise show the legacy format */}
+          {((task.nextStepItems && task.nextStepItems.length > 0) || (task.nextSteps && task.nextSteps.length > 0) || onUpdateTask) && (
             <div className="mt-4 text-base" onClick={(e) => e.stopPropagation()}>
-              {onUpdateTask ? (
+              {onUpdateTask && onApproveNextStepItem && onVetoNextStepItem && onUpdateNextStepItems && task.nextStepItems ? (
+                <ApprovalItemList
+                  label="Next Steps"
+                  items={task.nextStepItems}
+                  onUpdate={(newItems) => {
+                    if (onUpdateNextStepItems) {
+                      onUpdateNextStepItems(task.id, newItems);
+                    }
+                  }}
+                  onApprove={(itemId) => {
+                    if (onApproveNextStepItem) {
+                      onApproveNextStepItem(task.id, itemId);
+                    }
+                  }}
+                  onVeto={(itemId) => {
+                    if (onVetoNextStepItem) {
+                      onVetoNextStepItem(task.id, itemId);
+                    }
+                  }}
+                />
+              ) : onUpdateTask ? (
+                // Legacy format - for backward compatibility
                 <EditableItemList
                   label="Next Steps"
                   items={task.nextSteps || []}
                   onUpdate={(newItems) => {
                     if (onUpdateTask) {
+                      // Add the agent integration next steps if they don't already exist
+                      const agentNextSteps = [
+                        "Launch agent with 'Deploy Agent' button to implement feature",
+                        "Use 'Show Me' button to demonstrate completed functionality",
+                        "Review implementation and provide feedback with 'Give Feedback' form",
+                        "Address feedback with agent using 'Address Feedback' button"
+                      ];
+                      
+                      // Filter out any agent-related steps that might already exist to avoid duplicates
+                      const filteredNewItems = newItems.filter(item => 
+                        !agentNextSteps.some(agentStep => 
+                          item.toLowerCase().includes('agent') || 
+                          item.toLowerCase().includes('feedback')
+                        )
+                      );
+                      
+                      // Combine filtered items with agent next steps
+                      const combinedItems = [...filteredNewItems, ...agentNextSteps];
+                      
                       onUpdateTask(task.id, task.project, {
-                        nextSteps: newItems
+                        nextSteps: combinedItems
                       });
                     }
                   }}
@@ -2157,11 +2463,31 @@ function TaskCard({
               ) : (
                 <div className="text-gray-600">
                   <h4 className="font-medium text-gray-700 mb-1">Next Steps</h4>
-                  <ul className="list-disc pl-5 text-gray-600">
-                    {task.nextSteps?.map((step, index) => (
-                      <li key={index}>{step}</li>
-                    ))}
-                  </ul>
+                  {task.nextStepItems ? (
+                    <ul className="space-y-2 pl-5 list-disc">
+                      {task.nextStepItems.map((item) => (
+                        <li 
+                          key={item.id} 
+                          className={`p-2 rounded ${
+                            item.status === 'approved' ? 'border-l-4 border-green-500 pl-2 bg-green-50' : ''
+                          }`}
+                        >
+                          {item.content}
+                          {item.status === 'approved' && (
+                            <span className="ml-2 text-green-600 text-xs">
+                              (Approved)
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <ul className="list-disc pl-5 text-gray-600">
+                      {task.nextSteps?.map((step, index) => (
+                        <li key={index}>{step}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               )}
             </div>
@@ -2205,10 +2531,26 @@ export default React.memo(TaskCard, (prevProps, nextProps) => {
     prevProps.task.description === nextProps.task.description &&
     prevProps.task.userImpact === nextProps.task.userImpact &&
     prevProps.task.initiative === nextProps.task.initiative &&
+    // Check item collections for changes
+    JSON.stringify(prevProps.task.requirementItems) === JSON.stringify(nextProps.task.requirementItems) &&
+    JSON.stringify(prevProps.task.technicalPlanItems) === JSON.stringify(nextProps.task.technicalPlanItems) &&
+    JSON.stringify(prevProps.task.nextStepItems) === JSON.stringify(nextProps.task.nextStepItems) &&
+    // Compare handlers
     prevProps.onStatusChange === nextProps.onStatusChange &&
     prevProps.onMarkTested === nextProps.onMarkTested &&
     prevProps.onDelete === nextProps.onDelete &&
     prevProps.onUpdateDate === nextProps.onUpdateDate &&
-    prevProps.onUpdateTask === nextProps.onUpdateTask
+    prevProps.onUpdateTask === nextProps.onUpdateTask &&
+    prevProps.onToggleStar === nextProps.onToggleStar &&
+    // Item status handlers
+    prevProps.onApproveRequirementItem === nextProps.onApproveRequirementItem &&
+    prevProps.onVetoRequirementItem === nextProps.onVetoRequirementItem &&
+    prevProps.onUpdateRequirementItems === nextProps.onUpdateRequirementItems &&
+    prevProps.onApproveTechnicalPlanItem === nextProps.onApproveTechnicalPlanItem &&
+    prevProps.onVetoTechnicalPlanItem === nextProps.onVetoTechnicalPlanItem &&
+    prevProps.onUpdateTechnicalPlanItems === nextProps.onUpdateTechnicalPlanItems &&
+    prevProps.onApproveNextStepItem === nextProps.onApproveNextStepItem &&
+    prevProps.onVetoNextStepItem === nextProps.onVetoNextStepItem &&
+    prevProps.onUpdateNextStepItems === nextProps.onUpdateNextStepItems
   );
 });

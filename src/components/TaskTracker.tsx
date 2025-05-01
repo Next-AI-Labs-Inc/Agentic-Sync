@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext, createContext } from 'react';
 import { useTasks } from '@/contexts/TaskContext';
-import { useInitiatives } from '@/contexts/InitiativeContext';
 import * as taskApiService from '@/services/taskApiService';
 
 interface TrackedTask {
@@ -34,7 +33,6 @@ export function useTaskTracker() {
 export function TaskTrackerProvider({ children }: { children: React.ReactNode }) {
   const [trackedTasks, setTrackedTasks] = useState<TrackedTask[]>([]);
   const { refreshTasks } = useTasks();
-  const { refreshInitiatives } = useInitiatives();
   const [activeInitiative, setActiveInitiative] = useState<string | null>(null);
   
   // Load tracked tasks from localStorage
@@ -62,28 +60,10 @@ export function TaskTrackerProvider({ children }: { children: React.ReactNode })
   
   // Track a new task
   const trackTask = async (title: string, description: string) => {
-    // Create initiative if needed
+    // Initiatives have been removed, so we'll just set a default taskGroupName
     if (!activeInitiative) {
-      try {
-        const newInitiative = await taskApiService.createInitiative({
-          name: 'User Requested Tasks',
-          description: 'Tasks requested by the user during conversation',
-          status: 'in-progress',
-          priority: 'high',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        });
-        
-        if (newInitiative?.id) {
-          setActiveInitiative(String(newInitiative.id));
-          localStorage.setItem('activeUserInitiative', String(newInitiative.id));
-          
-          // Refresh initiatives in context
-          refreshInitiatives();
-        }
-      } catch (error) {
-        console.error('Failed to create initiative:', error);
-      }
+      setActiveInitiative('User Requested Tasks');
+      localStorage.setItem('activeUserInitiative', 'User Requested Tasks');
     }
     
     // Create task

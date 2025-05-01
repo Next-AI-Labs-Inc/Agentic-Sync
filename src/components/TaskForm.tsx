@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Project, TaskFormData, Initiative } from '@/types';
-import { useInitiatives } from '@/contexts/InitiativeContext';
+import { Project, TaskFormData } from '@/types';
 
 interface TaskFormProps {
   projects: Project[];
@@ -12,8 +11,8 @@ interface TaskFormProps {
 const LAST_PROJECT_KEY = 'taskForm_lastProject';
 
 export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps) {
-  // Load initiatives for dropdown
-  const { initiatives, loading: initiativesLoading } = useInitiatives();
+  // Empty array as we removed initiatives
+  const initiatives = [];
   
   // Get the last used project from localStorage or default to first project
   const getInitialProject = () => {

@@ -2,8 +2,21 @@
 
 This file contains project-specific documentation for Claude to work with this project.
 
-**IMPORTANT:** First read the main CLAUDE.md file at the repository root:
+## ⚠️ SINGLE SOURCE OF TRUTH - READ FIRST ⚠️
+
+The **MAIN CLAUDE.md** file in the root directory is the ONLY authoritative source for task management instructions:
 `/Users/jedi/react_projects/ix/CLAUDE.md`
+
+Refer to the "Changelog and Task Management" section for OFFICIAL, DEFINITIVE task management instructions.
+
+## Task Client Usage - NO SCRIPTS
+
+For all task operations, use the official MongoDB-based client utility DIRECTLY:
+```javascript
+const { createTask, updateTask, getTasks, getTask } = require('../ixcoach-api/utils/agentTaskClient');
+```
+
+DO NOT create separate scripts or files just to perform task operations.
 
 
 ## Task Management Workflow - The Ultimate Source of Truth

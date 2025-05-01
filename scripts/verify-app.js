@@ -60,18 +60,20 @@ async function runVerification(scriptName) {
 async function runAllVerifications() {
   appendLog('Starting verification process...');
   
-  // Run both verifications
+  // Run all verifications
   const buildResult = await runVerification('verify-app-build');
   const startupResult = await runVerification('verify-app-startup');
+  const concurrentResult = await runVerification('verify-app-concurrent');
   
   // Determine overall result
-  if (buildResult && startupResult) {
+  if (buildResult && startupResult && concurrentResult) {
     appendLog('\n✅ ALL VERIFICATIONS PASSED! Your app is working correctly.');
     process.exit(0);
   } else {
     appendLog('\n❌ VERIFICATION FAILED! Your app has issues that need to be fixed.');
     if (!buildResult) appendLog('- Build verification failed. Check .app-build-test.log for details.');
     if (!startupResult) appendLog('- Startup verification failed. Check .app-startup-test.log for details.');
+    if (!concurrentResult) appendLog('- Concurrent operation verification failed. Check .app-concurrent-test.log for details.');
     process.exit(1);
   }
 }

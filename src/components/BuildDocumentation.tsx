@@ -281,7 +281,7 @@ export default function BuildDocumentation({
           </div>
         ) : (
           documentation.map((doc) => (
-            <div key={doc.id} className="p-4">
+            <div key={doc.id} className="p-4" data-testid={`doc-item-${doc.id}`}>
               <div 
                 className="flex justify-between items-start cursor-pointer"
                 onClick={() => toggleExpand(doc.id)}
@@ -296,6 +296,7 @@ export default function BuildDocumentation({
                 <div className="flex space-x-2">
                   <button
                     className="text-gray-400 hover:text-gray-600"
+                    data-testid="toggle-button"
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleExpand(doc.id);
@@ -315,6 +316,7 @@ export default function BuildDocumentation({
                   {!readOnly && (
                     <button
                       className="text-red-400 hover:text-red-600"
+                      data-testid="delete-button"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteDocumentation(doc.id);
@@ -329,7 +331,7 @@ export default function BuildDocumentation({
               </div>
               
               {expandedIds.includes(doc.id) && (
-                <div className="mt-4 bg-gray-50 p-4 rounded prose prose-sm max-w-none">
+                <div className="mt-4 bg-gray-50 p-4 rounded prose prose-sm max-w-none" data-testid={`doc-content-${doc.id}`}>
                   {renderContent(doc)}
                 </div>
               )}

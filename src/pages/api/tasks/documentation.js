@@ -1,13 +1,22 @@
 /**
  * API endpoint for managing task build documentation
  */
-import { ObjectId } from 'mongodb';
-import { connect } from '../../../lib/database';
+import { connect, ObjectId } from '../../../lib/database';
 import { getSession } from '../../../lib/auth';
 
-// Connect to the database
-const { db } = await connect();
-const collection = db.collection('tasks');
+// Database connection will be initialized when needed
+let db = null;
+let collection = null;
+
+// Initialize the database connection
+async function initDatabase() {
+  if (!db) {
+    const connection = await connect();
+    db = connection.db;
+    collection = db.collection('tasks');
+  }
+  return { db, collection };
+}
 
 export default async function handler(req, res) {
   // Get user session for authentication
@@ -46,6 +55,9 @@ export default async function handler(req, res) {
  */
 async function getDocumentation(taskId, req, res) {
   try {
+    // Initialize database connection
+    const { collection } = await initDatabase();
+    
     // Get task from database
     const task = await collection.findOne({ _id: new ObjectId(taskId) });
     
@@ -67,6 +79,9 @@ async function getDocumentation(taskId, req, res) {
  */
 async function addDocumentation(taskId, req, res, session) {
   try {
+    // Initialize database connection
+    const { collection } = await initDatabase();
+    
     // Get documentation data from request body
     const { content, title, format = 'markdown' } = req.body;
     
@@ -112,6 +127,9 @@ async function addDocumentation(taskId, req, res, session) {
  */
 async function updateDocumentation(taskId, req, res, session) {
   try {
+    // Initialize database connection
+    const { collection } = await initDatabase();
+    
     // Get documentation data from request body
     const { id, content, title, format } = req.body;
     
@@ -160,6 +178,9 @@ async function updateDocumentation(taskId, req, res, session) {
  */
 async function deleteDocumentation(taskId, req, res, session) {
   try {
+    // Initialize database connection
+    const { collection } = await initDatabase();
+    
     // Get documentation ID from request body
     const { id } = req.body;
     

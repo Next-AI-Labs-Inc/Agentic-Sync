@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Task, TaskFormData, Initiative } from '@/types';
+import { Task, TaskFormData, Initiative, SystemPrompt, AgentOptions } from '@/types';
 
 // Task API configuration
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
@@ -317,6 +317,21 @@ export async function updateTask(id: string, updateData: Partial<Task>) {
 }
 
 /**
+ * Toggle a task's starred status
+ */
+export async function toggleTaskStar(id: string, currentStarred: boolean) {
+  try {
+    const response = await apiClient.put(`/api/developer/tasks/${id}`, { 
+      starred: !currentStarred 
+    });
+    return response.data.data;
+  } catch (error: any) {
+    console.error(`Error toggling starred status for task ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
  * Delete a task
  */
 export async function deleteTask(id: string) {
@@ -375,6 +390,585 @@ export async function cleanupDuplicateTasks() {
     console.error('Error cleaning up duplicate tasks:', error);
     throw error;
   }
+}
+
+/**
+ * Mark a task as complete and shut down the system
+ * 
+ * Used to signal task completion and trigger a graceful shutdown
+ * 
+ * @param id The task ID to mark complete
+ * @returns Response data with shutdown message
+ */
+export async function completeTaskAndShutdown(id: string) {
+  try {
+    // First mark the task as completed
+    const updatedTask = await updateTask(id, {
+      status: 'reviewed',
+      completedAt: new Date().toISOString(),
+      reviewedAt: new Date().toISOString()
+    });
+    
+    console.log('Task completed successfully. Shutting down...');
+    
+    // Signal successful task completion
+    return {
+      success: true,
+      message: 'Task completed and system shutdown initiated',
+      task: updatedTask
+    };
+  } catch (error: any) {
+    console.error(`Error completing task ${id}:`, error);
+    throw error;
+  }
+}
+
+// =====================================================================
+// Item Status Management (Requirements, Technical Plan, Next Steps)
+// =====================================================================
+
+/**
+ * Add a new requirement item to a task
+ * 
+ * @param taskId Task ID
+ * @param content Item content
+ * @returns Updated task
+ */
+export async function addRequirementItem(taskId: string, content: string) {
+  try {
+    const now = new Date().toISOString();
+    const newItem = {
+      content,
+      status: 'proposed',
+      id: `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    const response = await apiClient.post(`/api/developer/tasks/${taskId}/requirement-item`, newItem);
+    return response.data.data;
+  } catch (error: any) {
+    console.error(`Error adding requirement item to task ${taskId}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Update a requirement item's status
+ * 
+ * @param taskId Task ID
+ * @param itemId Item ID
+ * @param status New status ('proposed' or 'approved')
+ * @param content Optional new content if being edited
+ * @returns Updated task
+ */
+export async function updateRequirementItem(taskId: string, itemId: string, status: 'proposed' | 'approved', content?: string) {
+  try {
+    const updateData: any = {
+      status
+    };
+    
+    if (content !== undefined) {
+      updateData.content = content;
+    }
+    
+    // Add timestamp if being approved
+    if (status === 'approved') {
+      updateData.approvedAt = new Date().toISOString();
+    }
+    
+    updateData.updatedAt = new Date().toISOString();
+    
+    const response = await apiClient.put(`/api/developer/tasks/${taskId}/requirement-item/${itemId}`, updateData);
+    return response.data.data;
+  } catch (error: any) {
+    console.error(`Error updating requirement item ${itemId} for task ${taskId}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Delete a requirement item
+ * 
+ * @param taskId Task ID
+ * @param itemId Item ID
+ * @returns Updated task
+ */
+export async function deleteRequirementItem(taskId: string, itemId: string) {
+  try {
+    const response = await apiClient.delete(`/api/developer/tasks/${taskId}/requirement-item/${itemId}`);
+    return response.data.data;
+  } catch (error: any) {
+    console.error(`Error deleting requirement item ${itemId} from task ${taskId}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Add a new technical plan item to a task
+ * 
+ * @param taskId Task ID
+ * @param content Item content
+ * @returns Updated task
+ */
+export async function addTechnicalPlanItem(taskId: string, content: string) {
+  try {
+    const now = new Date().toISOString();
+    const newItem = {
+      content,
+      status: 'proposed',
+      id: `tp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    const response = await apiClient.post(`/api/developer/tasks/${taskId}/technical-plan-item`, newItem);
+    return response.data.data;
+  } catch (error: any) {
+    console.error(`Error adding technical plan item to task ${taskId}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Update a technical plan item's status
+ * 
+ * @param taskId Task ID
+ * @param itemId Item ID
+ * @param status New status ('proposed' or 'approved')
+ * @param content Optional new content if being edited
+ * @returns Updated task
+ */
+export async function updateTechnicalPlanItem(taskId: string, itemId: string, status: 'proposed' | 'approved', content?: string) {
+  try {
+    const updateData: any = {
+      status
+    };
+    
+    if (content !== undefined) {
+      updateData.content = content;
+    }
+    
+    // Add timestamp if being approved
+    if (status === 'approved') {
+      updateData.approvedAt = new Date().toISOString();
+    }
+    
+    updateData.updatedAt = new Date().toISOString();
+    
+    const response = await apiClient.put(`/api/developer/tasks/${taskId}/technical-plan-item/${itemId}`, updateData);
+    return response.data.data;
+  } catch (error: any) {
+    console.error(`Error updating technical plan item ${itemId} for task ${taskId}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Delete a technical plan item
+ * 
+ * @param taskId Task ID
+ * @param itemId Item ID
+ * @returns Updated task
+ */
+export async function deleteTechnicalPlanItem(taskId: string, itemId: string) {
+  try {
+    const response = await apiClient.delete(`/api/developer/tasks/${taskId}/technical-plan-item/${itemId}`);
+    return response.data.data;
+  } catch (error: any) {
+    console.error(`Error deleting technical plan item ${itemId} from task ${taskId}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Add a new next step item to a task
+ * 
+ * @param taskId Task ID
+ * @param content Item content
+ * @returns Updated task
+ */
+export async function addNextStepItem(taskId: string, content: string) {
+  try {
+    const now = new Date().toISOString();
+    const newItem = {
+      content,
+      status: 'proposed',
+      id: `ns-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    const response = await apiClient.post(`/api/developer/tasks/${taskId}/next-step-item`, newItem);
+    return response.data.data;
+  } catch (error: any) {
+    console.error(`Error adding next step item to task ${taskId}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Update a next step item's status
+ * 
+ * @param taskId Task ID
+ * @param itemId Item ID
+ * @param status New status ('proposed' or 'approved')
+ * @param content Optional new content if being edited
+ * @returns Updated task
+ */
+export async function updateNextStepItem(taskId: string, itemId: string, status: 'proposed' | 'approved', content?: string) {
+  try {
+    const updateData: any = {
+      status
+    };
+    
+    if (content !== undefined) {
+      updateData.content = content;
+    }
+    
+    // Add timestamp if being approved
+    if (status === 'approved') {
+      updateData.approvedAt = new Date().toISOString();
+    }
+    
+    updateData.updatedAt = new Date().toISOString();
+    
+    const response = await apiClient.put(`/api/developer/tasks/${taskId}/next-step-item/${itemId}`, updateData);
+    return response.data.data;
+  } catch (error: any) {
+    console.error(`Error updating next step item ${itemId} for task ${taskId}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Delete a next step item
+ * 
+ * @param taskId Task ID
+ * @param itemId Item ID
+ * @returns Updated task
+ */
+export async function deleteNextStepItem(taskId: string, itemId: string) {
+  try {
+    const response = await apiClient.delete(`/api/developer/tasks/${taskId}/next-step-item/${itemId}`);
+    return response.data.data;
+  } catch (error: any) {
+    console.error(`Error deleting next step item ${itemId} from task ${taskId}:`, error);
+    throw error;
+  }
+}
+
+// =====================================================================
+// Feedback Management Functions
+// =====================================================================
+
+/**
+ * Add feedback to a task
+ * 
+ * @param taskId Task ID
+ * @param content Feedback content
+ * @returns Updated task
+ */
+export async function addTaskFeedback(taskId: string, content: string) {
+  try {
+    const now = new Date().toISOString();
+    const newFeedback = {
+      id: `feedback-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      content,
+      createdAt: now,
+      createdBy: 'admin', // Default to admin, can be updated with actual user later
+      resolved: false
+    };
+    
+    // Use the update task endpoint to add feedback
+    const response = await apiClient.post(`/api/developer/tasks/${taskId}/feedback`, newFeedback);
+    return response.data.data;
+  } catch (error: any) {
+    console.error(`Error adding feedback to task ${taskId}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Mark feedback as resolved
+ * 
+ * @param taskId Task ID
+ * @param feedbackId Feedback ID
+ * @returns Updated task
+ */
+export async function resolveTaskFeedback(taskId: string, feedbackId: string) {
+  try {
+    const now = new Date().toISOString();
+    const updateData = {
+      resolved: true,
+      resolvedAt: now
+    };
+    
+    const response = await apiClient.put(
+      `/api/developer/tasks/${taskId}/feedback/${feedbackId}`, 
+      updateData
+    );
+    return response.data.data;
+  } catch (error: any) {
+    console.error(`Error resolving feedback ${feedbackId} for task ${taskId}:`, error);
+    throw error;
+  }
+}
+
+// =====================================================================
+// System Prompt Management Functions
+// =====================================================================
+
+/**
+ * Get all system prompts
+ * 
+ * @returns Array of system prompts
+ */
+export async function getSystemPrompts() {
+  try {
+    // This would typically be an API call, but for now we'll use localStorage
+    const storedPrompts = localStorage.getItem('systemPrompts');
+    if (storedPrompts) {
+      return JSON.parse(storedPrompts);
+    }
+    
+    // Default prompts if none are stored
+    const defaultPrompts = [
+      {
+        id: 'default-implementation',
+        name: 'Default Implementation Prompt',
+        content: 'You are an AI assistant tasked with implementing this feature. Review the task details, requirements, and technical plan, then implement the solution.',
+        type: 'implementation',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isDefault: true
+      },
+      {
+        id: 'default-demo',
+        name: 'Default Demo Prompt',
+        content: 'You are an AI assistant tasked with demonstrating how this feature works. Set up the necessary environment, execute the relevant commands, and show the feature in action.',
+        type: 'demo',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isDefault: true
+      },
+      {
+        id: 'default-feedback',
+        name: 'Default Feedback Prompt',
+        content: 'You are an AI assistant tasked with addressing feedback on this task. Review the task and feedback, then implement the necessary changes.',
+        type: 'feedback',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isDefault: true
+      }
+    ];
+    
+    // Store defaults
+    localStorage.setItem('systemPrompts', JSON.stringify(defaultPrompts));
+    return defaultPrompts;
+  } catch (error: any) {
+    console.error('Error fetching system prompts:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get a system prompt by ID
+ * 
+ * @param id Prompt ID
+ * @returns System prompt
+ */
+export async function getSystemPrompt(id: string) {
+  try {
+    const prompts = await getSystemPrompts();
+    const prompt = prompts.find((p: any) => p.id === id);
+    if (!prompt) {
+      throw new Error(`System prompt with ID ${id} not found`);
+    }
+    return prompt;
+  } catch (error: any) {
+    console.error(`Error fetching system prompt ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Create a new system prompt
+ * 
+ * @param promptData Prompt data
+ * @returns Created system prompt
+ */
+export async function createSystemPrompt(promptData: Omit<SystemPrompt, 'id' | 'createdAt' | 'updatedAt'>) {
+  try {
+    const prompts = await getSystemPrompts();
+    const now = new Date().toISOString();
+    
+    const newPrompt = {
+      ...promptData,
+      id: `prompt-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    // Add to prompts and save
+    const updatedPrompts = [...prompts, newPrompt];
+    localStorage.setItem('systemPrompts', JSON.stringify(updatedPrompts));
+    
+    return newPrompt;
+  } catch (error: any) {
+    console.error('Error creating system prompt:', error);
+    throw error;
+  }
+}
+
+/**
+ * Update a system prompt
+ * 
+ * @param id Prompt ID
+ * @param updateData Update data
+ * @returns Updated system prompt
+ */
+export async function updateSystemPrompt(id: string, updateData: Partial<SystemPrompt>) {
+  try {
+    const prompts = await getSystemPrompts();
+    const promptIndex = prompts.findIndex((p: any) => p.id === id);
+    
+    if (promptIndex === -1) {
+      throw new Error(`System prompt with ID ${id} not found`);
+    }
+    
+    // Update the prompt
+    const updatedPrompt = {
+      ...prompts[promptIndex],
+      ...updateData,
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Update prompts array and save
+    prompts[promptIndex] = updatedPrompt;
+    localStorage.setItem('systemPrompts', JSON.stringify(prompts));
+    
+    return updatedPrompt;
+  } catch (error: any) {
+    console.error(`Error updating system prompt ${id}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Delete a system prompt
+ * 
+ * @param id Prompt ID
+ * @returns Success status
+ */
+export async function deleteSystemPrompt(id: string) {
+  try {
+    const prompts = await getSystemPrompts();
+    
+    // Don't allow deleting default prompts
+    const prompt = prompts.find((p: any) => p.id === id);
+    if (prompt && prompt.isDefault) {
+      throw new Error('Cannot delete default system prompts');
+    }
+    
+    const filteredPrompts = prompts.filter((p: any) => p.id !== id);
+    localStorage.setItem('systemPrompts', JSON.stringify(filteredPrompts));
+    
+    return { success: true };
+  } catch (error: any) {
+    console.error(`Error deleting system prompt ${id}:`, error);
+    throw error;
+  }
+}
+
+// =====================================================================
+// Agent Deployment Functions
+// =====================================================================
+
+/**
+ * Launch a Claude agent for a task
+ * 
+ * @param options Agent options (task ID, system prompt, feedback, mode)
+ * @returns Success status and message
+ */
+export async function launchAgentForTask(options: AgentOptions) {
+  try {
+    console.log('Launching agent with options:', options);
+    
+    // In a real implementation, this would use an API to launch the agent
+    // For now, we'll construct the command that would be run
+    
+    let systemPrompt = '';
+    if (options.systemPromptId) {
+      // Get the system prompt by ID
+      const prompt = await getSystemPrompt(options.systemPromptId);
+      systemPrompt = prompt.content;
+    } else if (options.customSystemPrompt) {
+      systemPrompt = options.customSystemPrompt;
+    } else {
+      // Get default prompt for the mode
+      const prompts = await getSystemPrompts();
+      const defaultPrompt = prompts.find((p: any) => 
+        p.type === (options.mode === 'implement' ? 'implementation' : 
+                   options.mode === 'demo' ? 'demo' : 'feedback') && 
+        p.isDefault
+      );
+      
+      if (defaultPrompt) {
+        systemPrompt = defaultPrompt.content;
+      } else {
+        throw new Error(`No default system prompt found for mode: ${options.mode}`);
+      }
+    }
+    
+    // Get the task to include its details
+    const task = await getTask(options.taskId);
+    
+    // Prepare the command that would be run
+    // This is just for demonstration; in reality, this would launch a terminal
+    const command = constructAgentLaunchCommand(systemPrompt, task, options.feedback, options.mode);
+    
+    // Return a success response with the command
+    return { 
+      success: true, 
+      message: 'Agent launched successfully',
+      command
+    };
+  } catch (error: any) {
+    console.error('Error launching agent:', error);
+    throw error;
+  }
+}
+
+/**
+ * Construct the command to launch a Claude agent
+ * 
+ * @param systemPrompt System prompt
+ * @param task Task object
+ * @param feedback Optional feedback
+ * @param mode Agent mode (implement, demo, feedback)
+ * @returns Formatted command string
+ */
+function constructAgentLaunchCommand(
+  systemPrompt: string, 
+  task: Task, 
+  feedback?: string,
+  mode: 'implement' | 'demo' | 'feedback' = 'implement'
+) {
+  // Build the task context
+  const taskContext = `
+Task ID: ${task.id}
+Title: ${task.title}
+Description: ${task.description || 'No description provided'}
+Requirements: ${task.requirements || 'No requirements provided'}
+Technical Plan: ${task.technicalPlan || 'No technical plan provided'}
+Status: ${task.status}
+${feedback ? `\nFeedback: ${feedback}` : ''}
+  `.trim();
+  
+  // Format the command
+  // In a real implementation, this would launch a terminal with the claude command
+  return `cd /Users/jedi/react_projects/ix && claude "${systemPrompt}\n\nHere is the task you need to ${mode === 'implement' ? 'implement' : mode === 'demo' ? 'demonstrate' : 'address feedback for'}:\n\n${taskContext}"`;
 }
 
 // Export the API client for direct use

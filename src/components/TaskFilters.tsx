@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Project, TaskFilterStatus, ProjectFilterType, SortOption, SortDirection, SavedFilter } from '@/types';
+import { Project, Task, TaskFilterStatus, ProjectFilterType, SortOption, SortDirection, SavedFilter } from '@/types';
 import { FaSave, FaTrash, FaFilter, FaBroom, FaEllipsisV, FaCog } from 'react-icons/fa';
 import * as taskApiService from '@/services/taskApiService';
 import { TASK_STATUSES, STATUS_DISPLAY } from '@/constants/taskStatus';
@@ -24,6 +24,7 @@ interface TaskFiltersProps {
   dedupeEnabled?: boolean;
   setDedupeEnabled?: (enabled: boolean) => void;
   runManualDedupe?: () => void;
+  tasks?: Task[]; // Add access to all tasks for statistics like starred count
 }
 
 export default function TaskFilters({
@@ -41,7 +42,8 @@ export default function TaskFilters({
   refreshTasks,
   dedupeEnabled = false,
   setDedupeEnabled,
-  runManualDedupe
+  runManualDedupe,
+  tasks = []
 }: TaskFiltersProps) {
   // Sort projects alphabetically by name
   const sortedProjects = [...projects].sort((a, b) => 
@@ -418,6 +420,19 @@ export default function TaskFilters({
               Source Tasks
             </div>
             
+            {/* Today (Starred) */}
+            <button
+              onClick={() => setCompletedFilter(TASK_STATUSES.TODAY)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+                ${completedFilter === TASK_STATUSES.TODAY ? STATUS_DISPLAY[TASK_STATUSES.TODAY].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {STATUS_DISPLAY[TASK_STATUSES.TODAY].label}
+              <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+                {/* Use a different approach for starred count since it's not in taskCountsByStatus */}
+                {tasks.filter(task => task.starred).length || 0}
+              </span>
+            </button>
+            
             {/* Backlog */}
             <button
               onClick={() => setCompletedFilter(TASK_STATUSES.BACKLOG)}
@@ -458,6 +473,7 @@ export default function TaskFilters({
             
             {/* Todo */}
             <button
+              data-testid="status-filter"
               onClick={() => setCompletedFilter(TASK_STATUSES.TODO)}
               className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
                 ${completedFilter === TASK_STATUSES.TODO ? STATUS_DISPLAY[TASK_STATUSES.TODO].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}

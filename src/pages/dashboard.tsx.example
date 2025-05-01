@@ -1,0 +1,103 @@
+import React from 'react';
+import { enhancedWithAuth, enhancedUseAuth } from '@shared-tools/auth';
+import { Layout } from '@/components/Layout';
+
+/**
+ * Task Dashboard page with enhanced authentication
+ * Protected with role-based access control and works in all environments
+ */
+function Dashboard() {
+  const { 
+    user, 
+    isAdmin, 
+    isTauri, 
+    isWebView, 
+    isOffline,
+    logout 
+  } = enhancedUseAuth();
+
+  return (
+    <Layout>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold">Task Dashboard</h1>
+          
+          <div className="flex items-center space-x-4">
+            <div className="text-sm">
+              {/* Show environment indicators */}
+              {isTauri && <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-md mr-2">Tauri App</span>}
+              {isWebView && <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-md mr-2">WebView</span>}
+              {isOffline && <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-md mr-2">Offline</span>}
+            </div>
+            
+            <div className="text-sm text-gray-600">
+              Logged in as <span className="font-semibold">{user?.name}</span>
+              {isAdmin && <span className="ml-1 text-xs text-blue-600">(Admin)</span>}
+            </div>
+            
+            <button 
+              onClick={logout}
+              className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-md text-sm"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+        
+        <div className="bg-white shadow rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-4">Task Overview</h2>
+          
+          {/* Show different content based on online/offline status */}
+          {isOffline ? (
+            <div className="p-4 bg-yellow-50 rounded-md mb-4">
+              <p className="text-yellow-800">
+                You&apos;re currently working offline. Changes will be synchronized when you reconnect.
+              </p>
+            </div>
+          ) : (
+            <div className="p-4 bg-green-50 rounded-md mb-4">
+              <p className="text-green-800">
+                You&apos;re connected to the server. All changes will be saved in real-time.
+              </p>
+            </div>
+          )}
+          
+          {/* Task content would go here */}
+          <div className="mt-6">
+            <p>Your tasks will appear here...</p>
+          </div>
+        </div>
+        
+        {/* Admin-only section */}
+        {isAdmin && (
+          <div className="mt-8 bg-white shadow rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4">Admin Controls</h2>
+            <p>This section is only visible to administrators.</p>
+            
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              <button className="p-2 bg-blue-100 text-blue-800 rounded-md">
+                Manage Users
+              </button>
+              <button className="p-2 bg-blue-100 text-blue-800 rounded-md">
+                System Settings
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </Layout>
+  );
+}
+
+// Protect this page with authentication and require the 'user' role
+export default enhancedWithAuth(Dashboard, {
+  requiredRoles: ['user'],
+  fallbackUrl: '/unauthorized',
+  // Custom loading component
+  loadingComponent: (
+    <div className="flex flex-col justify-center items-center h-screen bg-gray-50">
+      <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary-600"></div>
+      <div className="mt-4 text-gray-700 font-medium">Loading Task Dashboard...</div>
+    </div>
+  )
+});

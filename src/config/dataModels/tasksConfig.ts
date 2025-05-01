@@ -243,6 +243,59 @@ const tasksConfig: DataModelConfig = createDataModelConfig({
         searchable: true,
         filterable: false,
         sortable: false
+      },
+      buildDocumentation: {
+        type: 'Array',
+        of: 'Object',
+        required: false,
+        label: 'Build Documentation',
+        description: 'Documentation related to building and implementing this task',
+        component: 'documentationList',
+        displayInList: false,
+        displayInDetail: true,
+        searchable: true,
+        filterable: false,
+        sortable: false
+      },
+      // New fields for item approval functionality
+      requirementItems: {
+        type: 'Array',
+        of: 'Object',
+        required: false,
+        label: 'Requirements With Approval Status',
+        description: 'Requirements with approval status tracking - each item can be proposed, approved, or vetoed',
+        component: 'approvalItemList',
+        displayInList: false,
+        displayInDetail: true,
+        searchable: true,
+        filterable: false,
+        sortable: false
+      },
+      technicalPlanItems: {
+        type: 'Array',
+        of: 'Object',
+        required: false,
+        label: 'Technical Plan With Approval Status',
+        description: 'Technical plan steps with approval status tracking - each item can be proposed, approved, or vetoed',
+        component: 'approvalItemList',
+        displayInList: false,
+        displayInDetail: true,
+        searchable: true,
+        filterable: false,
+        sortable: false
+      },
+      nextStepItems: {
+        type: 'Array',
+        of: 'Object',
+        required: false,
+        label: 'Next Steps With Approval Status',
+        description: 'Next steps with approval status tracking - each item can be proposed, approved, or vetoed',
+        component: 'approvalItemList',
+        displayInList: false,
+        displayInDetail: true,
+        searchable: true,
+        filterable: false,
+        sortable: false
       }
     },
     timestamps: true,
@@ -343,7 +396,17 @@ const tasksConfig: DataModelConfig = createDataModelConfig({
       { method: 'PUT', path: '/:id', handler: 'update' },
       { method: 'DELETE', path: '/:id', handler: 'delete' },
       { method: 'PUT', path: '/:id/status', handler: 'updateStatus' },
-      { method: 'PUT', path: '/:id/tested', handler: 'markTested' }
+      { method: 'PUT', path: '/:id/tested', handler: 'markTested' },
+      // New endpoints for item status management
+      { method: 'PUT', path: '/:id/requirement-item/:itemId', handler: 'updateRequirementItem' },
+      { method: 'PUT', path: '/:id/technical-plan-item/:itemId', handler: 'updateTechnicalPlanItem' },
+      { method: 'PUT', path: '/:id/next-step-item/:itemId', handler: 'updateNextStepItem' },
+      { method: 'DELETE', path: '/:id/requirement-item/:itemId', handler: 'deleteRequirementItem' },
+      { method: 'DELETE', path: '/:id/technical-plan-item/:itemId', handler: 'deleteTechnicalPlanItem' },
+      { method: 'DELETE', path: '/:id/next-step-item/:itemId', handler: 'deleteNextStepItem' },
+      { method: 'POST', path: '/:id/requirement-item', handler: 'addRequirementItem' },
+      { method: 'POST', path: '/:id/technical-plan-item', handler: 'addTechnicalPlanItem' },
+      { method: 'POST', path: '/:id/next-step-item', handler: 'addNextStepItem' }
     ]
   },
   

@@ -14,7 +14,9 @@ import {
   ProjectFilterType,
   SortOption,
   SortDirection,
-  TaskFormData
+  TaskFormData,
+  ItemWithStatus,
+  AgentOptions
 } from '@/types';
 import * as taskApiService from '@/services/taskApiService';
 import taskSyncService, { SyncEventType } from '@/services/taskSyncService';
@@ -45,6 +47,20 @@ interface TaskContextValue {
   addTask: (taskData: TaskFormData) => Promise<void>;
   updateTaskDate: (taskId: string, project: string, newDate: string) => Promise<void>;
   updateTask: (taskId: string, updateData: Partial<Task>) => Promise<void>;
+  toggleTaskStar: (taskId: string, project: string) => Promise<void>;
+  // Item status management functions
+  approveRequirementItem: (taskId: string, itemId: string) => Promise<void>;
+  vetoRequirementItem: (taskId: string, itemId: string) => Promise<void>;
+  updateRequirementItems: (taskId: string, items: ItemWithStatus[]) => Promise<void>;
+  approveTechnicalPlanItem: (taskId: string, itemId: string) => Promise<void>;
+  vetoTechnicalPlanItem: (taskId: string, itemId: string) => Promise<void>;
+  updateTechnicalPlanItems: (taskId: string, items: ItemWithStatus[]) => Promise<void>;
+  approveNextStepItem: (taskId: string, itemId: string) => Promise<void>;
+  vetoNextStepItem: (taskId: string, itemId: string) => Promise<void>;
+  updateNextStepItems: (taskId: string, items: ItemWithStatus[]) => Promise<void>;
+  // Agent integration functions
+  addTaskFeedback: (taskId: string, content: string) => Promise<void>;
+  launchAgentForTask: (taskId: string, mode: 'implement' | 'demo' | 'feedback', feedback?: string) => Promise<{success: boolean; message: string; command: string}>;
   filteredTasks: Task[];
   taskCountsByStatus: Record<string, number>;
   dedupeEnabled: boolean;
@@ -637,6 +653,9 @@ export function TaskProvider({
         );
       },
       
+      // 'today' filter (starred tasks)
+      today: (task: Task): boolean => Boolean(task.starred),
+      
       // Status-specific filters
       byStatus: (status: string) => (task: Task): boolean => task.status === status
     };
@@ -658,6 +677,8 @@ export function TaskProvider({
       filterFn = filterPredicates.recentCompleted;
     } else if (completedFilter === 'source-tasks') {
       filterFn = filterPredicates.sourceTasks;
+    } else if (completedFilter === 'today') {
+      filterFn = filterPredicates.today;
     } else {
       // Status-specific filter
       filterFn = filterPredicates.byStatus(completedFilter);
@@ -1014,6 +1035,637 @@ export function TaskProvider({
     }
   };
 
+  // Toggle a task's star status
+  const toggleTaskStar = async (taskId: string, project: string) => {
+    // Get the current task
+    const taskToUpdate = localTaskCache.get(taskId);
+    if (!taskToUpdate) {
+      console.error(`Task with ID ${taskId} not found in cache`);
+      return;
+    }
+
+    // Get current starred status
+    const currentStarred = Boolean(taskToUpdate.starred);
+    
+    // Create update data
+    const updateData: Partial<Task> = {
+      starred: !currentStarred,
+      updatedAt: new Date().toISOString()
+    };
+
+    // Create updated task for optimistic update
+    const updatedTask = { ...taskToUpdate, ...updateData };
+
+    // Update local cache optimistically
+    const newCache = new Map(localTaskCache);
+    newCache.set(taskId, updatedTask);
+    setLocalTaskCache(newCache);
+
+    // Update tasks array optimistically
+    const optimisticTasks = tasks.map((task) => (task.id === taskId ? updatedTask : task));
+    setTasks(optimisticTasks);
+
+    try {
+      // Perform the actual API update
+      await taskApiService.toggleTaskStar(taskId, currentStarred);
+
+      // Emit event for real-time sync to other clients
+      taskSyncService.emitTaskUpdated(updatedTask);
+
+    } catch (error) {
+      console.error('Error toggling task star:', error);
+      setError('Failed to update task star status');
+
+      // Revert to previous state on error
+      setTasks(tasks);
+
+      // Refresh data from server to ensure consistency
+      refreshTasks();
+    }
+  };
+
+  // =========================================================================
+  // Item Status Management Functions
+  // =========================================================================
+
+  // Approve a requirement item
+  const approveRequirementItem = async (taskId: string, itemId: string) => {
+    // Get the current task
+    const taskToUpdate = localTaskCache.get(taskId);
+    if (!taskToUpdate) {
+      console.error(`Task with ID ${taskId} not found in cache`);
+      return;
+    }
+
+    // Ensure requirementItems exists
+    if (!taskToUpdate.requirementItems || taskToUpdate.requirementItems.length === 0) {
+      console.error(`Task ${taskId} has no requirement items`);
+      return;
+    }
+
+    // Find the item
+    const itemIndex = taskToUpdate.requirementItems.findIndex(item => item.id === itemId);
+    if (itemIndex === -1) {
+      console.error(`Requirement item ${itemId} not found in task ${taskId}`);
+      return;
+    }
+
+    // Create an optimistic update
+    const now = new Date().toISOString();
+    const updatedItems = [...taskToUpdate.requirementItems];
+    updatedItems[itemIndex] = {
+      ...updatedItems[itemIndex],
+      status: 'approved',
+      approvedAt: now,
+      updatedAt: now
+    };
+
+    // Create the update data
+    const updateData: Partial<Task> = {
+      requirementItems: updatedItems,
+      updatedAt: now
+    };
+
+    // Create updated task for optimistic update
+    const updatedTask = { ...taskToUpdate, ...updateData };
+
+    // Update local cache optimistically
+    const newCache = new Map(localTaskCache);
+    newCache.set(taskId, updatedTask);
+    setLocalTaskCache(newCache);
+
+    // Update tasks array optimistically
+    const optimisticTasks = tasks.map((task) => (task.id === taskId ? updatedTask : task));
+    setTasks(optimisticTasks);
+
+    try {
+      // Perform the actual API update
+      await taskApiService.updateRequirementItem(taskId, itemId, 'approved');
+
+      // Emit event for real-time sync to other clients
+      taskSyncService.emitTaskUpdated(updatedTask);
+    } catch (error) {
+      console.error(`Error approving requirement item ${itemId}:`, error);
+      setError('Failed to approve requirement item');
+
+      // Revert to previous state on error
+      setTasks(tasks);
+
+      // Refresh data from server to ensure consistency
+      refreshTasks();
+    }
+  };
+
+  // Veto (delete) a requirement item
+  const vetoRequirementItem = async (taskId: string, itemId: string) => {
+    // Get the current task
+    const taskToUpdate = localTaskCache.get(taskId);
+    if (!taskToUpdate) {
+      console.error(`Task with ID ${taskId} not found in cache`);
+      return;
+    }
+
+    // Ensure requirementItems exists
+    if (!taskToUpdate.requirementItems || taskToUpdate.requirementItems.length === 0) {
+      console.error(`Task ${taskId} has no requirement items`);
+      return;
+    }
+
+    // Create optimistic update by removing the item
+    const updatedItems = taskToUpdate.requirementItems.filter(item => item.id !== itemId);
+    const now = new Date().toISOString();
+
+    // Create the update data
+    const updateData: Partial<Task> = {
+      requirementItems: updatedItems,
+      updatedAt: now
+    };
+
+    // Create updated task for optimistic update
+    const updatedTask = { ...taskToUpdate, ...updateData };
+
+    // Update local cache optimistically
+    const newCache = new Map(localTaskCache);
+    newCache.set(taskId, updatedTask);
+    setLocalTaskCache(newCache);
+
+    // Update tasks array optimistically
+    const optimisticTasks = tasks.map((task) => (task.id === taskId ? updatedTask : task));
+    setTasks(optimisticTasks);
+
+    try {
+      // Perform the actual API update
+      await taskApiService.deleteRequirementItem(taskId, itemId);
+
+      // Emit event for real-time sync to other clients
+      taskSyncService.emitTaskUpdated(updatedTask);
+    } catch (error) {
+      console.error(`Error vetoing requirement item ${itemId}:`, error);
+      setError('Failed to veto requirement item');
+
+      // Revert to previous state on error
+      setTasks(tasks);
+
+      // Refresh data from server to ensure consistency
+      refreshTasks();
+    }
+  };
+
+  // Update requirement items
+  const updateRequirementItems = async (taskId: string, items: ItemWithStatus[]) => {
+    // Get the current task
+    const taskToUpdate = localTaskCache.get(taskId);
+    if (!taskToUpdate) {
+      console.error(`Task with ID ${taskId} not found in cache`);
+      return;
+    }
+
+    const now = new Date().toISOString();
+
+    // Create the update data
+    const updateData: Partial<Task> = {
+      requirementItems: items,
+      updatedAt: now
+    };
+
+    // Create updated task for optimistic update
+    const updatedTask = { ...taskToUpdate, ...updateData };
+
+    // Update local cache optimistically
+    const newCache = new Map(localTaskCache);
+    newCache.set(taskId, updatedTask);
+    setLocalTaskCache(newCache);
+
+    // Update tasks array optimistically
+    const optimisticTasks = tasks.map((task) => (task.id === taskId ? updatedTask : task));
+    setTasks(optimisticTasks);
+
+    try {
+      // Perform the actual API update
+      await taskApiService.updateTask(taskId, { requirementItems: items });
+
+      // Emit event for real-time sync to other clients
+      taskSyncService.emitTaskUpdated(updatedTask);
+    } catch (error) {
+      console.error(`Error updating requirement items for task ${taskId}:`, error);
+      setError('Failed to update requirement items');
+
+      // Revert to previous state on error
+      setTasks(tasks);
+
+      // Refresh data from server to ensure consistency
+      refreshTasks();
+    }
+  };
+
+  // Approve a technical plan item
+  const approveTechnicalPlanItem = async (taskId: string, itemId: string) => {
+    // Get the current task
+    const taskToUpdate = localTaskCache.get(taskId);
+    if (!taskToUpdate) {
+      console.error(`Task with ID ${taskId} not found in cache`);
+      return;
+    }
+
+    // Ensure technicalPlanItems exists
+    if (!taskToUpdate.technicalPlanItems || taskToUpdate.technicalPlanItems.length === 0) {
+      console.error(`Task ${taskId} has no technical plan items`);
+      return;
+    }
+
+    // Find the item
+    const itemIndex = taskToUpdate.technicalPlanItems.findIndex(item => item.id === itemId);
+    if (itemIndex === -1) {
+      console.error(`Technical plan item ${itemId} not found in task ${taskId}`);
+      return;
+    }
+
+    // Create an optimistic update
+    const now = new Date().toISOString();
+    const updatedItems = [...taskToUpdate.technicalPlanItems];
+    updatedItems[itemIndex] = {
+      ...updatedItems[itemIndex],
+      status: 'approved',
+      approvedAt: now,
+      updatedAt: now
+    };
+
+    // Create the update data
+    const updateData: Partial<Task> = {
+      technicalPlanItems: updatedItems,
+      updatedAt: now
+    };
+
+    // Create updated task for optimistic update
+    const updatedTask = { ...taskToUpdate, ...updateData };
+
+    // Update local cache optimistically
+    const newCache = new Map(localTaskCache);
+    newCache.set(taskId, updatedTask);
+    setLocalTaskCache(newCache);
+
+    // Update tasks array optimistically
+    const optimisticTasks = tasks.map((task) => (task.id === taskId ? updatedTask : task));
+    setTasks(optimisticTasks);
+
+    try {
+      // Perform the actual API update
+      await taskApiService.updateTechnicalPlanItem(taskId, itemId, 'approved');
+
+      // Emit event for real-time sync to other clients
+      taskSyncService.emitTaskUpdated(updatedTask);
+    } catch (error) {
+      console.error(`Error approving technical plan item ${itemId}:`, error);
+      setError('Failed to approve technical plan item');
+
+      // Revert to previous state on error
+      setTasks(tasks);
+
+      // Refresh data from server to ensure consistency
+      refreshTasks();
+    }
+  };
+
+  // Veto (delete) a technical plan item
+  const vetoTechnicalPlanItem = async (taskId: string, itemId: string) => {
+    // Get the current task
+    const taskToUpdate = localTaskCache.get(taskId);
+    if (!taskToUpdate) {
+      console.error(`Task with ID ${taskId} not found in cache`);
+      return;
+    }
+
+    // Ensure technicalPlanItems exists
+    if (!taskToUpdate.technicalPlanItems || taskToUpdate.technicalPlanItems.length === 0) {
+      console.error(`Task ${taskId} has no technical plan items`);
+      return;
+    }
+
+    // Create optimistic update by removing the item
+    const updatedItems = taskToUpdate.technicalPlanItems.filter(item => item.id !== itemId);
+    const now = new Date().toISOString();
+
+    // Create the update data
+    const updateData: Partial<Task> = {
+      technicalPlanItems: updatedItems,
+      updatedAt: now
+    };
+
+    // Create updated task for optimistic update
+    const updatedTask = { ...taskToUpdate, ...updateData };
+
+    // Update local cache optimistically
+    const newCache = new Map(localTaskCache);
+    newCache.set(taskId, updatedTask);
+    setLocalTaskCache(newCache);
+
+    // Update tasks array optimistically
+    const optimisticTasks = tasks.map((task) => (task.id === taskId ? updatedTask : task));
+    setTasks(optimisticTasks);
+
+    try {
+      // Perform the actual API update
+      await taskApiService.deleteTechnicalPlanItem(taskId, itemId);
+
+      // Emit event for real-time sync to other clients
+      taskSyncService.emitTaskUpdated(updatedTask);
+    } catch (error) {
+      console.error(`Error vetoing technical plan item ${itemId}:`, error);
+      setError('Failed to veto technical plan item');
+
+      // Revert to previous state on error
+      setTasks(tasks);
+
+      // Refresh data from server to ensure consistency
+      refreshTasks();
+    }
+  };
+
+  // Update technical plan items
+  const updateTechnicalPlanItems = async (taskId: string, items: ItemWithStatus[]) => {
+    // Get the current task
+    const taskToUpdate = localTaskCache.get(taskId);
+    if (!taskToUpdate) {
+      console.error(`Task with ID ${taskId} not found in cache`);
+      return;
+    }
+
+    const now = new Date().toISOString();
+
+    // Create the update data
+    const updateData: Partial<Task> = {
+      technicalPlanItems: items,
+      updatedAt: now
+    };
+
+    // Create updated task for optimistic update
+    const updatedTask = { ...taskToUpdate, ...updateData };
+
+    // Update local cache optimistically
+    const newCache = new Map(localTaskCache);
+    newCache.set(taskId, updatedTask);
+    setLocalTaskCache(newCache);
+
+    // Update tasks array optimistically
+    const optimisticTasks = tasks.map((task) => (task.id === taskId ? updatedTask : task));
+    setTasks(optimisticTasks);
+
+    try {
+      // Perform the actual API update
+      await taskApiService.updateTask(taskId, { technicalPlanItems: items });
+
+      // Emit event for real-time sync to other clients
+      taskSyncService.emitTaskUpdated(updatedTask);
+    } catch (error) {
+      console.error(`Error updating technical plan items for task ${taskId}:`, error);
+      setError('Failed to update technical plan items');
+
+      // Revert to previous state on error
+      setTasks(tasks);
+
+      // Refresh data from server to ensure consistency
+      refreshTasks();
+    }
+  };
+
+  // Approve a next step item
+  const approveNextStepItem = async (taskId: string, itemId: string) => {
+    // Get the current task
+    const taskToUpdate = localTaskCache.get(taskId);
+    if (!taskToUpdate) {
+      console.error(`Task with ID ${taskId} not found in cache`);
+      return;
+    }
+
+    // Ensure nextStepItems exists
+    if (!taskToUpdate.nextStepItems || taskToUpdate.nextStepItems.length === 0) {
+      console.error(`Task ${taskId} has no next step items`);
+      return;
+    }
+
+    // Find the item
+    const itemIndex = taskToUpdate.nextStepItems.findIndex(item => item.id === itemId);
+    if (itemIndex === -1) {
+      console.error(`Next step item ${itemId} not found in task ${taskId}`);
+      return;
+    }
+
+    // Create an optimistic update
+    const now = new Date().toISOString();
+    const updatedItems = [...taskToUpdate.nextStepItems];
+    updatedItems[itemIndex] = {
+      ...updatedItems[itemIndex],
+      status: 'approved',
+      approvedAt: now,
+      updatedAt: now
+    };
+
+    // Create the update data
+    const updateData: Partial<Task> = {
+      nextStepItems: updatedItems,
+      updatedAt: now
+    };
+
+    // Create updated task for optimistic update
+    const updatedTask = { ...taskToUpdate, ...updateData };
+
+    // Update local cache optimistically
+    const newCache = new Map(localTaskCache);
+    newCache.set(taskId, updatedTask);
+    setLocalTaskCache(newCache);
+
+    // Update tasks array optimistically
+    const optimisticTasks = tasks.map((task) => (task.id === taskId ? updatedTask : task));
+    setTasks(optimisticTasks);
+
+    try {
+      // Perform the actual API update
+      await taskApiService.updateNextStepItem(taskId, itemId, 'approved');
+
+      // Emit event for real-time sync to other clients
+      taskSyncService.emitTaskUpdated(updatedTask);
+    } catch (error) {
+      console.error(`Error approving next step item ${itemId}:`, error);
+      setError('Failed to approve next step item');
+
+      // Revert to previous state on error
+      setTasks(tasks);
+
+      // Refresh data from server to ensure consistency
+      refreshTasks();
+    }
+  };
+
+  // Veto (delete) a next step item
+  const vetoNextStepItem = async (taskId: string, itemId: string) => {
+    // Get the current task
+    const taskToUpdate = localTaskCache.get(taskId);
+    if (!taskToUpdate) {
+      console.error(`Task with ID ${taskId} not found in cache`);
+      return;
+    }
+
+    // Ensure nextStepItems exists
+    if (!taskToUpdate.nextStepItems || taskToUpdate.nextStepItems.length === 0) {
+      console.error(`Task ${taskId} has no next step items`);
+      return;
+    }
+
+    // Create optimistic update by removing the item
+    const updatedItems = taskToUpdate.nextStepItems.filter(item => item.id !== itemId);
+    const now = new Date().toISOString();
+
+    // Create the update data
+    const updateData: Partial<Task> = {
+      nextStepItems: updatedItems,
+      updatedAt: now
+    };
+
+    // Create updated task for optimistic update
+    const updatedTask = { ...taskToUpdate, ...updateData };
+
+    // Update local cache optimistically
+    const newCache = new Map(localTaskCache);
+    newCache.set(taskId, updatedTask);
+    setLocalTaskCache(newCache);
+
+    // Update tasks array optimistically
+    const optimisticTasks = tasks.map((task) => (task.id === taskId ? updatedTask : task));
+    setTasks(optimisticTasks);
+
+    try {
+      // Perform the actual API update
+      await taskApiService.deleteNextStepItem(taskId, itemId);
+
+      // Emit event for real-time sync to other clients
+      taskSyncService.emitTaskUpdated(updatedTask);
+    } catch (error) {
+      console.error(`Error vetoing next step item ${itemId}:`, error);
+      setError('Failed to veto next step item');
+
+      // Revert to previous state on error
+      setTasks(tasks);
+
+      // Refresh data from server to ensure consistency
+      refreshTasks();
+    }
+  };
+
+  // Update next step items
+  const updateNextStepItems = async (taskId: string, items: ItemWithStatus[]) => {
+    // Get the current task
+    const taskToUpdate = localTaskCache.get(taskId);
+    if (!taskToUpdate) {
+      console.error(`Task with ID ${taskId} not found in cache`);
+      return;
+    }
+
+    const now = new Date().toISOString();
+
+    // Create the update data
+    const updateData: Partial<Task> = {
+      nextStepItems: items,
+      updatedAt: now
+    };
+
+    // Create updated task for optimistic update
+    const updatedTask = { ...taskToUpdate, ...updateData };
+
+    // Update local cache optimistically
+    const newCache = new Map(localTaskCache);
+    newCache.set(taskId, updatedTask);
+    setLocalTaskCache(newCache);
+
+    // Update tasks array optimistically
+    const optimisticTasks = tasks.map((task) => (task.id === taskId ? updatedTask : task));
+    setTasks(optimisticTasks);
+
+    try {
+      // Perform the actual API update
+      await taskApiService.updateTask(taskId, { nextStepItems: items });
+
+      // Emit event for real-time sync to other clients
+      taskSyncService.emitTaskUpdated(updatedTask);
+    } catch (error) {
+      console.error(`Error updating next step items for task ${taskId}:`, error);
+      setError('Failed to update next step items');
+
+      // Revert to previous state on error
+      setTasks(tasks);
+
+      // Refresh data from server to ensure consistency
+      refreshTasks();
+    }
+  };
+
+  // Agent integration functions
+  const addTaskFeedback = async (taskId: string, content: string) => {
+    try {
+      // Get the current task
+      const taskToUpdate = localTaskCache.get(taskId);
+      if (!taskToUpdate) {
+        console.error(`Task with ID ${taskId} not found in cache`);
+        return;
+      }
+      
+      // Add feedback to the task
+      const result = await taskApiService.addTaskFeedback(taskId, content);
+      
+      // Update local state with the server response
+      if (result) {
+        // Get the updated task
+        const updatedTask = result;
+        
+        // Update local cache
+        const newCache = new Map(localTaskCache);
+        newCache.set(taskId, updatedTask);
+        setLocalTaskCache(newCache);
+        
+        // Update tasks array
+        const optimisticTasks = tasks.map((task) => (task.id === taskId ? updatedTask : task));
+        setTasks(optimisticTasks);
+        
+        // Emit task updated event for real-time sync
+        taskSyncService.emitTaskUpdated(updatedTask);
+      }
+    } catch (error) {
+      console.error(`Error adding feedback to task ${taskId}:`, error);
+      throw error;
+    }
+  };
+  
+  // Launch agent for a task
+  const launchAgentForTask = async (taskId: string, mode: 'implement' | 'demo' | 'feedback', feedback?: string) => {
+    try {
+      // Get the current task
+      const taskToUpdate = localTaskCache.get(taskId);
+      if (!taskToUpdate) {
+        console.error(`Task with ID ${taskId} not found in cache`);
+        throw new Error(`Task with ID ${taskId} not found in cache`);
+      }
+      
+      // Prepare agent options
+      const options: AgentOptions = {
+        taskId,
+        mode
+      };
+      
+      // Add feedback if provided
+      if (feedback) {
+        options.feedback = feedback;
+      }
+      
+      // Launch the agent
+      const result = await taskApiService.launchAgentForTask(options);
+      
+      // Return the result (guaranteed to be non-undefined by this point)
+      return result;
+    } catch (error) {
+      console.error(`Error launching agent for task ${taskId}:`, error);
+      throw error;
+    }
+  };
+
   const value = {
     tasks,
     loading,
@@ -1035,6 +1687,20 @@ export function TaskProvider({
     addTask,
     updateTaskDate,
     updateTask,
+    toggleTaskStar,
+    // Item status management functions
+    approveRequirementItem,
+    vetoRequirementItem,
+    updateRequirementItems,
+    approveTechnicalPlanItem,
+    vetoTechnicalPlanItem,
+    updateTechnicalPlanItems,
+    approveNextStepItem,
+    vetoNextStepItem,
+    updateNextStepItems,
+    // Agent integration functions
+    addTaskFeedback,
+    launchAgentForTask,
     filteredTasks,
     taskCountsByStatus,
     dedupeEnabled,

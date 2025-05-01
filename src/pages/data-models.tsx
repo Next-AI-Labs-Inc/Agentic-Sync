@@ -130,12 +130,10 @@ const DataModelsContent: React.FC = () => {
               )}
               
               {activeTab === 'preview' && (
-                <DataModelProvider config={activeModel as DataModelConfig}>
-                  <DataPreview 
-                    config={activeModel as DataModelConfig}
-                    limit={20}
-                  />
-                </DataModelProvider>
+                <DataPreview 
+                  config={activeModel as DataModelConfig}
+                  limit={20}
+                />
               )}
             </>
           )}

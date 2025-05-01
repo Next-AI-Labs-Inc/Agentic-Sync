@@ -3,7 +3,8 @@ import type { AppProps } from 'next/app';
 import { useEffect, useState } from 'react';
 import { ProjectProvider } from '@/contexts/ProjectContext';
 import { TaskProvider } from '@/contexts/TaskContext';
-import { InitiativeProvider } from '@/contexts/InitiativeContext';
+import Head from 'next/head';
+// Initiative feature removed
 // KPI feature removed
 import Layout from '@/components/Layout';
 import { TaskTrackerProvider, useTaskTracker } from '@/components/TaskTracker';
@@ -61,10 +62,16 @@ export default function App({ Component, pageProps }: AppProps) {
   }, []);
 
   return (
-    <ProjectProvider>
-      <TaskProvider>
-        <InitiativeProvider>
-          <TaskTrackerProvider>
+    <>
+      <Head>
+        <title>IX Agent Sync - Next AI Labs</title>
+        <meta name="description" content="AI Task Management and Tracking System by Next AI Labs" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+        <ProjectProvider>
+          <TaskProvider>
+            <TaskTrackerProvider>
               <GlobalFunctionsExposer />
               <Layout>
                 <RouteTransition>
@@ -81,8 +88,8 @@ export default function App({ Component, pageProps }: AppProps) {
                 </RouteTransition>
               </Layout>
             </TaskTrackerProvider>
-        </InitiativeProvider>
-      </TaskProvider>
-    </ProjectProvider>
+          </TaskProvider>
+        </ProjectProvider>
+    </>
   );
 }

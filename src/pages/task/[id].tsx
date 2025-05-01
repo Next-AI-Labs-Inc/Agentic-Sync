@@ -6,7 +6,56 @@ import { getTask } from '@/services/taskApiService';
 import TaskCard from '@/components/TaskCard';
 import BuildDocumentation from '@/components/BuildDocumentation';
 import { Task } from '@/types';
-import { TaskProvider } from '@/contexts/TaskContext';
+import { TaskProvider, useTasks } from '@/contexts/TaskContext';
+
+/**
+ * Task detail component that uses the TaskContext
+ */
+function TaskDetail({ task }: { task: Task }) {
+  // Use the Tasks context at the component level
+  const { addTaskFeedback, launchAgentForTask } = useTasks();
+  
+  return (
+    <div className="task-single-view">
+      <TaskCard 
+        task={task}
+        onStatusChange={() => Promise.resolve()} // Read-only view
+        onMarkTested={() => Promise.resolve()}   // Read-only view
+        onDelete={() => Promise.resolve()}       // Read-only view
+        onUpdateDate={() => Promise.resolve()}   // Read-only view
+        onUpdateTask={() => Promise.resolve()}   // Read-only view
+        onToggleStar={() => Promise.resolve()}   // Read-only view
+        // Item approval functions (read-only)
+        onApproveRequirementItem={() => Promise.resolve()}
+        onVetoRequirementItem={() => Promise.resolve()}
+        onUpdateRequirementItems={() => Promise.resolve()}
+        onApproveTechnicalPlanItem={() => Promise.resolve()}
+        onVetoTechnicalPlanItem={() => Promise.resolve()}
+        onUpdateTechnicalPlanItems={() => Promise.resolve()}
+        onApproveNextStepItem={() => Promise.resolve()}
+        onVetoNextStepItem={() => Promise.resolve()}
+        onUpdateNextStepItems={() => Promise.resolve()}
+        // Agent integration functions - properly passed from context
+        onAddFeedback={addTaskFeedback}
+        onLaunchAgent={async (taskId, mode, feedback) => {
+          // Call the function but don't propagate the return value
+          await launchAgentForTask(taskId, mode, feedback);
+          return Promise.resolve();
+        }}
+        expanded={true}           // Always show expanded
+        hideExpand={true}         // Hide expand button
+      />
+      
+      {/* Build Documentation Section */}
+      <div className="mt-6">
+        <BuildDocumentation 
+          taskId={task.id} 
+          className="bg-white"
+        />
+      </div>
+    </div>
+  );
+}
 
 /**
  * Individual task view page
@@ -94,26 +143,7 @@ export default function SingleTaskPage() {
       {/* Task display */}
       {!loading && !error && task && (
         <TaskProvider initialCache={new Map([[task.id, task]])}>
-          <div className="task-single-view">
-            <TaskCard 
-              task={task}
-              onStatusChange={() => Promise.resolve()} // Read-only view
-              onMarkTested={() => Promise.resolve()}   // Read-only view
-              onDelete={() => Promise.resolve()}       // Read-only view
-              onUpdateDate={() => Promise.resolve()}   // Read-only view
-              onUpdateTask={() => Promise.resolve()}   // Read-only view
-              expanded={true}           // Always show expanded
-              hideExpand={true}         // Hide expand button
-            />
-            
-            {/* Build Documentation Section */}
-            <div className="mt-6">
-              <BuildDocumentation 
-                taskId={task.id} 
-                className="bg-white"
-              />
-            </div>
-          </div>
+          <TaskDetail task={task} />
         </TaskProvider>
       )}
     </>

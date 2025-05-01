@@ -25,7 +25,8 @@ export const TASK_STATUSES = {
   SOURCE_TASKS: 'source-tasks', // Group for backlog/brainstorm tasks
   ENGAGED: 'engaged', // Group for actively engaged tasks (todo, in-progress, on-hold)
   REVIEW: 'review', // Group for tasks in review stage (for-review)
-  COMPLETIONS: 'completions' // Group for completed tasks (done, reviewed)
+  COMPLETIONS: 'completions', // Group for completed tasks (done, reviewed)
+  TODAY: 'today' // Starred tasks for today
 } as const;
 
 // Status display names (for UI)
@@ -44,7 +45,8 @@ export const STATUS_DISPLAY_NAMES = {
   [TASK_STATUSES.ARCHIVED]: 'Archived',
   [TASK_STATUSES.ENGAGED]: 'Engaged',
   [TASK_STATUSES.REVIEW]: 'Review',
-  [TASK_STATUSES.COMPLETIONS]: 'Completions'
+  [TASK_STATUSES.COMPLETIONS]: 'Completions',
+  [TASK_STATUSES.TODAY]: 'Today'
 };
 
 // Status color classes for badges
@@ -64,6 +66,7 @@ export const STATUS_COLORS = {
   [TASK_STATUSES.ENGAGED]: 'bg-yellow-100 text-yellow-800',
   [TASK_STATUSES.REVIEW]: 'bg-green-100 text-green-800',
   [TASK_STATUSES.COMPLETIONS]: 'bg-teal-100 text-teal-800',
+  [TASK_STATUSES.TODAY]: 'bg-rose-100 text-rose-800',
   DEFAULT: 'bg-gray-100 text-gray-800'
 };
 
@@ -83,7 +86,8 @@ export const STATUS_DESCRIPTIONS = {
   [TASK_STATUSES.ARCHIVED]: 'Task has been archived and is no longer active',
   [TASK_STATUSES.ENGAGED]: 'Tasks you are actively working on (Todo, In Progress, On Hold)',
   [TASK_STATUSES.REVIEW]: 'Tasks awaiting review before being completed',
-  [TASK_STATUSES.COMPLETIONS]: 'Tasks that have been completed and verified'
+  [TASK_STATUSES.COMPLETIONS]: 'Tasks that have been completed and verified',
+  [TASK_STATUSES.TODAY]: 'Starred tasks to focus on today'
 };
 
 // Status display configuration (for UI presentation)
@@ -201,6 +205,12 @@ export const STATUS_DISPLAY = {
     color: 'bg-teal-100 text-teal-800',
     icon: 'FaCheckDouble',
     description: 'Tasks that have been completed and verified'
+  },
+  [TASK_STATUSES.TODAY]: {
+    label: 'Today',
+    color: 'bg-rose-100 text-rose-800',
+    icon: 'FaStar',
+    description: 'Starred tasks to focus on today'
   }
 } as const;
 

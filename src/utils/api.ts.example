@@ -1,0 +1,187 @@
+import { enhancedUseAuth } from '@shared-tools/auth';
+
+/**
+ * API client with authentication and offline support
+ * Works in all environments (browser, Tauri, WebView)
+ */
+
+// Base URL for API requests
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+
+// Default headers for API requests
+const DEFAULT_HEADERS = {
+  'Content-Type': 'application/json'
+};
+
+/**
+ * Make an authenticated API request
+ * Automatically handles authentication tokens and offline mode
+ */
+export async function apiRequest<T = any>(
+  path: string,
+  options: RequestInit = {},
+  offlineData?: T
+): Promise<T> {
+  const { getToken, isTauri, isOffline } = enhancedUseAuth();
+  
+  // Handle offline mode for Tauri
+  if (isOffline && isTauri && offlineData !== undefined) {
+    console.log(`[OFFLINE] Using cached data for ${path}`);
+    return offlineData;
+  }
+  
+  // Get authentication token
+  const token = await getToken();
+  
+  // Prepare headers with authentication
+  const headers = {
+    ...DEFAULT_HEADERS,
+    ...options.headers,
+  } as Record<string, string>;
+  
+  // Add authentication token if available
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+    // Also include IX-specific token header for compatibility
+    headers['X-IX-Token'] = token;
+  }
+  
+  // Build the request URL
+  const url = path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
+  
+  try {
+    // Make the API request
+    const response = await fetch(url, {
+      ...options,
+      headers,
+      credentials: 'include' // Include cookies for browser auth
+    });
+    
+    // Handle non-successful responses
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`API error (${response.status}): ${errorText}`);
+    }
+    
+    // Parse JSON response
+    const data = await response.json();
+    
+    // For Tauri, cache successful responses for offline use
+    if (isTauri) {
+      try {
+        cacheResponseForOffline(path, data);
+      } catch (cacheError) {
+        console.warn('Failed to cache response for offline use:', cacheError);
+      }
+    }
+    
+    return data;
+  } catch (error) {
+    console.error(`API request failed for ${path}:`, error);
+    
+    // For Tauri offline mode, try to use cached data
+    if (isOffline && isTauri) {
+      const cachedData = getCachedResponse<T>(path);
+      if (cachedData) {
+        console.log(`[OFFLINE] Using cached data for ${path}`);
+        return cachedData;
+      }
+    }
+    
+    // Re-throw the error for handling by the caller
+    throw error;
+  }
+}
+
+/**
+ * Cache API response for offline use in Tauri
+ */
+function cacheResponseForOffline(path: string, data: any): void {
+  try {
+    const cacheKey = `offline-cache:${path}`;
+    const cacheEntry = {
+      data,
+      timestamp: Date.now()
+    };
+    localStorage.setItem(cacheKey, JSON.stringify(cacheEntry));
+  } catch (error) {
+    console.error('Failed to cache response:', error);
+  }
+}
+
+/**
+ * Get cached API response for offline use
+ */
+function getCachedResponse<T>(path: string): T | null {
+  try {
+    const cacheKey = `offline-cache:${path}`;
+    const cachedData = localStorage.getItem(cacheKey);
+    
+    if (!cachedData) return null;
+    
+    const { data, timestamp } = JSON.parse(cachedData);
+    
+    // Check if cache is too old (24 hours)
+    const cacheAge = Date.now() - timestamp;
+    const MAX_CACHE_AGE = 24 * 60 * 60 * 1000; // 24 hours
+    
+    if (cacheAge > MAX_CACHE_AGE) {
+      console.log(`Cache for ${path} is too old, not using`);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Failed to retrieve cached response:', error);
+    return null;
+  }
+}
+
+// Helper functions for common API operations
+
+/**
+ * Fetch user tasks with authentication
+ */
+export async function fetchTasks() {
+  return apiRequest<any[]>(
+    '/api/tasks',
+    { method: 'GET' },
+    [] // Default empty array for offline mode
+  );
+}
+
+/**
+ * Create a new task
+ */
+export async function createTask(taskData: any) {
+  return apiRequest<any>(
+    '/api/tasks',
+    {
+      method: 'POST',
+      body: JSON.stringify(taskData)
+    }
+  );
+}
+
+/**
+ * Update a task
+ */
+export async function updateTask(id: string, taskData: any) {
+  return apiRequest<any>(
+    `/api/tasks/${id}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(taskData)
+    }
+  );
+}
+
+/**
+ * Delete a task
+ */
+export async function deleteTask(id: string) {
+  return apiRequest<void>(
+    `/api/tasks/${id}`,
+    { method: 'DELETE' }
+  );
+}

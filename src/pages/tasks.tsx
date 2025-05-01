@@ -46,6 +46,17 @@ function TasksPage() {
     addTask,
     updateTaskDate,
     updateTask,
+    toggleTaskStar,
+    // Item status management functions
+    approveRequirementItem,
+    vetoRequirementItem,
+    updateRequirementItems,
+    approveTechnicalPlanItem,
+    vetoTechnicalPlanItem,
+    updateTechnicalPlanItems,
+    approveNextStepItem,
+    vetoNextStepItem,
+    updateNextStepItems,
     refreshTasks,
     taskCountsByStatus,
     dedupeEnabled,
@@ -137,6 +148,7 @@ function TasksPage() {
         dedupeEnabled={dedupeEnabled}
         setDedupeEnabled={setDedupeEnabled}
         runManualDedupe={runManualDedupe}
+        tasks={filteredTasks}
       />
 
       {/* Task Creation Form */}
@@ -149,7 +161,7 @@ function TasksPage() {
       )}
 
       {/* Tasks List - Always displayed regardless of loading state */}
-      <div className="tasks-list mt-4">
+      <div className="tasks-list mt-4" data-testid="task-list">
         {filteredTasks.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-8 text-center">
             <h3 className="text-xl font-semibold text-gray-800 mb-2">
@@ -224,9 +236,18 @@ function TasksPage() {
                     onMarkTested={markTaskTested}
                     onDelete={deleteTask}
                     onUpdateDate={updateTaskDate}
-                    onUpdateTask={(taskId, project, updates) =>
-                      updateTask(taskId, updates)
-                    }
+                    onUpdateTask={(taskId, project, updates) => updateTask(taskId, updates)}
+                    onToggleStar={toggleTaskStar}
+                    // Item approval functions
+                    onApproveRequirementItem={(taskId, itemId) => approveRequirementItem(taskId, itemId)}
+                    onVetoRequirementItem={(taskId, itemId) => vetoRequirementItem(taskId, itemId)}
+                    onUpdateRequirementItems={(taskId, items) => updateRequirementItems(taskId, items)}
+                    onApproveTechnicalPlanItem={(taskId, itemId) => approveTechnicalPlanItem(taskId, itemId)}
+                    onVetoTechnicalPlanItem={(taskId, itemId) => vetoTechnicalPlanItem(taskId, itemId)}
+                    onUpdateTechnicalPlanItems={(taskId, items) => updateTechnicalPlanItems(taskId, items)}
+                    onApproveNextStepItem={(taskId, itemId) => approveNextStepItem(taskId, itemId)}
+                    onVetoNextStepItem={(taskId, itemId) => vetoNextStepItem(taskId, itemId)}
+                    onUpdateNextStepItems={(taskId, items) => updateNextStepItems(taskId, items)}
                   />
                 </div>
               ))}

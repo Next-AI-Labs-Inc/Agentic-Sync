@@ -1,3 +1,16 @@
+// Item status type for requirements, technical plan, and next steps
+export type ItemStatus = 'proposed' | 'approved';
+
+// Structure for items with status tracking
+export interface ItemWithStatus {
+  content: string;
+  status: ItemStatus;
+  id: string; // Unique identifier for the item
+  createdAt: string;
+  updatedAt: string;
+  approvedAt?: string;
+}
+
 export interface Task {
   id: string;         // MongoDB _id
   _id?: string;       // Original MongoDB _id field
@@ -5,8 +18,12 @@ export interface Task {
   description?: string;
   userImpact?: string; // Description of how this task impacts users
   quotes?: string;    // Direct quotes to be displayed in collapsed/expanded views
-  requirements?: string; // List of requirements the solution must fulfill
-  technicalPlan?: string; // Step-by-step implementation plan
+  requirements?: string; // List of requirements the solution must fulfill (legacy string format)
+  technicalPlan?: string; // Step-by-step implementation plan (legacy string format)
+  // New fields for structured items with status tracking
+  requirementItems?: ItemWithStatus[]; // Requirements with status tracking
+  technicalPlanItems?: ItemWithStatus[]; // Technical plan with status tracking
+  nextStepItems?: ItemWithStatus[]; // Next steps with status tracking
   status: 'inbox' | 'brainstorm' | 'proposed' | 'backlog' | 'maybe' | 'todo' | 'in-progress' | 'on-hold' | 'for-review' | 'done' | 'reviewed' | 'archived';
   priority: 'low' | 'medium' | 'high';
   project: string;
@@ -16,7 +33,7 @@ export interface Task {
   verificationSteps?: string[];
   files?: string[];
   dependencies?: number[];
-  nextSteps?: string[];
+  nextSteps?: string[]; // Legacy format - simple array of strings
   buildDocumentation?: Array<{
     id: string;
     title: string;
@@ -27,6 +44,14 @@ export interface Task {
     updatedAt?: string;
     updatedBy?: string;
   }>;
+  feedback?: Array<{
+    id: string;
+    content: string;
+    createdAt: string;
+    createdBy?: string;
+    resolved?: boolean;
+    resolvedAt?: string;
+  }>;
   createdAt: string;
   updatedAt: string;
   completedAt?: string | null;
@@ -36,6 +61,7 @@ export interface Task {
   owner?: string;
   createdBy?: string;
   _isNew?: boolean; // Flag for UI animations
+  starred?: boolean; // Flag for "Today" filter
 }
 
 export interface Initiative {
@@ -93,7 +119,7 @@ export interface Project {
   _isNew?: boolean; // Flag for UI animations
 }
 
-export type TaskFilterStatus = 'all' | 'inbox' | 'brainstorm' | 'proposed' | 'backlog' | 'maybe' | 'todo' | 'in-progress' | 'on-hold' | 'for-review' | 'done' | 'reviewed' | 'archived' | 'pending' | 'recent-completed' | 'source-tasks' | 'engaged' | 'review' | 'completions';
+export type TaskFilterStatus = 'all' | 'inbox' | 'brainstorm' | 'proposed' | 'backlog' | 'maybe' | 'todo' | 'in-progress' | 'on-hold' | 'for-review' | 'done' | 'reviewed' | 'archived' | 'pending' | 'recent-completed' | 'source-tasks' | 'engaged' | 'review' | 'completions' | 'today';
 export type ProjectFilterType = 'all' | 'none' | string | string[];
 export type SortOption = 'priority' | 'updated' | 'created' | 'status';
 
@@ -106,6 +132,26 @@ export interface SavedFilter {
   sortDirection: SortDirection;
 }
 export type SortDirection = 'asc' | 'desc';
+
+// System prompt types for agent integration
+export interface SystemPrompt {
+  id: string;
+  name: string;
+  content: string;
+  type: 'default' | 'implementation' | 'demo' | 'feedback' | 'custom';
+  createdAt: string;
+  updatedAt: string;
+  createdBy?: string;
+  isDefault?: boolean;
+}
+
+export interface AgentOptions {
+  systemPromptId?: string;
+  customSystemPrompt?: string;
+  taskId: string;
+  feedback?: string;
+  mode: 'implement' | 'demo' | 'feedback';
+}
 
 export interface TaskFormData {
   title: string;
@@ -122,4 +168,8 @@ export interface TaskFormData {
   tags: string;
   verificationSteps: string;
   nextSteps: string;
+}
+
+export interface FeedbackFormData {
+  content: string;
 }

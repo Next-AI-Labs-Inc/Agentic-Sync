@@ -1,0 +1,30 @@
+import React from 'react';
+import type { AppProps } from 'next/app';
+import { EnhancedAuthProvider } from '@shared-tools/auth';
+import '@/styles/globals.css';
+
+/**
+ * Enhanced app component with universal authentication support
+ * Works across all environments:
+ * - Web browser (with cookie-based auth)
+ * - Tauri desktop app (with offline support)
+ * - WebView contexts (with appropriate fallbacks)
+ */
+function MyApp({ Component, pageProps }: AppProps) {
+  return (
+    <EnhancedAuthProvider
+      authServiceUrl={process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3010'}
+      apiUrl={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002'}
+      appName="ix-tasks"
+      // Optional customization
+      offlineAdminPassword="ixAgent2025!SyncData"
+      devBypass={process.env.NODE_ENV === 'development'}
+      // Auto-selects best strategy based on environment
+      storageStrategy="auto"
+    >
+      <Component {...pageProps} />
+    </EnhancedAuthProvider>
+  );
+}
+
+export default MyApp;

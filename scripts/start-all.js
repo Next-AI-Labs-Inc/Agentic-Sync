@@ -20,8 +20,8 @@ const colors = {
 
 // Configuration
 const API_SERVER_DIR = path.resolve(process.env.IX_API_PATH || '../../ixcoach-api');
-const API_PORT = process.env.API_PORT || 3002;
-const FRONTEND_PORT = 3045;
+const API_PORT = process.env.API_PORT || 3002; // IXCoach API port - matches central port map
+const FRONTEND_PORT = 3045; // Tasks App (Optimized) port - matches central port map
 const USE_OPTIMIZED_MODE = process.env.OPTIMIZE || 'true';
 
 // Check if API directory exists
