@@ -74,6 +74,7 @@ export default function SingleTaskPage() {
       return; // Router query params might not be available yet
     }
     
+    // Get the actual ID value from the query parameter
     const taskId = Array.isArray(id) ? id[0] : id;
     
     if (taskId) {

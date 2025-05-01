@@ -16,9 +16,9 @@ const openTaskDetail = (taskId: string, task?: Task) => {
   if (task) {
     localStorage.setItem(`task_cache_${taskId}`, JSON.stringify(task));
   }
-  // Explicitly construct the correct URL with the task ID as a path parameter
-  const url = new URL('/task/' + taskId, window.location.origin);
-  window.location.href = url.toString();
+  
+  // Use the standard query parameter format
+  window.location.href = `/task-detail?id=${taskId}`;
 };
 
 // CompactTaskItem Component - Shows a single task in one-line format
