@@ -9,6 +9,101 @@ The **MAIN CLAUDE.md** file in the root directory is the ONLY authoritative sour
 
 Refer to the "Changelog and Task Management" section for OFFICIAL, DEFINITIVE task management instructions.
 
+## Human-Centric Testing Standards
+
+### Test Implementation Requirements
+
+When implementing or modifying tests in the Tasks application, you MUST follow these specific requirements for all test cases:
+
+1. **Human-Readable Format**: All tests MUST be written to explicitly communicate their purpose, impact, and nuance to human reviewers. Each test should serve as documentation that can be understood without reviewing the implementation code.
+
+2. **UX Impact Statements**: Every test MUST include a comment section that describes how the tested functionality affects the user experience. These impact statements should use natural language that connects technical behavior to human outcomes.
+
+3. **Context-Rich Descriptions**: Test descriptions MUST provide enough context to understand:
+   - What functionality is being tested
+   - Why this functionality matters
+   - How failure would impact users
+   - What edge cases or specific concerns are addressed
+
+4. **Outcome Documentation**: Tests MUST document both the expected outcome and the actual outcome in human-readable terms, beyond simply checking return values.
+
+5. **Nuanced Expectations**: Test expectations MUST reflect the nuanced requirements of the feature, not just simplistic pass/fail conditions.
+
+Example format for properly documenting tests:
+
+```javascript
+/**
+ * UX IMPACT: This test ensures that task notifications appear immediately when new 
+ * tasks are created by other users. If this fails, users would experience a delayed 
+ * awareness of new assignments, potentially missing urgent tasks.
+ * 
+ * TECHNICAL CONTEXT: Uses the EventBus system to simulate the real-time notification
+ * mechanism that enables collaborative work without page refreshes.
+ */
+test('should immediately notify users when new tasks are assigned to them', () => {
+  // Test implementation
+});
+```
+
+### Test Organization and Execution
+
+1. **Automatic Test Execution**: Tests MUST be configured to run automatically:
+   - On every commit (via pre-commit hooks)
+   - During CI/CD pipeline execution
+   - When explicitly triggered via the test commands below
+
+2. **Test Commands**: The following commands MUST be used to run tests:
+   - `npm test`: Run all tests
+   - `npm test -- [fileName]`: Run tests in specific file(s)
+   - `npm test -- --watch`: Run tests in watch mode during development
+
+3. **Test Output Format**: Test results MUST be presented in a format that:
+   - Highlights critical failures that impact user experience
+   - Provides context-rich error messages
+   - Shows success/failure status at a glance
+   - Includes timing information for performance-sensitive tests
+
+4. **Test Documentation**: Each test file MUST begin with a descriptive header that explains:
+   - The purpose of the tests in this file
+   - The UX features/capabilities being verified
+   - Any special considerations for these tests
+   - How to interpret the test results
+
+## Agent Utility Commands
+
+| Command | Description | Usage | Output Format |
+|---------|-------------|-------|--------------|
+| `node scripts/check-memory-health.js` | Analyzes system memory health with color-coded status indicators | `node scripts/check-memory-health.js [--json] [--simple]` | Color-coded console output (default) or JSON (with `--json` flag) |
+| `npm test` | Runs all tests with human-readable output | `npm test [--watch] [fileName]` | Human-oriented test results with UX impact details |
+
+### Memory Health Check Tool
+
+The memory health check tool provides a comprehensive analysis of system memory usage, with color-coded status indicators to help identify potential memory issues.
+
+**Features:**
+- Overall memory health assessment (Excellent/Good/Fair/Warning/Critical)
+- Detailed memory metrics including used memory, free memory, and compression
+- Node.js process memory usage analysis
+- Specific recommendations based on current memory state
+
+**Usage Options:**
+```bash
+# Standard color output with detailed analysis
+node scripts/check-memory-health.js
+
+# JSON output for programmatic use by agents
+node scripts/check-memory-health.js --json
+
+# Plain text output without colors (for log files)
+node scripts/check-memory-health.js --simple
+```
+
+**When to use:**
+- When diagnosing memory-related performance issues
+- Before and after implementing memory optimizations to measure improvement
+- When checking system health as part of deployment preparations
+- For automated monitoring when integrated with CI/CD pipelines (using `--json` output)
+
 ## Task Client Usage - NO SCRIPTS
 
 For all task operations, use the official MongoDB-based client utility DIRECTLY:
@@ -268,5 +363,59 @@ The existence of this diagnostic tool does NOT mean you should create your own s
 For normal task logging, always use the client directly in your current context without creating any scripts.
 
 For more detailed documentation, see the main CLAUDE.md file at the repository root.
+
+## Shared Components Integration
+
+The Tasks application is in the process of migrating to modular shared components from the `@ix/shared-tools` package. This migration requires careful management of component imports to prevent build failures.
+
+### Shared Components Usage Protocol
+
+When working with UI components:
+
+1. **Check component status** before making changes:
+   ```bash
+   npm run verify:imports
+   ```
+
+2. **Use consistent import patterns** - either local or shared, never mixed:
+   ```javascript
+   // Local component (default export)
+   import LoadingSpinner from '@/components/LoadingSpinner';
+   
+   // Shared component (named export)
+   import { LoadingSpinner } from '@ix/loading-spinner';
+   ```
+
+3. **Never mix import styles** in the same codebase - this will cause build failures.
+
+4. **Always run verification** before committing changes:
+   ```bash
+   npm run precommit
+   ```
+
+### Troubleshooting Shared Components
+
+If you encounter "Module not found: Can't resolve '@ix/loading-spinner'" or similar errors:
+
+1. Check if the shared tools are properly set up:
+   ```bash
+   ls -la ../shared-tools/packages
+   ```
+
+2. Run the component setup script if needed:
+   ```bash
+   npm run setup:components
+   ```
+
+3. As a temporary fix, revert imports to local components:
+   ```javascript
+   // Change from:
+   import { LoadingSpinner } from '@ix/loading-spinner';
+   
+   // To:
+   import LoadingSpinner from '@/components/LoadingSpinner';
+   ```
+
+For complete documentation on shared component migration, see [SHARED_COMPONENTS_MIGRATION.md](./docs/SHARED_COMPONENTS_MIGRATION.md).
 
 

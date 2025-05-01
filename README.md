@@ -101,6 +101,7 @@ This project has been enhanced with:
 - **Instant, Social Media-like Experience**: Tasks appear, update, and disappear instantly
 - **Optimistic UI Updates**: All changes happen immediately in the UI before server confirmation
 - **Animation System**: Subtle animations provide visual feedback for all actions
+- **Memory Optimization**: Enhanced event system to prevent memory leaks with efficient subscription management
 
 ### Tasks Enhancements (March 2025)
 
@@ -108,6 +109,8 @@ This project has been enhanced with:
 - **Improved Task Status Flow**: Reorganized to support GTD methodology
 - **Flexible Filter Layout**: Horizontal scrolling filters with logical grouping
 - **Enhanced Task Cards**: Improved inline editing and expandable details
+- **Memory-Optimized Event System**: Reduced memory usage in real-time updates with EventBus pattern
+- **Memory Usage Monitoring**: Debug tools for tracking subscription and listener counts
 
 ## Author/Owner Display
 
@@ -144,6 +147,19 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - **Data Storage**: MongoDB
 - **API Integration**: RESTful API calls with optimistic updates
 - **Animation**: CSS animations and React state transitions
+- **Event System**: EventBus pattern for memory-efficient real-time updates
+- **Memory Management**: Custom hooks with cleanup to prevent memory leaks
+
+### Memory Optimization
+
+The application features a sophisticated memory management system:
+
+- **EventBus Pattern**: Centralized event management with organized subscription tracking
+- **Memory Usage Monitoring**: Real-time tracking of active listeners and subscriptions
+- **Optimized Subscriptions**: Automatic cleanup of listeners when components unmount
+- **Custom Hooks**: Specialized hooks like `useTaskSync` for efficient event handling
+- **Memory Debug Tools**: UI components that show subscription counts and memory usage
+- **Development Mode**: Special debug features available in development only
 
 ## License
 

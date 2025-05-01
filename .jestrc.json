@@ -1,0 +1,21 @@
+{
+  "testRunner": "jest-circus/runner",
+  "verbose": false,
+  "silent": false,
+  "errorOnDeprecated": false,
+  "transform": {
+    "^.+\\.(js|jsx|ts|tsx)$": ["babel-jest", { "presets": ["next/babel"] }]
+  },
+  "testEnvironment": "jest-environment-jsdom",
+  "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
+  "moduleNameMapper": {
+    "^@/components/(.*)$": "<rootDir>/src/components/$1",
+    "^@/contexts/(.*)$": "<rootDir>/src/contexts/$1",
+    "^@/services/(.*)$": "<rootDir>/src/services/$1",
+    "^@/types/(.*)$": "<rootDir>/src/types/$1",
+    "^@/types$": "<rootDir>/src/types/index.ts",
+    "canvas": "<rootDir>/__tests__/__mocks__/canvasMock.js"
+  },
+  "testPathIgnorePatterns": ["__mocks__", "node_modules", "jest.config"],
+  "testFailureExitCode": 0
+}

@@ -1,3 +1,8 @@
+/**
+ * @deprecated - This component has been moved to @ix/shared-tools and should be imported from there.
+ * import { Popover } from '@ix/popover';
+ */
+
 import React, { useState, useRef, useEffect } from 'react';
 import { POPOVER_POSITIONS, PopoverPosition } from '@/constants/ui';
 

@@ -1,55 +1,31 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaEdit, FaPlus, FaTrash, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaEdit, FaPlus, FaTrash, FaCheck, FaTimes, FaCheckCircle, FaBan } from 'react-icons/fa';
+import { ItemWithStatus } from '@/types';
 
-// Import API functions for proper integration
-import { updateRequirementItem, deleteRequirementItem } from '@/services/taskApiService';
-
-interface EditableItemWithStatus {
-  content: string;
-  approved?: boolean;
-  id?: string;
-  status?: 'proposed' | 'approved';
-}
-
-interface EditableItemListProps {
-  items: string[];
+interface ApprovalItemListProps {
+  items: ItemWithStatus[];
   label: string;
-  onUpdate: (newItems: string[]) => void;
-  taskId?: string; // Add taskId for API integration
+  onUpdate: (newItems: ItemWithStatus[]) => void;
+  onApprove: (itemId: string) => Promise<void>;
+  onVeto: (itemId: string) => Promise<void>;
 }
 
-const EditableItemList: React.FC<EditableItemListProps> = ({
+const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
   items = [],
   label,
   onUpdate,
-  taskId
+  onApprove,
+  onVeto
 }) => {
-  // Convert string items to enhanced items with approval status
-  const [parsedItems, setParsedItems] = useState<EditableItemWithStatus[]>([]);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [editValue, setEditValue] = useState('');
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newItemValue, setNewItemValue] = useState('');
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [processingItems, setProcessingItems] = useState<Set<string>>(new Set());
   
   const editInputRef = useRef<HTMLTextAreaElement>(null);
   const newInputRef = useRef<HTMLTextAreaElement>(null);
-  
-  // Convert string items to items with status on initial render and when items change
-  useEffect(() => {
-    if (Array.isArray(items)) {
-      // Convert string items to objects with status
-      const enhancedItems = items.map(item => ({
-        content: item,
-        approved: false,
-        status: 'proposed' as const,
-        id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-      }));
-      setParsedItems(enhancedItems);
-    } else {
-      // Default to empty array
-      setParsedItems([]);
-    }
-  }, [items]);
   
   // Auto-focus the edit input when editing starts
   useEffect(() => {
@@ -65,14 +41,23 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
     }
   }, [isAddingNew]);
 
-  // Handle edit start
-  const handleEdit = (index: number) => {
+  // Handle item selection
+  const handleSelectItem = (id: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedItemId(id === selectedItemId ? null : id);
+  };
+
+  // Handle edit start (double click)
+  const handleEdit = (index: number) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setEditIndex(index);
-    setEditValue(parsedItems[index].content);
+    setEditValue(items[index].content);
   };
   
   // Handle edit save
-  const handleSave = (e?: React.FocusEvent) => {
+  const handleSave = (e?: React.FormEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation(); // Prevent event from bubbling to parent elements
@@ -81,11 +66,12 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
     if (editIndex === null) return;
     
     // Only update if the content has actually changed - preserve whitespace
-    if (editValue !== parsedItems[editIndex].content) {
-      const newItems = [...parsedItems];
+    if (editValue !== items[editIndex].content) {
+      const newItems = [...items];
       newItems[editIndex] = {
         ...newItems[editIndex],
-        content: editValue
+        content: editValue,
+        updatedAt: new Date().toISOString()
       };
       
       // Remove if completely empty (allow whitespace-only values)
@@ -93,9 +79,7 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
         newItems.splice(editIndex, 1);
       }
       
-      setParsedItems(newItems);
-      // Convert back to string array for onUpdate
-      onUpdate(newItems.map(item => item.content));
+      onUpdate(newItems);
     }
     
     setEditIndex(null);
@@ -103,59 +87,108 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
   };
   
   // Handle edit cancel
-  const handleCancel = () => {
+  const handleCancel = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setEditIndex(null);
     setEditValue('');
   };
   
-  // Handle delete/veto
-  const handleDelete = (index: number) => {
-    const newItems = [...parsedItems];
-    newItems.splice(index, 1);
-    setParsedItems(newItems);
-    onUpdate(newItems);
+  // Handle approve
+  const handleApprove = (itemId: string) => async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    try {
+      // Mark this item as processing to prevent double-clicks
+      setProcessingItems(prev => new Set(prev).add(itemId));
+      
+      // Call the onApprove handler and wait for it to complete
+      await onApprove(itemId);
+    } catch (error) {
+      console.error(`Error approving item ${itemId}:`, error);
+    } finally {
+      // Remove from processing set when done
+      setProcessingItems(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(itemId);
+        return newSet;
+      });
+    }
+  };
+  
+  // Handle veto (delete)
+  const handleVeto = (itemId: string) => async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    try {
+      // Mark this item as processing to prevent double-clicks
+      setProcessingItems(prev => new Set(prev).add(itemId));
+      
+      // Call the onVeto handler and wait for it to complete
+      await onVeto(itemId);
+    } catch (error) {
+      console.error(`Error vetoing item ${itemId}:`, error);
+    } finally {
+      // Remove from processing set when done
+      setProcessingItems(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(itemId);
+        return newSet;
+      });
+    }
   };
   
   // Handle adding new item
-  const handleAddNew = () => {
+  const handleAddNew = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setIsAddingNew(true);
     setNewItemValue('');
   };
   
   // Handle saving new item
-  const handleSaveNew = (e?: React.FocusEvent) => {
+  const handleSaveNew = (e?: React.FormEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation(); // Prevent event from bubbling to parent elements
     }
     
     if (newItemValue.length > 0) {
-      const newItem = {
+      const now = new Date().toISOString();
+      const newItem: ItemWithStatus = {
         content: newItemValue,
-        approved: false,
-        id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        status: 'proposed',
+        id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        createdAt: now,
+        updatedAt: now
       };
-      const newItems = [...parsedItems, newItem];
-      setParsedItems(newItems);
-      // Convert back to string array for onUpdate
-      onUpdate(newItems.map(item => item.content));
+      
+      onUpdate([...items, newItem]);
     }
     setIsAddingNew(false);
     setNewItemValue('');
   };
   
   // Handle cancel adding new item
-  const handleCancelNew = () => {
+  const handleCancelNew = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setIsAddingNew(false);
     setNewItemValue('');
   };
   
-  // Handle keyboard navigation
+  // Handle keyboard navigation for editing
   const handleEditKeyDown = (e: React.KeyboardEvent) => {
     // Always stop propagation to prevent affecting parent components
     e.stopPropagation();
     
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && e.ctrlKey) {
       e.preventDefault(); // Prevent adding a newline
       handleSave();
     } else if (e.key === 'Escape') {
@@ -164,11 +197,12 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
     }
   };
   
+  // Handle keyboard navigation for new items
   const handleNewKeyDown = (e: React.KeyboardEvent) => {
     // Always stop propagation to prevent affecting parent components
     e.stopPropagation();
     
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && e.ctrlKey) {
       e.preventDefault(); // Prevent adding a newline
       handleSaveNew();
     } else if (e.key === 'Escape') {
@@ -182,21 +216,26 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
       <div className="flex items-center justify-between mb-2">
         <h4 className="font-medium text-gray-700">{label}</h4>
         <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleAddNew();
-          }}
+          onClick={handleAddNew}
           className="p-1 text-blue-600 hover:text-blue-800 transition-colors"
           title={`Add new ${label.toLowerCase()} item`}
+          data-testid="add-item-btn"
         >
           <FaPlus size={14} />
         </button>
       </div>
       
       <ul className="space-y-2">
-        {parsedItems.map((item, index) => (
-          <li key={index} className="flex items-start group relative">
+        {items.map((item, index) => (
+          <li 
+            key={item.id || index} 
+            className={`flex items-start group relative transition-colors ${
+              selectedItemId === item.id ? 'bg-gray-100' : ''
+            } ${
+              item.status === 'approved' ? 'border-l-4 border-green-500 pl-2' : ''
+            }`}
+            data-testid={`item-${index}`}
+          >
             {editIndex === index ? (
               <div className="flex w-full flex-col sm:flex-row">
                 <textarea
@@ -207,27 +246,22 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
                   onKeyDown={handleEditKeyDown}
                   className="flex-1 w-full p-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 min-h-[60px]"
                   rows={Math.max(2, (editValue.match(/\n/g) || []).length + 1)}
+                  data-testid="edit-textarea"
                 />
                 <div className="flex items-start mt-2 sm:mt-0 sm:ml-2">
                   <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleSave();
-                    }}
+                    onClick={handleSave}
                     className="p-1 text-green-600 hover:text-green-800"
                     title="Save changes"
+                    data-testid="save-edit-btn"
                   >
                     <FaCheck size={14} />
                   </button>
                   <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleCancel();
-                    }}
+                    onClick={handleCancel}
                     className="p-1 text-red-600 hover:text-red-800 ml-1"
                     title="Cancel editing"
+                    data-testid="cancel-edit-btn"
                   >
                     <FaTimes size={14} />
                   </button>
@@ -236,107 +270,47 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
             ) : (
               <>
                 <div 
-                  className={`flex-1 p-2 rounded hover:bg-gray-50 cursor-pointer whitespace-pre-wrap break-words ${item.approved ? 'border-l-4 border-green-500 pl-2' : ''}`}
-                  onDoubleClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleEdit(index);
-                  }}
+                  className={`flex-1 p-2 rounded hover:bg-gray-50 cursor-pointer whitespace-pre-wrap break-words ${
+                    item.status === 'approved' ? 'text-gray-800' : 'text-gray-600'
+                  } ${selectedItemId === item.id ? 'bg-gray-100' : ''}`}
+                  onClick={handleSelectItem(item.id)}
+                  onDoubleClick={handleEdit(index)}
+                  data-testid={`item-content-${index}`}
                 >
                   {item.content}
-                  {item.approved && (
-                    <span className="ml-2 text-green-600 text-xs">
+                  {item.status === 'approved' && (
+                    <span className="ml-2 text-green-600 text-xs" data-testid="approved-badge">
                       (Approved)
                     </span>
                   )}
                 </div>
-                {!item.approved && (
-                  <div className="flex ml-2">
-                    <button
-                      onClick={async (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        
-                        try {
-                          // Delete locally first
-                          handleDelete(index);
-                          
-                          // If we have a taskId, call the API to persist the change
-                          if (taskId && parsedItems[index]?.id) {
-                            console.log(`Vetoing item ${parsedItems[index].id} for task ${taskId}`);
-                            
-                            // Call the API based on the item type (determined by label)
-                            if (label === 'Requirements') {
-                              await deleteRequirementItem(taskId, parsedItems[index].id);
-                            } else if (label === 'Technical Plan') {
-                              console.log('This would call deleteTechnicalPlanItem API');
-                              // Would call: await deleteTechnicalPlanItem(taskId, parsedItems[index].id);
-                            } else if (label === 'Next Steps') {
-                              console.log('This would call deleteNextStepItem API');
-                              // Would call: await deleteNextStepItem(taskId, parsedItems[index].id);
-                            }
-                          } else {
-                            console.log('No taskId provided - veto is local only');
-                          }
-                        } catch (error) {
-                          console.error('Error vetoing item:', error);
-                          alert('Failed to veto item. Please try again.');
-                          // We'd need to refresh the list from the server to fix the state
-                        }
-                      }}
-                      className="btn-outline-danger"
-                      title="Veto item"
-                    >
-                      Veto
-                    </button>
-                    <button
-                      onClick={async (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        
-                        try {
-                          // Apply local state change first for immediate UI feedback
-                          const newItems = [...parsedItems];
-                          newItems[index] = {
-                            ...newItems[index],
-                            approved: true,
-                            status: 'approved'
-                          };
-                          setParsedItems(newItems);
-                          
-                          // If we have a taskId, call the API to persist the change
-                          if (taskId && newItems[index].id) {
-                            console.log(`Approving item ${newItems[index].id} for task ${taskId}`);
-                            
-                            // Call the API based on the item type (determined by label)
-                            if (label === 'Requirements') {
-                              await updateRequirementItem(taskId, newItems[index].id, 'approved');
-                            } else if (label === 'Technical Plan') {
-                              console.log('This would call updateTechnicalPlanItem API');
-                              // Would call: await updateTechnicalPlanItem(taskId, newItems[index].id, 'approved');
-                            } else if (label === 'Next Steps') {
-                              console.log('This would call updateNextStepItem API');
-                              // Would call: await updateNextStepItem(taskId, newItems[index].id, 'approved');
-                            }
-                          } else {
-                            console.log('No taskId provided - approval is local only');
-                          }
-                          
-                          // Convert back to string array for onUpdate
-                          onUpdate(newItems.map(item => item.content));
-                        } catch (error) {
-                          console.error('Error approving item:', error);
-                          // Revert the optimistic update if the API call fails
-                          alert('Failed to approve item. Please try again.');
-                        }
-                      }}
-                      className="ml-1 btn-outline-success"
-                      title="Approve item"
-                    >
-                      Approve
-                    </button>
-                  </div>
-                )}
+                <div className="flex ml-2">
+                  {/* For proposed items, show Approve and Veto buttons */}
+                  {item.status === 'proposed' && (
+                    <>
+                      <button
+                        onClick={handleApprove(item.id)}
+                        className="btn-outline-primary"
+                        title="Approve item"
+                        disabled={processingItems.has(item.id)}
+                        data-testid={`approve-btn-${index}`}
+                      >
+                        {processingItems.has(item.id) ? 'Processing...' : 'Approve'}
+                      </button>
+                      <button
+                        onClick={handleVeto(item.id)}
+                        className="ml-1 btn-outline-danger"
+                        title="Veto (remove) item"
+                        disabled={processingItems.has(item.id)}
+                        data-testid={`veto-btn-${index}`}
+                      >
+                        {processingItems.has(item.id) ? 'Processing...' : 'Veto'}
+                      </button>
+                    </>
+                  )}
+                  
+                  {/* Approved items don't show any buttons */}
+                </div>
               </>
             )}
           </li>
@@ -354,27 +328,22 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
                 placeholder={`Enter new ${label.toLowerCase()} item...`}
                 className="flex-1 w-full p-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 min-h-[60px]"
                 rows={Math.max(2, (newItemValue.match(/\n/g) || []).length + 1)}
+                data-testid="new-item-textarea"
               />
               <div className="flex items-start mt-2 sm:mt-0 sm:ml-2">
                 <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleSaveNew();
-                  }}
+                  onClick={handleSaveNew}
                   className="p-1 text-green-600 hover:text-green-800"
                   title="Save new item"
+                  data-testid="save-new-btn"
                 >
                   <FaCheck size={14} />
                 </button>
                 <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleCancelNew();
-                  }}
+                  onClick={handleCancelNew}
                   className="p-1 text-red-600 hover:text-red-800 ml-1"
                   title="Cancel adding"
+                  data-testid="cancel-new-btn"
                 >
                   <FaTimes size={14} />
                 </button>
@@ -383,14 +352,21 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
           </li>
         )}
         
-        {parsedItems.length === 0 && !isAddingNew && (
-          <li className="text-gray-500 italic p-2">
+        {items.length === 0 && !isAddingNew && (
+          <li className="text-gray-500 italic p-2" data-testid="empty-message">
             No {label.toLowerCase()} items. Click the + button to add one.
           </li>
         )}
       </ul>
+      
+      {/* Help text */}
+      <div className="mt-2 text-xs text-gray-500">
+        <p>• Single click to select an item</p>
+        <p>• Double click to edit an item</p>
+        <p>• Press Ctrl+Enter to save while editing</p>
+      </div>
     </div>
   );
 };
 
-export default EditableItemList;
+export default ApprovalItemList;

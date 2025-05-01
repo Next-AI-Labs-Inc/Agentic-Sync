@@ -172,7 +172,7 @@ export default function TaskSearchIcon() {
       ) : (
         <button
           onClick={() => setExpanded(true)}
-          className={`p-1.5 rounded-full ${isSearchActive ? 'text-blue-500 bg-blue-50' : 'text-gray-500'} hover:text-primary-600 hover:bg-gray-100`}
+          className="px-3 py-1.5 rounded-md text-sm font-medium transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200 w-9 h-9 flex items-center justify-center"
           aria-label="Search tasks"
           title="Search tasks or navigate to task by ID"
         >

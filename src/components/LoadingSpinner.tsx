@@ -1,3 +1,9 @@
+/**
+ * @deprecated - This component will be moved to shared-tools in the future.
+ * The future import pattern will be:
+ * import { LoadingSpinner } from '@ix/loading-spinner';
+ */
+
 import React from 'react';
 
 interface LoadingSpinnerProps {

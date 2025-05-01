@@ -4,6 +4,7 @@
  */
 
 import { Task, Project } from '@/types';
+import eventBus, { Event } from './eventBus';
 
 // Event types for task sync
 export enum SyncEventType {
@@ -17,18 +18,26 @@ export enum SyncEventType {
 }
 
 // Custom event interface
-export interface SyncEvent {
+export interface SyncEvent extends Event {
   type: SyncEventType;
   payload: any;
   timestamp: number;
 }
 
 // Listener type definition
-type SyncEventListener = (event: SyncEvent) => void;
+export type SyncEventListener = (event: SyncEvent) => void;
 
-// The main TaskSyncService class
+// Payload type for task deletion event
+export interface TaskDeletePayload {
+  id: string;
+  project: string;
+}
+
+/**
+ * TaskSyncService - Manages real-time task synchronization
+ * Uses the EventBus for efficient pub/sub with memory leak prevention
+ */
 class TaskSyncService {
-  private listeners: Map<SyncEventType, SyncEventListener[]> = new Map();
   private eventSource: EventSource | null = null;
   private reconnectTimer: NodeJS.Timeout | null = null;
   private isConnected: boolean = false;
@@ -63,7 +72,7 @@ class TaskSyncService {
   }
   
   /**
-   * Shutdown the sync service
+   * Shutdown the sync service and clean up resources
    */
   public shutdown(): void {
     if (this.eventSource) {
@@ -76,35 +85,35 @@ class TaskSyncService {
       this.reconnectTimer = null;
     }
     
-    // Clear all listeners
-    this.listeners.clear();
+    // Clear all event listeners to prevent memory leaks
+    this.clearAllListeners();
+    
     this.isConnected = false;
   }
   
   /**
+   * Clear all listeners for all event types
+   */
+  public clearAllListeners(): void {
+    // Clear each event type individually to ensure all are covered
+    Object.values(SyncEventType).forEach(eventType => {
+      this.clearListeners(eventType as SyncEventType);
+    });
+  }
+  
+  /**
    * Subscribe to a specific event type
+   * @param eventType The sync event type to subscribe to
+   * @param listener The callback function to execute when event occurs
+   * @returns Unsubscribe function to clean up the subscription
    */
   public subscribe(eventType: SyncEventType, listener: SyncEventListener): () => void {
-    if (!this.listeners.has(eventType)) {
-      this.listeners.set(eventType, []);
-    }
-    
-    this.listeners.get(eventType)!.push(listener);
-    
-    // Return unsubscribe function
-    return () => {
-      const typeListeners = this.listeners.get(eventType);
-      if (typeListeners) {
-        const index = typeListeners.indexOf(listener);
-        if (index !== -1) {
-          typeListeners.splice(index, 1);
-        }
-      }
-    };
+    return eventBus.subscribe(eventType, listener as any);
   }
   
   /**
    * Emit a task created event
+   * @param task The created task
    */
   public emitTaskCreated(task: Task): void {
     this.emit({
@@ -116,6 +125,7 @@ class TaskSyncService {
   
   /**
    * Emit a task updated event
+   * @param task The updated task
    */
   public emitTaskUpdated(task: Task): void {
     this.emit({
@@ -127,6 +137,8 @@ class TaskSyncService {
   
   /**
    * Emit a task deleted event
+   * @param taskId The ID of the deleted task
+   * @param projectId The project ID the task belonged to
    */
   public emitTaskDeleted(taskId: string, projectId: string): void {
     this.emit({
@@ -138,6 +150,7 @@ class TaskSyncService {
   
   /**
    * Emit a project created event
+   * @param project The created project
    */
   public emitProjectCreated(project: Project): void {
     this.emit({
@@ -148,19 +161,73 @@ class TaskSyncService {
   }
   
   /**
+   * Emit a project updated event
+   * @param project The updated project
+   */
+  public emitProjectUpdated(project: Project): void {
+    this.emit({
+      type: SyncEventType.PROJECT_UPDATED,
+      payload: project,
+      timestamp: Date.now()
+    });
+  }
+  
+  /**
+   * Emit a project deleted event
+   * @param projectId The ID of the deleted project
+   */
+  public emitProjectDeleted(projectId: string): void {
+    this.emit({
+      type: SyncEventType.PROJECT_DELETED,
+      payload: { id: projectId },
+      timestamp: Date.now()
+    });
+  }
+  
+  /**
+   * Emit a sync error event
+   * @param error The error that occurred
+   */
+  public emitSyncError(error: Error): void {
+    this.emit({
+      type: SyncEventType.SYNC_ERROR,
+      payload: error,
+      timestamp: Date.now()
+    });
+  }
+  
+  /**
+   * Get number of listeners for an event type
+   * @param eventType The event type to check
+   * @returns The number of listeners
+   */
+  public listenerCount(eventType: SyncEventType): number {
+    return eventBus.listenerCount(eventType);
+  }
+  
+  /**
+   * Check if there are any listeners for a specific event type
+   * @param eventType The event type to check
+   * @returns True if there are listeners, false otherwise
+   */
+  public hasListeners(eventType: SyncEventType): boolean {
+    return eventBus.hasListeners(eventType);
+  }
+  
+  /**
+   * Clear all listeners for a specific event type
+   * @param eventType The event type to clear
+   */
+  public clearListeners(eventType: SyncEventType): void {
+    eventBus.clearListeners(eventType);
+  }
+  
+  /**
    * Emit an event to all listeners
+   * @param event The event to emit
    */
   private emit(event: SyncEvent): void {
-    const typeListeners = this.listeners.get(event.type);
-    if (typeListeners) {
-      typeListeners.forEach(listener => {
-        try {
-          listener(event);
-        } catch (error) {
-          console.error('Error in event listener:', error);
-        }
-      });
-    }
+    eventBus.emit(event);
   }
   
   /**

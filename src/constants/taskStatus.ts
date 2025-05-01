@@ -99,7 +99,7 @@ export const STATUS_DISPLAY = {
     description: 'Initial collection point for new ideas and tasks'
   },
   [TASK_STATUSES.MAYBE]: {
-    label: 'Someday/Maybe',
+    label: 'Maybe',
     color: 'bg-purple-100 text-purple-800',
     icon: 'FaCalendarAlt',
     description: 'Items to consider in the future but not actionable now'

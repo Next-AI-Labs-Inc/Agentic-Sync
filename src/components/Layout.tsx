@@ -45,8 +45,8 @@ export default function Layout({ children }: LayoutProps) {
       <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="container mx-auto px-4 py-3">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <Link href="/tasks" className="text-2xl font-bold text-gray-800">
-              IX <span className="text-primary-600">Agent Sync</span>
+            <Link href="/tasks" className="text-2xl font-bold text-gray-800 flex items-center">
+              <span className="align-middle">IX <span className="text-primary-600">Agent Sync</span></span>
             </Link>
             <div className="flex items-center space-x-6">
               <nav className="mt-2 md:mt-0">

@@ -24,6 +24,18 @@ Those belong in the MongoDB task entry.
 
 ---
 
+## [2025-03-19] Task: Fix TaskCard Component Error to Prevent App Crashes
+
+**MongoDB Task ID:** taskcard-id-fix-2025-03-19
+
+**User Impact:** Users can now click on any component within the task card interface without experiencing application crashes due to undefined task IDs, providing a more reliable and frustration-free experience.
+
+**Technical Summary:** Fixed a critical bug in TaskCardHeader where accessing `task.id.substring(0, 8)` without checking if `task.id` exists caused a TypeError, and implemented comprehensive tests to prevent future regressions.
+
+**Verification:** Open the task interface, click on various task card components including those with potentially missing IDs, and verify no errors appear in the console.
+
+---
+
 ## [2025-03-18] Task: Fix Next.js Build Process for Reliable Production Deployments
 
 **MongoDB Task ID:** build-process-fix-2025-03-18

@@ -21,9 +21,6 @@ interface TaskFiltersProps {
   onAddNewClick: () => void;
   taskCountsByStatus?: Record<string, number>;
   refreshTasks?: () => Promise<any>;
-  dedupeEnabled?: boolean;
-  setDedupeEnabled?: (enabled: boolean) => void;
-  runManualDedupe?: () => void;
   tasks?: Task[]; // Add access to all tasks for statistics like starred count
 }
 
@@ -40,9 +37,6 @@ export default function TaskFilters({
   onAddNewClick,
   taskCountsByStatus = {},
   refreshTasks,
-  dedupeEnabled = false,
-  setDedupeEnabled,
-  runManualDedupe,
   tasks = []
 }: TaskFiltersProps) {
   // Sort projects alphabetically by name
@@ -231,27 +225,6 @@ export default function TaskFilters({
       }
     ];
     
-    // Add deduplication toggle if the prop is provided
-    if (setDedupeEnabled) {
-      items.push({
-        id: 'toggle-dedupe',
-        label: `${dedupeEnabled ? 'Disable' : 'Enable'} Client Deduplication`,
-        icon: <FaBroom size={14} />,
-        onClick: () => setDedupeEnabled(!dedupeEnabled),
-        description: `${dedupeEnabled ? 'Disable' : 'Enable'} automatic client-side deduplication (impacts performance)`
-      });
-    }
-    
-    // Add manual deduplication button if the function is provided
-    if (runManualDedupe) {
-      items.push({
-        id: 'manual-dedupe',
-        label: 'Run Manual Deduplication',
-        icon: <FaBroom size={14} />,
-        onClick: runManualDedupe,
-        description: 'Manually remove duplicate tasks from the current view'
-      });
-    }
     
     return items;
   };
@@ -274,14 +247,62 @@ export default function TaskFilters({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
-          <h2 className="text-lg font-semibold">Task Filters</h2>
+          <h2 className="text-lg font-semibold">Filters</h2>
         </div>
-        <div className="flex items-center gap-2 mt-2 md:mt-0">
+        <div className="flex items-center gap-2 mt-2 md:mt-0 overflow-x-auto">
+          <div className="flex items-center gap-1 mr-1 overflow-x-auto">
+            {/* View Controls Row */}
+            <button
+              onClick={() => setCompletedFilter(TASK_STATUSES.ALL)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+                ${completedFilter === TASK_STATUSES.ALL ? STATUS_DISPLAY[TASK_STATUSES.ALL].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {STATUS_DISPLAY[TASK_STATUSES.ALL].label}
+              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+                {Object.values(taskCountsByStatus).reduce((acc, count) => acc + count, 0)}
+              </span>}
+            </button>
+            
+            <button
+              onClick={() => setCompletedFilter(TASK_STATUSES.PENDING)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+                ${completedFilter === TASK_STATUSES.PENDING ? STATUS_DISPLAY[TASK_STATUSES.PENDING].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {STATUS_DISPLAY[TASK_STATUSES.PENDING].label}
+              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+                {([TASK_STATUSES.PROPOSED, TASK_STATUSES.BACKLOG, TASK_STATUSES.BRAINSTORM, TASK_STATUSES.TODO, TASK_STATUSES.IN_PROGRESS, TASK_STATUSES.ON_HOLD] as const)
+                  .reduce((acc, status) => acc + (taskCountsByStatus[status] || 0), 0)}
+              </span>}
+            </button>
+            
+            <button
+              onClick={() => setCompletedFilter(TASK_STATUSES.TODAY)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+                ${completedFilter === TASK_STATUSES.TODAY ? STATUS_DISPLAY[TASK_STATUSES.TODAY].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {STATUS_DISPLAY[TASK_STATUSES.TODAY].label}
+              <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+                {tasks.filter(task => task.starred).length || 0}
+              </span>
+            </button>
+            
+            <button
+              onClick={() => setCompletedFilter(TASK_STATUSES.ARCHIVED)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+                ${completedFilter === TASK_STATUSES.ARCHIVED ? STATUS_DISPLAY[TASK_STATUSES.ARCHIVED].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {STATUS_DISPLAY[TASK_STATUSES.ARCHIVED].label}
+              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+                {taskCountsByStatus[TASK_STATUSES.ARCHIVED] || 0}
+              </span>}
+            </button>
+          </div>
+          
           <TaskSearchIcon />
           <DropdownMenu 
             trigger={
-              <button className="btn-icon">
-                <FaCog size={14} />
+              <button className="px-3 py-1.5 rounded-md text-sm font-medium transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200 w-9 h-9 flex items-center justify-center">
+                <FaCog size={16} />
               </button>
             }
             items={getMenuItems()}
@@ -289,13 +310,10 @@ export default function TaskFilters({
           />
           <button 
             onClick={onAddNewClick}
-            className="btn btn-primary relative overflow-hidden"
+            className="px-3 py-1.5 rounded-md text-sm font-medium transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200 w-9 h-9 flex items-center justify-center"
+            aria-label="Add new task"
           >
-            <span className="flex items-center">
-              <span className="mr-1">+</span> Add New Task
-              {/* Interactive ripple effect on click */}
-              <span className="absolute inset-0 bg-white bg-opacity-30 transform scale-0 transition-transform duration-300 rounded-full hover:scale-0 active:scale-100 origin-center"></span>
-            </span>
+            +
           </button>
         </div>
       </div>
@@ -318,38 +336,10 @@ export default function TaskFilters({
       
       {/* Status filter tabs with counts */}
       <div className="mb-4">
-        <div className="flex space-x-6 pb-2 overflow-x-auto">
-          {/* Views column */}
-          <div className="flex flex-col space-y-1">
-            <div className="px-3 py-1.5 text-sm font-medium text-gray-500 whitespace-nowrap flex items-center border-b border-gray-300">
-              Views
-            </div>
-            
-            {/* All Tasks */}
-            <button
-              onClick={() => setCompletedFilter(TASK_STATUSES.ALL)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
-                ${completedFilter === TASK_STATUSES.ALL ? STATUS_DISPLAY[TASK_STATUSES.ALL].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-            >
-              {STATUS_DISPLAY[TASK_STATUSES.ALL].label}
-              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
-                {Object.values(taskCountsByStatus).reduce((acc, count) => acc + count, 0)}
-              </span>}
-            </button>
-            
-            {/* All Pending */}
-            <button
-              onClick={() => setCompletedFilter(TASK_STATUSES.PENDING)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
-                ${completedFilter === TASK_STATUSES.PENDING ? STATUS_DISPLAY[TASK_STATUSES.PENDING].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-            >
-              {STATUS_DISPLAY[TASK_STATUSES.PENDING].label}
-              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
-                {([TASK_STATUSES.PROPOSED, TASK_STATUSES.BACKLOG, TASK_STATUSES.BRAINSTORM, TASK_STATUSES.TODO, TASK_STATUSES.IN_PROGRESS, TASK_STATUSES.ON_HOLD] as const)
-                  .reduce((acc, status) => acc + (taskCountsByStatus[status] || 0), 0)}
-              </span>}
-            </button>
-            
+        <div className="flex space-x-3 pb-2 overflow-x-auto">
+          {/* Empty first column to maintain alignment with structure below */}
+          <div className="flex space-x-2">
+            {/* This space intentionally left empty as view controls moved to top row */}
           </div>
           
           {/* Collection column */}
@@ -419,19 +409,6 @@ export default function TaskFilters({
             <div className="px-3 py-1.5 text-sm font-medium text-gray-500 whitespace-nowrap flex items-center border-b border-gray-300">
               Source Tasks
             </div>
-            
-            {/* Today (Starred) */}
-            <button
-              onClick={() => setCompletedFilter(TASK_STATUSES.TODAY)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
-                ${completedFilter === TASK_STATUSES.TODAY ? STATUS_DISPLAY[TASK_STATUSES.TODAY].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-            >
-              {STATUS_DISPLAY[TASK_STATUSES.TODAY].label}
-              <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
-                {/* Use a different approach for starred count since it's not in taskCountsByStatus */}
-                {tasks.filter(task => task.starred).length || 0}
-              </span>
-            </button>
             
             {/* Backlog */}
             <button
@@ -542,24 +519,7 @@ export default function TaskFilters({
             </button>
           </div>
           
-          {/* Reference column */}
-          <div className="flex flex-col space-y-1">
-            <div className="px-3 py-1.5 text-sm font-medium text-gray-500 whitespace-nowrap flex items-center border-b border-gray-300">
-              Reference
-            </div>
-            
-            {/* Archived */}
-            <button
-              onClick={() => setCompletedFilter(TASK_STATUSES.ARCHIVED)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
-                ${completedFilter === TASK_STATUSES.ARCHIVED ? STATUS_DISPLAY[TASK_STATUSES.ARCHIVED].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-            >
-              {STATUS_DISPLAY[TASK_STATUSES.ARCHIVED].label}
-              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
-                {taskCountsByStatus[TASK_STATUSES.ARCHIVED] || 0}
-              </span>}
-            </button>
-          </div>
+          {/* Reference column removed */}
           
         </div>
       </div>

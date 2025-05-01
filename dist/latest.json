@@ -1,0 +1,19 @@
+{
+  "version": "1.0.0",
+  "notes": "Stable release 1.0.0",
+  "pub_date": "2025-03-19T23:37:03.899Z",
+  "platforms": {
+    "windows": {
+      "url": "https://github.com/Next-AI-Labs-Inc/tasks/releases/download/v1.0.0/IX.Agent.Sync_1.0.0_x64_en-US.msi",
+      "signature": ""
+    },
+    "darwin": {
+      "url": "https://github.com/Next-AI-Labs-Inc/tasks/releases/download/v1.0.0/IX.Agent.Sync_1.0.0_aarch64.dmg",
+      "signature": ""
+    },
+    "linux": {
+      "url": "https://github.com/Next-AI-Labs-Inc/tasks/releases/download/v1.0.0/ix-agent-sync_1.0.0_amd64.AppImage",
+      "signature": ""
+    }
+  }
+}

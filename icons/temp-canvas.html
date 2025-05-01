@@ -1,0 +1,14 @@
+
+      <html>
+      <body>
+        <canvas id="canvas" width="64" height="64"></canvas>
+        <script>
+          const canvas = document.getElementById('canvas');
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#1E3A8A';
+          ctx.fillRect(0, 0, 64, 64);
+          document.write(canvas.toDataURL());
+        </script>
+      </body>
+      </html>
+    

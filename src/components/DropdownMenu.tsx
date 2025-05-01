@@ -1,6 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Z_INDICES } from '@/config/constants';
 
+/**
+ * @deprecated This component is deprecated. Please use the DropdownMenu component 
+ * from shared-tools in the future when fully migrated. It provides enhanced accessibility, 
+ * keyboard navigation, and additional features.
+ * 
+ * Future usage pattern will be:
+ * ```tsx
+ * import { DropdownMenu } from '@ix/dropdown-menu';
+ * ```
+ */
+
 export interface DropdownMenuItem {
   id: string;
   label: string;

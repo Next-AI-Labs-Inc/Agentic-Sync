@@ -34,20 +34,25 @@ async function buildApp() {
   try {
     log('Starting IX Agent Sync build process');
     
-    // Generate simple icons (no canvas dependency required)
-    log('Generating simple icons');
-    execute('npm run generate-icons', 'Failed to generate icons');
+    // Convert logo_src.png to proper icon formats using ImageMagick
+    log('Converting logo_src.png to proper icon formats using ImageMagick');
+    try {
+      execSync('npm run convert-icons-properly', { stdio: 'inherit' });
+    } catch (error) {
+      log('Proper icon conversion failed, falling back to direct copy');
+      execSync('npm run direct-copy-icon', { stdio: 'inherit' });
+    }
     
     // Skip installing dependencies to avoid canvas build issues
     log('Skipping dependency installation (already installed)');
     
-    // Build Next.js static assets
-    log('Building Next.js static assets');
-    execute('npm run build', 'Failed to build Next.js static assets');
+    // Build Next.js static assets with TAURI_BUILD=true
+    log('Building Next.js static assets for Tauri production build');
+    execute('TAURI_BUILD=true npm run build', 'Failed to build Next.js static assets');
     
-    // Build Tauri desktop app
-    log('Building Tauri desktop app with v1.5.9');
-    execute('cd src-tauri && npx @tauri-apps/cli@1.5.9 build', 'Failed to build Tauri desktop app');
+    // Build Tauri desktop app with TAURI_BUILD=true
+    log('Building Tauri desktop app with v1.5.9 for production');
+    execute('cd src-tauri && TAURI_BUILD=true npx @tauri-apps/cli@1.5.9 build', 'Failed to build Tauri desktop app');
     
     log('Build completed successfully! 🎉');
     

@@ -1,0 +1,20 @@
+/* font-size.css - Global font size scaling */
+
+/* Increase base font size by 15% */
+html {
+  font-size: 115%; /* Base size increase of 15% */
+}
+
+/* Adjust specific elements for better fit */
+.badge, .text-xs {
+  font-size: 0.75rem !important; /* Keep badges small */
+}
+
+.btn-outline {
+  font-size: 0.875rem !important; /* Keep outline buttons readable */
+}
+
+/* Keep footer text readable */
+footer .text-sm {
+  font-size: 0.875rem !important;
+}

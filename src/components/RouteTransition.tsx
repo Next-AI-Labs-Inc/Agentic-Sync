@@ -1,6 +1,26 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 
+/**
+ * @deprecated This component is deprecated. Please use the RouteTransition component 
+ * from @ix/shared-tools instead. It provides enhanced features, better accessibility,
+ * customizable styling, and improved performance.
+ * 
+ * Example usage:
+ * ```tsx
+ * import { RouteTransition } from '@ix/route-transition';
+ * 
+ * // In _app.tsx
+ * function MyApp({ Component, pageProps }) {
+ *   return (
+ *     <RouteTransition>
+ *       <Component {...pageProps} />
+ *     </RouteTransition>
+ *   );
+ * }
+ * ```
+ */
+
 interface RouteTransitionProps {
   children: React.ReactNode;
 }

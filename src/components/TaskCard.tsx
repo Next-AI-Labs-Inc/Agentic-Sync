@@ -2275,14 +2275,18 @@ function TaskCard({
                   {formatProjectName(task.project)}
                 </div>
               )}
-              <Link
-                href={{ pathname: '/task/[id]', query: { id: task.id } }}
-                onClick={(e) => e.stopPropagation()}
-                className="text-xs text-primary-500 hover:underline"
-                title="View task details"
-              >
-                {task.id.substring(0, 8)}...
-              </Link>
+              {task?.id ? (
+                <Link
+                  href={{ pathname: '/task/[id]', query: { id: task.id } }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-xs text-primary-500 hover:underline"
+                  title="View task details"
+                >
+                  {task.id.substring(0, 8)}...
+                </Link>
+              ) : (
+                <span className="text-xs text-gray-400">ID unavailable</span>
+              )}
             </div>
 
             <div className="flex items-center space-x-1">
