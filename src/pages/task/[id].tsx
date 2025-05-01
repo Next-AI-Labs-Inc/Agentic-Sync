@@ -69,12 +69,18 @@ export default function SingleTaskPage() {
   const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
-    // Only fetch the task when we have an ID
-    if (id && typeof id === 'string') {
+    // Only proceed when we have an ID from the router
+    if (!id) {
+      return; // Router query params might not be available yet
+    }
+    
+    const taskId = Array.isArray(id) ? id[0] : id;
+    
+    if (taskId) {
       setLoading(true);
       
       // First check if we have cached task data
-      const cachedTaskJson = localStorage.getItem(`task_cache_${id}`);
+      const cachedTaskJson = localStorage.getItem(`task_cache_${taskId}`);
       
       if (cachedTaskJson) {
         try {
@@ -96,7 +102,7 @@ export default function SingleTaskPage() {
             setLoading(false);
             
             // Clean up the cache after using it
-            localStorage.removeItem(`task_cache_${id}`);
+            localStorage.removeItem(`task_cache_${taskId}`);
             return; // Skip API call if we have valid cache data
           }
         } catch (cacheError) {
@@ -106,7 +112,7 @@ export default function SingleTaskPage() {
       }
       
       // If no cache or insufficient cache data, fetch from API
-      getTask(id)
+      getTask(taskId)
         .then(taskData => {
           // Ensure the task has an ID property
           if (taskData) {
@@ -137,7 +143,14 @@ export default function SingleTaskPage() {
       </Head>
       
       <div className="mb-6">
-        <Link href="/tasks" className="text-primary-600 hover:underline mb-4 inline-flex items-center">
+        <Link 
+          href={{ 
+            pathname: '/tasks',
+            // Explicitly omit any query params from the task detail page
+            query: {} 
+          }} 
+          className="text-primary-600 hover:underline mb-4 inline-flex items-center"
+        >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
@@ -164,7 +177,7 @@ export default function SingleTaskPage() {
           <p>{error}</p>
           <div className="mt-4">
             <button 
-              onClick={() => router.push('/tasks')}
+              onClick={() => router.push({ pathname: '/tasks', query: {} })}
               className="bg-red-100 text-red-800 px-4 py-2 rounded hover:bg-red-200"
             >
               Return to Tasks
