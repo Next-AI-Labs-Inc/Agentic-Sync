@@ -381,10 +381,10 @@ export default function TaskFilters({
             </button>
           </div>
           
-          {/* Someday/Maybe column */}
+          {/* Maybe column */}
           <div className="flex flex-col space-y-1">
             <div className="px-3 py-1.5 text-sm font-medium text-gray-500 whitespace-nowrap flex items-center border-b border-gray-300">
-              Someday/Maybe
+              Maybe
             </div>
             
             {/* Maybe */}
@@ -396,6 +396,18 @@ export default function TaskFilters({
               {STATUS_DISPLAY[TASK_STATUSES.MAYBE].label}
               {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
                 {taskCountsByStatus[TASK_STATUSES.MAYBE] || 0}
+              </span>}
+            </button>
+            
+            {/* On Hold */}
+            <button
+              onClick={() => setCompletedFilter(TASK_STATUSES.ON_HOLD)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+                ${completedFilter === TASK_STATUSES.ON_HOLD ? STATUS_DISPLAY[TASK_STATUSES.ON_HOLD].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {STATUS_DISPLAY[TASK_STATUSES.ON_HOLD].label}
+              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+                {taskCountsByStatus[TASK_STATUSES.ON_HOLD] || 0}
               </span>}
             </button>
           </div>
@@ -474,8 +486,34 @@ export default function TaskFilters({
                 {taskCountsByStatus[TASK_STATUSES.IN_PROGRESS] || 0}
               </span>}
             </button>
+          </div>
+          
+          {/* Review column */}
+          <div className="flex flex-col space-y-1">
+            <div className="px-3 py-1.5 text-sm font-medium text-gray-500 whitespace-nowrap flex items-center border-b border-gray-300">
+              Review
+            </div>
             
-            {/* For Review (renamed from Done) */}
+            {/* For Review */}
+            <button
+              onClick={() => setCompletedFilter(TASK_STATUSES.FOR_REVIEW)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
+                ${completedFilter === TASK_STATUSES.FOR_REVIEW ? STATUS_DISPLAY[TASK_STATUSES.FOR_REVIEW].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              For Review
+              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
+                {taskCountsByStatus[TASK_STATUSES.FOR_REVIEW] || 0}
+              </span>}
+            </button>
+          </div>
+          
+          {/* Completions column */}
+          <div className="flex flex-col space-y-1">
+            <div className="px-3 py-1.5 text-sm font-medium text-gray-500 whitespace-nowrap flex items-center border-b border-gray-300">
+              Completions
+            </div>
+            
+            {/* Done (Completed) */}
             <button
               onClick={() => setCompletedFilter(TASK_STATUSES.DONE)}
               className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
@@ -494,18 +532,6 @@ export default function TaskFilters({
               Reference
             </div>
             
-            {/* Done (renamed from Reviewed) */}
-            <button
-              onClick={() => setCompletedFilter(TASK_STATUSES.REVIEWED)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
-                ${completedFilter === TASK_STATUSES.REVIEWED ? STATUS_DISPLAY[TASK_STATUSES.REVIEWED].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-            >
-              {STATUS_DISPLAY[TASK_STATUSES.REVIEWED].label}
-              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
-                {taskCountsByStatus[TASK_STATUSES.REVIEWED] || 0}
-              </span>}
-            </button>
-            
             {/* Archived */}
             <button
               onClick={() => setCompletedFilter(TASK_STATUSES.ARCHIVED)}
@@ -519,24 +545,6 @@ export default function TaskFilters({
             </button>
           </div>
           
-          {/* On Hold column */}
-          <div className="flex flex-col space-y-1">
-            <div className="px-3 py-1.5 text-sm font-medium text-gray-500 whitespace-nowrap flex items-center border-b border-gray-300">
-              On Hold
-            </div>
-            
-            {/* On Hold */}
-            <button
-              onClick={() => setCompletedFilter(TASK_STATUSES.ON_HOLD)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
-                ${completedFilter === TASK_STATUSES.ON_HOLD ? STATUS_DISPLAY[TASK_STATUSES.ON_HOLD].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-            >
-              {STATUS_DISPLAY[TASK_STATUSES.ON_HOLD].label}
-              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
-                {taskCountsByStatus[TASK_STATUSES.ON_HOLD] || 0}
-              </span>}
-            </button>
-          </div>
         </div>
       </div>
       

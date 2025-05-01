@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the plan to convert the Tasks web application into a native desktop application using Tauri.
+This document outlines the plan to convert the Tasks web application into a native desktop application using Tauri, with instructions for building and running the macOS version.
 
 ## Why Tauri?
 
@@ -11,6 +11,50 @@ This document outlines the plan to convert the Tasks web application into a nati
 3. **Native Features**: Access to native OS capabilities
 4. **Security**: More secure than Electron due to its architecture
 5. **Auto-Updates**: Built-in update system
+
+## macOS Build Instructions
+
+### Prerequisites
+
+1. **Install Rust and Cargo**:
+   ```bash
+   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   ```
+
+2. **Install macOS Dependencies**:
+   ```bash
+   xcode-select --install
+   ```
+
+3. **Install Tauri CLI**:
+   ```bash
+   npm install -g @tauri-apps/cli
+   ```
+
+### Building the macOS Application
+
+1. **Build the Next.js application**:
+   ```bash
+   cd /Users/jedi/react_projects/ix/tasks
+   npm run build
+   ```
+
+2. **Bundle the application for macOS**:
+   ```bash
+   npm run tauri:build
+   ```
+   The built application will be available in `src-tauri/target/release/bundle/macos/`
+
+### Development Testing
+
+1. **Run in development mode (hot-reload)**:
+   ```bash
+   npm run tauri:dev
+   ```
+
+2. **Running production and development simultaneously**:
+   - Development runs on port 3045: `npm run dev`
+   - Production runs on port 3046: `npm run prod`
 
 ## Implementation Plan
 

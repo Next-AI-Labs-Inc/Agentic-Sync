@@ -410,19 +410,19 @@ function TaskCard({
     
     switch (field) {
       case 'initiative':
-        updates.initiative = editedInitiative.trim();
+        updates.initiative = editedInitiative; // Preserve whitespace
         setIsEditingInitiative(false);
         break;
       case 'title':
-        updates.title = editedTitle.trim();
+        updates.title = editedTitle; // Preserve whitespace
         setIsEditingTitle(false);
         break;
       case 'description':
-        updates.description = editedDescription.trim();
+        updates.description = editedDescription; // Preserve whitespace
         setIsEditingDescription(false);
         break;
       case 'userImpact':
-        updates.userImpact = editedUserImpact.trim();
+        updates.userImpact = editedUserImpact; // Preserve whitespace
         setIsEditingUserImpact(false);
         break;
     }
@@ -2000,7 +2000,7 @@ function TaskCard({
                 </div>
               ) : (
                 <div 
-                  className="text-gray-600 group cursor-pointer"
+                  className="text-gray-600 group cursor-pointer whitespace-pre-wrap break-words"
                   onDoubleClick={(e) => onUpdateTask && handleInlineEdit('userImpact')(e)}
                 >
                   {task.userImpact}
@@ -2032,7 +2032,7 @@ function TaskCard({
                 </div>
               ) : (
                 <div 
-                  className="text-gray-600 group cursor-pointer"
+                  className="text-gray-600 group cursor-pointer whitespace-pre-wrap break-words"
                   onClick={(e) => onUpdateTask && handleInlineEdit('description')(e)}
                 >
                   {task.description}

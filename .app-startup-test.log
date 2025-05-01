@@ -1,27 +1,43 @@
-App startup verification started at 2025-03-17T20:28:02.070Z
-[2025-03-17T20:28:02.076Z] Waiting for Next.js app to start...
-[2025-03-17T20:28:02.414Z] [stdout] > tasks@0.1.0 dev
-> next dev -p 3045
-[2025-03-17T20:28:02.757Z] [stderr] [31m[1m⨯[22m[39m Failed to start server
-[2025-03-17T20:28:02.759Z] [stderr] Error: listen EADDRINUSE: address already in use :::3045
+App startup verification started at 2025-03-18T18:40:26.759Z
+[2025-03-18T18:40:26.763Z] Waiting for Next.js app to start...
+[2025-03-18T18:40:27.005Z] [stdout] > tasks@0.1.0 prod
+> PROD_MODE=true node scripts/run-with-auth.js
+[2025-03-18T18:40:27.037Z] [stdout] [36m╔════════════════════════════════════════════════════╗
+║  IX Tasks Production Mode with Auth          ║
+╚════════════════════════════════════════════════════╝[0m
+[2025-03-18T18:40:27.037Z] [stdout] [32mStarting Auth Service on port 3010...[0m
+[34mWill start Tasks App on port 3020 after Auth Service is ready...[0m
+[2025-03-18T18:40:27.039Z] [stdout] [36mServices are starting...[0m
+[32mYou will be able to access:[0m
+- Tasks App: [34mhttp://localhost:3020[0m
+- Auth Service: [34mhttp://localhost:3010[0m
+[2025-03-18T18:40:27.041Z] ✅ SUCCESS: App started successfully!
+[2025-03-18T18:40:27.053Z] Performing health check on http://localhost:3020...
+[2025-03-18T18:40:27.288Z] [stdout] > auth-service@0.1.0 dev
+> next dev -p 3010
+[2025-03-18T18:40:27.834Z] [stdout] [1m[38;2;173;127;168m ▲ Next.js 14.1.3[39m[22m
+[2025-03-18T18:40:27.834Z] [stdout] - Local:        http://localhost:3010
+   - Environments: .env.local
+[2025-03-18T18:40:29.041Z] [stdout] [34mStarting Tasks App on port 3020...[0m
+[2025-03-18T18:40:29.179Z] [stdout] [32m[1m✓[22m[39m Ready in 1462ms
+[2025-03-18T18:40:29.251Z] [stderr] [31m[1m⨯[22m[39m Failed to start server
+[2025-03-18T18:40:29.255Z] [stderr] Error: listen EADDRINUSE: address already in use :::3020
     at Server.setupListenHandle [as _listen2] (node:net:1740:16)
     at listenInCluster (node:net:1788:12)
     at Server.listen (node:net:1876:7)
     at /Users/jedi/react_projects/ix/tasks/node_modules/next/dist/server/lib/start-server.js:279:16
     at new Promise (<anonymous>)
     at startServer (/Users/jedi/react_projects/ix/tasks/node_modules/next/dist/server/lib/start-server.js:190:11)
-    at /Users/jedi/react_projects/ix/tasks/node_modules/next/dist/server/lib/start-server.js:309:52
-    at Span.traceAsyncFn (/Users/jedi/react_projects/ix/tasks/node_modules/next/dist/trace/trace.js:151:26)
-    at process.<anonymous> (/Users/jedi/react_projects/ix/tasks/node_modules/next/dist/server/lib/start-server.js:309:35)
-    at process.emit (node:events:512:28) {
+    at nextStart (/Users/jedi/react_projects/ix/tasks/node_modules/next/dist/cli/next-start.js:50:40)
+    at /Users/jedi/react_projects/ix/tasks/node_modules/next/dist/bin/next:155:54
+    at async main (/Users/jedi/react_projects/ix/tasks/node_modules/next/dist/bin/next:155:5) {
   code: 'EADDRINUSE',
   errno: -48,
   syscall: 'listen',
   address: '::',
-  port: 3045
+  port: 3020
 }
-[2025-03-17T20:28:02.764Z] [stdout] [?25h
-[2025-03-17T20:28:02.764Z] [stdout] 
-[2025-03-17T20:28:02.770Z] Next.js process exited with code 0
-[2025-03-17T20:28:02.771Z] 🛑 Terminated Next.js process
-[2025-03-17T20:28:02.771Z] ❓ VERIFICATION INCONCLUSIVE: Could not determine app status
+[2025-03-18T18:40:29.260Z] [stdout] [33mTasks app exited with code 1[0m
+[2025-03-18T18:40:29.271Z] Next.js process exited with code 1
+[2025-03-18T18:40:29.272Z] 🛑 Terminated Next.js process
+[2025-03-18T18:40:29.272Z] ❌ VERIFICATION FAILED: Next.js app has errors on startup

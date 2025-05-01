@@ -1,0 +1,18 @@
+{
+  "extends": ["next/core-web-vitals", "next", "eslint:recommended"],
+  "rules": {
+    "react/no-unescaped-entities": "off",
+    "@next/next/no-img-element": "off",
+    "no-unused-vars": "warn",
+    "no-undef": "warn",
+    "react-hooks/exhaustive-deps": "warn",
+    "no-prototype-builtins": "warn",
+    "no-unreachable": "warn"
+  },
+  "env": {
+    "jest": true,
+    "browser": true,
+    "node": true,
+    "es6": true
+  }
+}

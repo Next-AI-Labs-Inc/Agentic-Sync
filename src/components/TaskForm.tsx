@@ -34,6 +34,7 @@ export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps
     title: '',
     description: '',
     userImpact: '',
+    quotes: '',
     requirements: '',
     technicalPlan: '',
     priority: 'medium',
@@ -78,7 +79,7 @@ export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps
       project?: string;
     } = {};
     
-    if (!formData.title.trim()) {
+    if (!formData.title || formData.title.length === 0) {
       newErrors.title = 'Title is required';
     }
     
@@ -107,6 +108,7 @@ export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps
       title: '',
       description: '',
       userImpact: '',
+      quotes: '',
       requirements: '',
       technicalPlan: '',
       priority: 'medium',
@@ -194,6 +196,24 @@ export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps
           />
           <div className="mt-1 text-xs text-gray-500">
             This will replace the description in the collapsed view if provided
+          </div>
+        </div>
+        
+        {/* Quotes */}
+        <div className="mb-4">
+          <label htmlFor="quotes" className="form-label">
+            Quotes
+          </label>
+          <textarea
+            id="quotes"
+            name="quotes"
+            value={formData.quotes}
+            onChange={handleChange}
+            className="form-textarea h-24"
+            placeholder="Add relevant quotes here"
+          />
+          <div className="mt-1 text-xs text-gray-500">
+            Quotes will show a 2-line preview in collapsed view and full content in expanded view
           </div>
         </div>
         

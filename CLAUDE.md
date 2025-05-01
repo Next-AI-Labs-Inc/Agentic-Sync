@@ -6,6 +6,69 @@ This file contains project-specific documentation for Claude to work with this p
 `/Users/jedi/react_projects/ix/CLAUDE.md`
 
 
+## Task Management Workflow - The Ultimate Source of Truth
+
+The task management system follows a sophisticated workflow combining GTD (Getting Things Done) methodology with AI agent actions, as implemented in the UI. **This is the definitive source of truth for all task statuses and transitions:**
+
+### 1. UI Column Structure (in order, exactly as shown in TaskFilters.tsx):
+
+1. **Views:** 
+   - All Active
+   - All Pending (all non-completed tasks)
+
+2. **Collection:** 
+   - Inbox (initial collection point for new ideas and tasks)
+   - Brainstorm (space to develop ideas and flesh out tasks)
+
+3. **Maybe:**
+   - Someday/Maybe (items to consider in the future but not actionable now)
+   - On Hold (tasks temporarily paused during engagement)
+
+4. **Source Tasks:**
+   - Backlog (task is in the backlog for future consideration)
+
+5. **Proposed:**
+   - Proposed (task has been proposed but not started yet)
+
+6. **Actionable:**
+   - Todo (task is ready to be worked on)
+
+7. **Engaged:**
+   - In Progress (task is currently being worked on)
+
+8. **Review:**
+   - For Review (AI agents mark tasks as complete here for human review)
+
+9. **Completions:**
+   - Completed (task has been reviewed and accepted as complete by humans)
+
+10. **Reference:**
+    - Archived (task has been archived and is no longer active)
+
+### Task Status Transitions (from taskStatus.ts):
+
+- **Inbox** → Brainstorm
+- **Brainstorm** → Proposed
+- **Proposed** → Todo
+- **Backlog** → Todo
+- **Maybe** → Backlog
+- **Todo** → In Progress
+- **In Progress** → For Review
+- **On Hold** → In Progress
+- **For Review** → Done (human verification)
+- **Done** → Reviewed
+- **Reviewed** → Archived
+
+### AI Agent Workflow:
+
+1. AI agents create tasks with 'proposed' status
+2. When actively working, AI agents set status to 'in-progress'
+3. When work is completed, AI agents MUST set status to 'for-review' (NEVER 'done')
+4. Only humans may move tasks from 'for-review' to 'done' after verification
+5. Once completely verified, tasks may be moved to 'reviewed' and eventually 'archived'
+
+**⚠️ CRITICAL: ALWAYS mark completed tasks as 'for-review' instead of 'done'**. This ensures human verification of AI-completed work. Only humans should move tasks from 'for-review' to 'done' after verifying the work.
+
 ## MongoDB Task Client Documentation
 
 ## ⚠️ CRITICAL: DIRECT TASK CLIENT USAGE ONLY - NO SCRIPTS ⚠️
@@ -74,9 +137,10 @@ Creates a new task in the MongoDB database.
       title: 'Your task title',                    // Human-readable, user-focused title
       description: 'Detailed description',         // Brief overview of the task
       userImpact: 'How this affects users',        // User experience impact
+      impactedFunctionality: 'What will change',   // List components/behaviors affected
       requirements: 'List of requirements',        // Bullet list of requirements
       technicalPlan: 'Step-by-step plan',          // Numbered list of implementation steps
-      status: 'proposed',                          // One of: proposed, todo, in-progress, done, reviewed
+      status: 'proposed',                          // One of: proposed, backlog, todo, in-progress, for-review (NEVER use 'done')
       priority: 'high',                            // One of: high, medium, low
       project: 'tasks',                            // Current project name
       
@@ -156,14 +220,20 @@ Updates an existing task with new data.
 (async () => {
   try {
     await updateTask('67d68dd4cb31daeb662f11c8', {
-      status: 'done',
+      status: 'for-review',  // ⚠️ CRITICAL: Always use 'for-review' when AI completes a task
       verificationSteps: [
         '1. Navigate to the feature',
         '2. Verify the behavior works as expected',
         '3. Check that error states are handled correctly'
       ]
     });
-    console.log('✅ Task marked as complete');
+    console.log('✅ Task marked for review');
+    
+    // ⚠️ NEVER use this code as an AI agent - only humans should do this:
+    // await updateTask('67d68dd4cb31daeb662f11c8', {
+    //   status: 'done',  // ⚠️ This status is ONLY for human reviewers to use
+    //   completedAt: new Date().toISOString()
+    // });
   } catch (error) {
     console.error(`❌ Error: ${error.message}`);
   }

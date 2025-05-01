@@ -1,0 +1,36 @@
+[
+  {
+    "id": "20",
+    "title": "Get TDD Working and testing all blur and update functions",
+    "description": "Implement comprehensive tests for all edit functions and onBlur handlers in the Tasks repository. This ensures that all database updates occur correctly when fields are edited and blurred.",
+    "status": "in-progress",
+    "priority": "high",
+    "initiative": "Task Management System Enhancement",
+    "branch": "feature/tdd-blur-update-functions",
+    "tags": ["testing", "tdd", "blur-handlers", "database-updates", "task-ui"],
+    "verificationSteps": [
+      "1. Test each edit function to verify it allows editing of task fields",
+      "2. Verify that each onBlur handler correctly updates the database",
+      "3. Create comprehensive tests based on existing documentation",
+      "4. Run tests and identify functions that do not work as intended",
+      "5. Document all issues found during testing"
+    ],
+    "files": [
+      "/Users/jedi/react_projects/ix/tasks/src/components/TaskCard.tsx",
+      "/Users/jedi/react_projects/ix/tasks/src/components/EditableItems/EditableItemList.tsx",
+      "/Users/jedi/react_projects/ix/tasks/__tests__/TaskContext.test.tsx",
+      "/Users/jedi/react_projects/ix/tasks/__tests__/TaskForm.test.tsx",
+      "/Users/jedi/react_projects/ix/tasks/__tests__/TaskCreation.test.tsx"
+    ],
+    "dependencies": [],
+    "nextSteps": [
+      "Fix failing tests in TaskContext.test.tsx",
+      "Fix failing tests in TaskCreation.test.tsx",
+      "Add tests for inline editing functionality in TaskCard",
+      "Add tests for EditableItemList onBlur database updates"
+    ],
+    "createdAt": "2025-03-17T00:00:00Z",
+    "updatedAt": "2025-03-17T00:15:00Z",
+    "completedAt": null
+  }
+]

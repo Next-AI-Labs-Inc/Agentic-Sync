@@ -1,11 +1,241 @@
-App build verification started at 2025-03-17T23:09:09.590Z
-[2025-03-17T23:09:09.594Z] Building Next.js app...
-[2025-03-17T23:09:10.011Z] [stdout] > tasks@0.1.0 build
+App build verification started at 2025-03-18T18:40:38.639Z
+[2025-03-18T18:40:38.642Z] Building Next.js app...
+[2025-03-18T18:40:38.886Z] [stdout] > tasks@0.1.0 build
 > next build
-[2025-03-17T23:09:10.563Z] [stdout] [1m[38;2;173;127;168m ▲ Next.js 14.1.3[39m[22m
-[2025-03-17T23:09:10.563Z] [stdout] - Environments: .env.local
+[2025-03-18T18:40:39.216Z] [stdout] [1m[38;2;173;127;168m ▲ Next.js 14.1.3[39m[22m
+[2025-03-18T18:40:39.216Z] [stdout] - Environments: .env.local
 
  [37m[1m [22m[39m Linting and checking validity of types ...
-[2025-03-17T23:09:13.970Z] Received SIGTERM signal
-[2025-03-17T23:09:13.971Z] 🛑 Terminated build process
-[2025-03-17T23:09:13.971Z] ❓ VERIFICATION INCONCLUSIVE: Could not determine build status
+[2025-03-18T18:40:39.901Z] [stdout] [36m./src/components/DropdownMenu.tsx[39m
+[33m8[39m:[33m13[39m  [33m[1mWarning[22m[39m: 'e' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+
+[36m./src/components/EditableItems/EditableItemList.tsx[39m
+[33m7[39m:[33m14[39m  [33m[1mWarning[22m[39m: 'newItems' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+
+[36m./src/components/InitiativeCard.tsx[39m
+[33m8[39m:[33m15[39m  [33m[1mWarning[22m[39m: 'id' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m9[39m:[33m13[39m  [33m[1mWarning[22m[39m: 'initiative' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m10[39m:[33m21[39m  [33m[1mWarning[22m[39m: 'id' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m10[39m:[33m33[39m  [33m[1mWarning[22m[39m: 'status' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m11[39m:[33m23[39m  [33m[1mWarning[22m[39m: 'id' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m11[39m:[33m35[39m  [33m[1mWarning[22m[39m: 'priority' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m136[39m:[33m9[39m  [33m[1mWarning[22m[39m: 'formatDate' is assigned a value but never used.  [90m[1mno-unused-vars[22m[39m
+
+[36m./src/components/Popover.tsx[39m
+[33m2[39m:[33m29[39m  [33m[1mWarning[22m[39m: 'PopoverPosition' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+
+[36m./src/components/ProjectSelector.tsx[39m
+[33m8[39m:[33m14[39m  [33m[1mWarning[22m[39m: 'selectedProjects' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m9[39m:[33m24[39m  [33m[1mWarning[22m[39m: 'filter' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+
+[36m./src/components/RouteTransition.tsx[39m
+[33m11[39m:[33m29[39m  [33m[1mWarning[22m[39m: 'NodeJS' is not defined.  [90m[1mno-undef[22m[39m
+
+[36m./src/components/TaskCard.tsx[39m
+[33m2[39m:[33m10[39m  [33m[1mWarning[22m[39m: 'format' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m4[39m:[33m3[39m  [33m[1mWarning[22m[39m: 'FaCheckCircle' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m5[39m:[33m3[39m  [33m[1mWarning[22m[39m: 'FaRegCircle' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m11[39m:[33m3[39m  [33m[1mWarning[22m[39m: 'FaInfoCircle' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m31[39m:[33m45[39m  [33m[1mWarning[22m[39m: 'STATUS_ACTION_TEXT' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m36[39m:[33m5[39m  [33m[1mWarning[22m[39m: 'taskId' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m37[39m:[33m5[39m  [33m[1mWarning[22m[39m: 'project' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m38[39m:[33m5[39m  [33m[1mWarning[22m[39m: 'status' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m40[39m:[33m18[39m  [33m[1mWarning[22m[39m: 'taskId' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m40[39m:[33m34[39m  [33m[1mWarning[22m[39m: 'project' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m41[39m:[33m14[39m  [33m[1mWarning[22m[39m: 'taskId' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m41[39m:[33m30[39m  [33m[1mWarning[22m[39m: 'project' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m42[39m:[33m19[39m  [33m[1mWarning[22m[39m: 'taskId' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m42[39m:[33m35[39m  [33m[1mWarning[22m[39m: 'project' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m42[39m:[33m52[39m  [33m[1mWarning[22m[39m: 'newDate' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m43[39m:[33m19[39m  [33m[1mWarning[22m[39m: 'taskId' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m43[39m:[33m35[39m  [33m[1mWarning[22m[39m: 'project' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m43[39m:[33m52[39m  [33m[1mWarning[22m[39m: 'updates' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m70[39m:[33m13[39m  [33m[1mWarning[22m[39m: 'container' is assigned a value but never used.  [90m[1mno-unused-vars[22m[39m
+[33m362[39m:[33m9[39m  [33m[1mWarning[22m[39m: 'handleDateClick' is assigned a value but never used.  [90m[1mno-unused-vars[22m[39m
+
+[36m./src/components/TaskFilters.tsx[39m
+[33m3[39m:[33m46[39m  [33m[1mWarning[22m[39m: 'FaEllipsisV' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m14[39m:[33m22[39m  [33m[1mWarning[22m[39m: 'filter' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m16[39m:[33m24[39m  [33m[1mWarning[22m[39m: 'filter' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m18[39m:[33m15[39m  [33m[1mWarning[22m[39m: 'sort' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m20[39m:[33m22[39m  [33m[1mWarning[22m[39m: 'direction' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m25[39m:[33m23[39m  [33m[1mWarning[22m[39m: 'enabled' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m47[39m:[33m9[39m  [33m[1mWarning[22m[39m: 'sortedProjects' is assigned a value but never used.  [90m[1mno-unused-vars[22m[39m
+[33m98[39m:[33m9[39m  [33m[1mWarning[22m[39m: 'handleProjectSelection' is assigned a value but never used.  [90m[1mno-unused-vars[22m[39m
+[33m118[39m:[33m9[39m  [33m[1mWarning[22m[39m: 'handleSelectAllProjects' is assigned a value but never used.  [90m[1mno-unused-vars[22m[39m
+[33m131[39m:[33m9[39m  [33m[1mWarning[22m[39m: 'handleSelectNone' is assigned a value but never used.  [90m[1mno-unused-vars[22m[39m
+
+[36m./src/components/TaskForm.tsx[39m
+[33m2[39m:[33m33[39m  [33m[1mWarning[22m[39m: 'Initiative' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m7[39m:[33m14[39m  [33m[1mWarning[22m[39m: 'taskData' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m16[39m:[33m33[39m  [33m[1mWarning[22m[39m: 'initiativesLoading' is assigned a value but never used.  [90m[1mno-unused-vars[22m[39m
+
+[36m./src/components/TaskPlanCreator.tsx[39m
+[33m1[39m:[33m8[39m  [33m[1mWarning[22m[39m: 'React' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+
+[36m./src/components/TaskTracker.tsx[39m
+[33m16[39m:[33m15[39m  [33m[1mWarning[22m[39m: 'title' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m16[39m:[33m30[39m  [33m[1mWarning[22m[39m: 'description' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m17[39m:[33m22[39m  [33m[1mWarning[22m[39m: 'taskId' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m17[39m:[33m38[39m  [33m[1mWarning[22m[39m: 'status' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+
+[36m./src/components/UserTaskTracker.tsx[39m
+[33m6[39m:[33m11[39m  [33m[1mWarning[22m[39m: 'TrackedTask' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+
+[36m./src/constants/numberIndicators.ts[39m
+[33m92[39m:[33m16[39m  [33m[1mWarning[22m[39m: Do not access Object.prototype method 'hasOwnProperty' from target object.  [90m[1mno-prototype-builtins[22m[39m
+
+[36m./src/constants/projectEnhancements.ts[39m
+[33m8[39m:[33m25[39m  [33m[1mWarning[22m[39m: 'Initiative' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+
+[36m./src/contexts/AuthContext.tsx[39m
+[33m18[39m:[33m11[39m  [33m[1mWarning[22m[39m: 'redirectUrl' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m373[39m:[33m6[39m  [33m[1mWarning[22m[39m: React Hook useEffect has a missing dependency: 'user'. Either include it or remove the dependency array.  [90m[1mreact-hooks/exhaustive-deps[22m[39m
+
+[36m./src/contexts/InitiativeContext.tsx[39m
+[33m5[39m:[33m8[39m  [33m[1mWarning[22m[39m: 'axios' is defined but ne
+[2025-03-18T18:40:39.902Z] [stdout] ver used.  [90m[1mno-unused-vars[22m[39m
+[33m18[39m:[33m22[39m  [33m[1mWarning[22m[39m: 'initiative' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m19[39m:[33m22[39m  [33m[1mWarning[22m[39m: 'id' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m19[39m:[33m34[39m  [33m[1mWarning[22m[39m: 'data' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m20[39m:[33m22[39m  [33m[1mWarning[22m[39m: 'id' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m26[39m:[33m15[39m  [33m[1mWarning[22m[39m: 'option' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m27[39m:[33m22[39m  [33m[1mWarning[22m[39m: 'direction' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m28[39m:[33m21[39m  [33m[1mWarning[22m[39m: 'status' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m37[39m:[33m7[39m  [33m[1mWarning[22m[39m: 'deduplicateInitiatives' is assigned a value but never used.  [90m[1mno-unused-vars[22m[39m
+[33m99[39m:[33m6[39m  [33m[1mWarning[22m[39m: React Hook useEffect has a missing dependency: 'router.query'. Either include it or remove the dependency array.  [90m[1mreact-hooks/exhaustive-deps[22m[39m
+[33m112[39m:[33m6[39m  [33m[1mWarning[22m[39m: React Hook useCallback has an unnecessary dependency: 'router'. Either exclude it or remove the dependency array.  [90m[1mreact-hooks/exhaustive-deps[22m[39m
+[33m198[39m:[33m6[39m  [33m[1mWarning[22m[39m: React Hook useEffect has a missing dependency: 'refreshInitiatives'. Either include it or remove the dependency array.  [90m[1mreact-hooks/exhaustive-deps[22m[39m
+
+[36m./src/contexts/ProjectContext.tsx[39m
+[33m120[39m:[33m6[39m  [33m[1mWarning[22m[39m: React Hook useEffect has a missing dependency: 'projects.length'. Either include it or remove the dependency array.  [90m[1mreact-hooks/exhaustive-deps[22m[39m
+
+[36m./src/contexts/TaskContext.tsx[39m
+[33m32[39m:[33m19[39m  [33m[1mWarning[22m[39m: 'term' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m34[39m:[33m24[39m  [33m[1mWarning[22m[39m: 'filter' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m35[39m:[33m22[39m  [33m[1mWarning[22m[39m: 'filter' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m36[39m:[33m15[39m  [33m[1mWarning[22m[39m: 'sort' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m37[39m:[33m22[39m  [33m[1mWarning[22m[39m: 'direction' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m39[39m:[33m5[39m  [33m[1mWarning[22m[39m: 'taskId' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m40[39m:[33m5[39m  [33m[1mWarning[22m[39m: 'project' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m41[39m:[33m5[39m  [33m[1mWarning[22m[39m: 'status' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m43[39m:[33m20[39m  [33m[1mWarning[22m[39m: 'taskId' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m43[39m:[33m36[39m  [33m[1mWarning[22m[39m: 'project' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m44[39m:[33m16[39m  [33m[1mWarning[22m[39m: 'taskId' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m44[39m:[33m32[39m  [33m[1mWarning[22m[39m: 'project' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m45[39m:[33m13[39m  [33m[1mWarning[22m[39m: 'taskData' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m46[39m:[33m20[39m  [33m[1mWarning[22m[39m: 'taskId' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m46[39m:[33m36[39m  [33m[1mWarning[22m[39m: 'project' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m46[39m:[33m53[39m  [33m[1mWarning[22m[39m: 'newDate' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m47[39m:[33m16[39m  [33m[1mWarning[22m[39m: 'taskId' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m47[39m:[33m32[39m  [33m[1mWarning[22m[39m: 'updateData' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m51[39m:[33m22[39m  [33m[1mWarning[22m[39m: 'enabled' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m84[39m:[33m9[39m  [33m[1mWarning[22m[39m: 'titleProjectKey' is assigned a value but never used.  [90m[1mno-unused-vars[22m[39m
+[33m221[39m:[33m6[39m  [33m[1mWarning[22m[39m: React Hook useEffect has a missing dependency: 'router.query'. Either include it or remove the dependency array.  [90m[1mreact-hooks/exhaustive-deps[22m[39m
+[33m295[39m:[33m6[39m  [33m[1mWarning[22m[39m: React Hook useEffect has a missing dependency: 'tasks'. Either include it or remove the dependency array.  [90m[1mreact-hooks/exhaustive-deps[22m[39m
+[33m462[39m:[33m5[39m  [33m[1mWarning[22m[39m: Unreachable code.  [90m[1mno-unreachable[22m[39m
+[33m463[39m:[33m6[39m  [33m[1mWarning[22m[39m: React Hook useCallback has a missing dependency: 'dedupeEnabled'. Either include it or remove the dependency array.  [90m[1mreact-hooks/exhaustive-deps[22m[39m
+[33m610[39m:[33m6[39m  [33m[1mWarning[22m[39m: React Hook useEffect has a missing dependency: 'refreshTasks'. Either include it or remove the dependency array.  [90m[1mreact-hooks/exhaustive-deps[22m[39m
+[33m651[39m:[33m20[39m  [33m[1mWarning[22m[39m: 'task' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m756[39m:[33m49[39m  [33m[1mWarning[22m[39m: 'project' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+
+[36m./src/pages/api/initiatives/index.js[39m
+[33m103[39m:[33m11[39m  [33m[1mWarning[22m[39m: 'id' is assigned a value but never used.  [90m[1mno-unused-vars[22m[39m
+
+[36m./src/pages/api/initiatives-old.js[39m
+[33m73[39m:[33m11[39m  [33m[1mWarning[22m[39m: 'id' is assigned a value but never used.  [90m[1mno-unused-vars[22m[39m
+
+[36m./src/pages/index.tsx[39m
+[33m24[39m:[33m11[39m  [33m[1mWarning[22m[39m: 'projects' is assigned a value but never used.  [90m[1mno-unused-vars[22m[39m
+
+[36m./src/pages/initiatives.tsx[39m
+[33m1[39m:[33m27[39m  [33m[1mWarning[22m[39m: 'useEffect' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m6[39m:[33m8[39m  [33m[1mWarning[22m[39m: 'LoadingSpinner' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m25[39m:[33m5[39m  [33m[1mWarning[22m[39m: 'refreshInitiatives' is assigned a value but never used.  [90m[1mno-unused-vars[22m[39m
+[33m36[39m:[33m10[39m  [33m[1mWarning[22m[39m: 'selectedInitiative' is assigned a value but never used.  [90m[1mno-unused-vars[22m[39m
+[33m36[39m:[33m30[39m  [33m[1mWarning[22m[39m: 'setSelectedInitiative' is assigned a value but never used.  [90m[1mno-unused-vars[22m[39m
+
+[36m./src/pages/task-detail/index.tsx[39m
+[33m99[39m:[33m46[39m  [33m[1mWarning[22m[39m: 'project' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m99[39m:[33m55[39m  [33m[1mWarning[22m[39m: 'status' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m109[39m:[33m44[39m  [33m[1mWarning[22m[39m: 'project' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m119[39m:[33m32[39m  [33m[1mWarning[22m[39m: 'taskId' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m119[39m:[33m40[39m  [33m[1mWarning[22m[39m: 'project' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m128[39m:[33m44[39m  [33m[1mWarning[22m[39m: 'project' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m128[39m:[33m53[39m  [33m[1mWarning[22m[39m: 'newDate' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+
+[36m./src/pages/tasks.tsx[39m
+[33m1[39m:[33m27[39m  [33m[1mWarning[22m[39m: 'useRef' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m8[39m:[33m27[39m  [
+[2025-03-18T18:40:39.902Z] [stdout] 33m[1mWarning[22m[39m: 'List' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m13[39m:[33m10[39m  [33m[1mWarning[22m[39m: 'windowHeight' is assigned a value but never used.  [90m[1mno-unused-vars[22m[39m
+[33m14[39m:[33m10[39m  [33m[1mWarning[22m[39m: 'isClient' is assigned a value but never used.  [90m[1mno-unused-vars[22m[39m
+
+[36m./src/services/taskSyncService.ts[39m
+[33m10[39m:[33m3[39m  [33m[1mWarning[22m[39m: 'TASK_CREATED' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m11[39m:[33m3[39m  [33m[1mWarning[22m[39m: 'TASK_UPDATED' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m12[39m:[33m3[39m  [33m[1mWarning[22m[39m: 'TASK_DELETED' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m13[39m:[33m3[39m  [33m[1mWarning[22m[39m: 'PROJECT_CREATED' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m14[39m:[33m3[39m  [33m[1mWarning[22m[39m: 'PROJECT_UPDATED' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m15[39m:[33m3[39m  [33m[1mWarning[22m[39m: 'PROJECT_DELETED' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m16[39m:[33m3[39m  [33m[1mWarning[22m[39m: 'SYNC_ERROR' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m27[39m:[33m27[39m  [33m[1mWarning[22m[39m: 'event' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+[33m33[39m:[33m27[39m  [33m[1mWarning[22m[39m: 'NodeJS' is not defined.  [90m[1mno-undef[22m[39m
+
+[36m./src/utils/taskFormatters.ts[39m
+[33m109[39m:[33m17[39m  [33m[1mWarning[22m[39m: 'id' is defined but never used.  [90m[1mno-unused-vars[22m[39m
+
+[36m./src/utils/withAuth.tsx[39m
+[33m113[39m:[33m8[39m  [33m[1mWarning[22m[39m: React Hook useEffect has missing dependencies: 'isDevelopmentBypass', 'login', and 'user'. Either include them or remove the dependency array.  [90m[1mreact-hooks/exhaustive-deps[22m[39m
+
+[36minfo[39m  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+[2025-03-18T18:40:39.903Z] ❌ ERROR detected in output
+[2025-03-18T18:40:41.630Z] [stdout] [37m[1m [22m[39m Creating an optimized production build ...
+[2025-03-18T18:40:43.968Z] [stdout] [32m[1m✓[22m[39m Compiled successfully
+[2025-03-18T18:40:43.968Z] [stdout] [37m[1m [22m[39m Collecting page data ...
+[2025-03-18T18:40:44.129Z] [stdout] Initializing real-time task sync service...
+Setting up real-time event simulation
+[2025-03-18T18:40:44.132Z] [stdout] Initializing real-time task sync service...
+[2025-03-18T18:40:44.132Z] [stdout] Initializing real-time task sync service...
+Setting up real-time event simulation
+[2025-03-18T18:40:44.133Z] [stdout] Setting up real-time event simulation
+[2025-03-18T18:40:44.135Z] [stdout] Initializing real-time task sync service...
+Setting up real-time event simulation
+[2025-03-18T18:40:44.140Z] [stdout] Initializing real-time task sync service...
+Setting up real-time event simulation
+Initializing real-time task sync service...
+Setting up real-time event simulation
+[2025-03-18T18:40:44.144Z] [stdout] Initializing real-time task sync service...
+Setting up real-time event simulation
+[2025-03-18T18:40:44.152Z] [stdout] Initializing real-time task sync service...
+Setting up real-time event simulation
+[2025-03-18T18:40:44.155Z] [stdout] Initializing real-time task sync service...
+Setting up real-time event simulation
+[2025-03-18T18:40:44.588Z] [stdout] [37m[1m [22m[39m Generating static pages (0/10) ...
+[2025-03-18T18:40:44.660Z] [stdout] [37m[1m [22m[39m Generating static pages (2/10)
+[2025-03-18T18:40:44.660Z] [stdout] [37m[1m [22m[39m Generating static pages (4/10) 
+ [37m[1m [22m[39m Generating static pages (7/10)
+[2025-03-18T18:40:44.713Z] [stdout] [32m[1m✓[22m[39m Generating static pages (10/10)
+[2025-03-18T18:40:45.156Z] [stdout] [37m[1m [22m[39m Finalizing page optimization ...
+ [37m[1m [22m[39m Collecting build traces ...
+[2025-03-18T18:40:48.975Z] [stdout] 
+[2025-03-18T18:40:48.977Z] [stdout] [4mRoute (pages)[24m                              [4mSize[24m     [4mFirst Load JS[24m
+┌ ○ /                                      1.76 kB         [37m[1m176 kB[22m[39m
+├   /_app                                  0 B             [37m[1m124 kB[22m[39m
+├ ○ /404                                   182 B           [37m[1m125 kB[22m[39m
+├ λ /api/docs                              0 B             [37m[1m124 kB[22m[39m
+├ λ /api/initiatives                       0 B             [37m[1m124 kB[22m[39m
+├ λ /api/initiatives-old                   0 B             [37m[1m124 kB[22m[39m
+├ λ /api/initiatives/[id]                  0 B             [37m[1m124 kB[22m[39m
+├ ○ /docs                                  4.06 kB         [37m[1m162 kB[22m[39m
+├ ○ /initiatives                           2 kB            [37m[1m176 kB[22m[39m
+├ ○ /minimal                               2 kB            [37m[1m180 kB[22m[39m
+├ ○ /task-detail                           1.37 kB         [37m[1m173 kB[22m[39m
+├ ○ /task/[id]                             1.26 kB         [37m[1m173 kB[22m[39m
+├ ○ /tasks                                 2.62 kB         [37m[1m180 kB[22m[39m
+└ ○ /tasks-core                            1.81 kB         [37m[1m179 kB[22m[39m
++ First Load JS shared by all              [37m[1m131 kB[22m[39m
+  ├ chunks/framework-03cd576e71e4cd66.js   45.2 kB
+  ├ chunks/main-c693b54913497348.js        36.4 kB
+  ├ chunks/pages/_app-072fd03a908fd9a3.js  42.1 kB
+  └ other shared chunks (total)            7.19 kB

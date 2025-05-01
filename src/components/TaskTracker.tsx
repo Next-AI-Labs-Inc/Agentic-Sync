@@ -7,14 +7,14 @@ interface TrackedTask {
   id: string;
   title: string;
   description: string;
-  status: 'proposed' | 'todo' | 'in-progress' | 'done' | 'reviewed';
+  status: 'proposed' | 'todo' | 'in-progress' | 'for-review' | 'done' | 'reviewed';
   timestamp: string;
 }
 
 interface TaskTrackerContextValue {
   trackedTasks: TrackedTask[];
   trackTask: (title: string, description: string) => Promise<TrackedTask | null>;
-  updateTaskStatus: (taskId: string, status: 'proposed' | 'todo' | 'in-progress' | 'done' | 'reviewed') => Promise<void>;
+  updateTaskStatus: (taskId: string, status: 'proposed' | 'todo' | 'in-progress' | 'for-review' | 'done' | 'reviewed') => Promise<void>;
   activeInitiative: string | null;
 }
 
@@ -125,7 +125,7 @@ export function TaskTrackerProvider({ children }: { children: React.ReactNode })
   };
   
   // Update task status
-  const updateTaskStatus = async (taskId: string, status: 'proposed' | 'todo' | 'in-progress' | 'done' | 'reviewed') => {
+  const updateTaskStatus = async (taskId: string, status: 'proposed' | 'todo' | 'in-progress' | 'for-review' | 'done' | 'reviewed') => {
     try {
       await taskApiService.updateTaskStatus(taskId, status);
       
