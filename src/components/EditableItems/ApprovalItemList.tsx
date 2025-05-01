@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { FaEdit, FaPlus, FaTrash, FaCheck, FaTimes, FaCheckCircle, FaBan } from 'react-icons/fa';
 import { ItemWithStatus } from '@/types';
 
@@ -21,7 +21,7 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
   const [editValue, setEditValue] = useState('');
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newItemValue, setNewItemValue] = useState('');
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  // Remove selectedItemId state - use CSS :hover/:focus instead
   const [processingApprove, setProcessingApprove] = useState<string | null>(null);
   const [processingVeto, setProcessingVeto] = useState<string | null>(null);
   
@@ -42,23 +42,18 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
     }
   }, [isAddingNew]);
 
-  // Handle item selection
-  const handleSelectItem = (id: string) => (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setSelectedItemId(id === selectedItemId ? null : id);
-  };
+  // Remove selection handler - use CSS hover and focus instead
 
   // Handle edit start (double click)
-  const handleEdit = (index: number) => (e: React.MouseEvent) => {
+  const handleEdit = useCallback((index: number) => (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setEditIndex(index);
     setEditValue(items[index].content);
-  };
+  }, [items]);
   
   // Handle edit save
-  const handleSave = (e?: React.FormEvent) => {
+  const handleSave = useCallback((e?: React.FormEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation(); // Prevent event from bubbling to parent elements
@@ -85,20 +80,20 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
     
     setEditIndex(null);
     setEditValue('');
-  };
+  }, [editIndex, editValue, items, onUpdate]);
   
   // Handle edit cancel
-  const handleCancel = (e?: React.MouseEvent) => {
+  const handleCancel = useCallback((e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
     setEditIndex(null);
     setEditValue('');
-  };
+  }, []);
   
   // Handle approve
-  const handleApprove = (itemId: string) => async (e: React.MouseEvent) => {
+  const handleApprove = useCallback((itemId: string) => async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -114,10 +109,10 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
       // Reset processing state
       setProcessingApprove(null);
     }
-  };
+  }, [onApprove]);
   
   // Handle veto (delete)
-  const handleVeto = (itemId: string) => async (e: React.MouseEvent) => {
+  const handleVeto = useCallback((itemId: string) => async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -133,18 +128,18 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
       // Reset processing state
       setProcessingVeto(null);
     }
-  };
+  }, [onVeto]);
   
   // Handle adding new item
-  const handleAddNew = (e: React.MouseEvent) => {
+  const handleAddNew = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsAddingNew(true);
     setNewItemValue('');
-  };
+  }, []);
   
   // Handle saving new item
-  const handleSaveNew = (e?: React.FormEvent) => {
+  const handleSaveNew = useCallback((e?: React.FormEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation(); // Prevent event from bubbling to parent elements
@@ -164,45 +159,45 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
     }
     setIsAddingNew(false);
     setNewItemValue('');
-  };
+  }, [newItemValue, items, onUpdate]);
   
   // Handle cancel adding new item
-  const handleCancelNew = (e?: React.MouseEvent) => {
+  const handleCancelNew = useCallback((e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
     setIsAddingNew(false);
     setNewItemValue('');
-  };
+  }, []);
   
   // Handle keyboard navigation for editing
-  const handleEditKeyDown = (e: React.KeyboardEvent) => {
+  const handleEditKeyDown = useCallback((e: React.KeyboardEvent) => {
     // Always stop propagation to prevent affecting parent components
     e.stopPropagation();
     
-    if (e.key === 'Enter' && e.ctrlKey) {
+    if (e.key === 'Enter') {
       e.preventDefault(); // Prevent adding a newline
       handleSave();
     } else if (e.key === 'Escape') {
       e.preventDefault();
       handleCancel();
     }
-  };
+  }, [handleSave, handleCancel]);
   
   // Handle keyboard navigation for new items
-  const handleNewKeyDown = (e: React.KeyboardEvent) => {
+  const handleNewKeyDown = useCallback((e: React.KeyboardEvent) => {
     // Always stop propagation to prevent affecting parent components
     e.stopPropagation();
     
-    if (e.key === 'Enter' && e.ctrlKey) {
+    if (e.key === 'Enter') {
       e.preventDefault(); // Prevent adding a newline
       handleSaveNew();
     } else if (e.key === 'Escape') {
       e.preventDefault();
       handleCancelNew();
     }
-  };
+  }, [handleSaveNew, handleCancelNew]);
 
   return (
     <div className="mb-4 editable-item">
@@ -210,11 +205,11 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
         <h4 className="font-medium text-gray-700">{label}</h4>
         <button
           onClick={handleAddNew}
-          className="p-1 text-blue-600 hover:text-blue-800 transition-colors"
+          className="p-2 rounded-md bg-blue-50 border border-blue-300 text-blue-600 hover:bg-blue-100 transition-colors shadow-sm flex items-center gap-1 text-sm font-medium"
           title={`Add new ${label.toLowerCase()} item`}
           data-testid="add-item-btn"
         >
-          <FaPlus size={14} />
+          <FaPlus size={12} /> Add
         </button>
       </div>
       
@@ -223,8 +218,6 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
           <li 
             key={item.id} 
             className={`flex items-start group relative transition-colors ${
-              selectedItemId === item.id ? 'bg-gray-100' : ''
-            } ${
               item.status === 'approved' ? 'border-l-4 border-green-500 pl-2' : ''
             }`}
           >
@@ -236,14 +229,14 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
                   onChange={(e) => setEditValue(e.target.value)}
                   onBlur={handleSave}
                   onKeyDown={handleEditKeyDown}
-                  className="flex-1 w-full p-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 min-h-[60px]"
+                  className="flex-1 w-full p-3 border border-blue-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[60px]"
                   rows={Math.max(2, (editValue.match(/\n/g) || []).length + 1)}
                   data-testid="edit-textarea"
                 />
                 <div className="flex items-start mt-2 sm:mt-0 sm:ml-2">
                   <button
                     onClick={handleSave}
-                    className="p-1 text-green-600 hover:text-green-800"
+                    className="p-2 rounded-md bg-green-50 border border-green-300 text-green-600 hover:bg-green-100 transition-colors shadow-sm"
                     title="Save changes"
                     data-testid="save-edit-btn"
                   >
@@ -251,7 +244,7 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
                   </button>
                   <button
                     onClick={handleCancel}
-                    className="p-1 text-red-600 hover:text-red-800 ml-1"
+                    className="p-2 rounded-md bg-red-50 border border-red-300 text-red-600 hover:bg-red-100 transition-colors shadow-sm ml-2"
                     title="Cancel editing"
                     data-testid="cancel-edit-btn"
                   >
@@ -262,17 +255,21 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
             ) : (
               <>
                 <div 
-                  className={`flex-1 p-2 rounded hover:bg-gray-50 cursor-pointer whitespace-pre-wrap break-words ${
-                    item.status === 'approved' ? 'text-gray-800' : 'text-gray-600'
-                  } ${selectedItemId === item.id ? 'bg-gray-100' : ''}`}
-                  onClick={handleSelectItem(item.id)}
+                  className={`flex-1 p-3 rounded-md border border-gray-200 shadow-sm transition-all duration-200 
+                    cursor-pointer whitespace-pre-wrap break-words 
+                    ${
+                      item.status === 'approved' 
+                        ? 'text-gray-800 border-l-4 border-l-green-500' 
+                        : 'text-gray-700 hover:bg-blue-50 hover:border-blue-300 hover:shadow-md focus:bg-blue-50 focus:border-blue-400 focus:shadow-md'
+                    }`}
                   onDoubleClick={handleEdit(index)}
+                  tabIndex={0}
                   data-testid={`item-content-${index}`}
                 >
                   {item.content}
                   {item.status === 'approved' && (
-                    <span className="ml-2 text-green-600 text-xs" data-testid="approved-badge">
-                      (Approved)
+                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800" data-testid="approved-badge">
+                      Approved
                     </span>
                   )}
                 </div>
@@ -282,7 +279,7 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
                     <>
                       <button
                         onClick={handleApprove(item.id)}
-                        className="btn-outline-primary"
+                        className="px-3 py-1 rounded-md bg-blue-50 border border-blue-300 text-blue-600 hover:bg-blue-100 transition-colors shadow-sm text-sm font-medium"
                         title="Approve item"
                         data-testid={`approve-btn-${index}`}
                         disabled={processingApprove === item.id}
@@ -291,7 +288,7 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
                       </button>
                       <button
                         onClick={handleVeto(item.id)}
-                        className="ml-1 btn-outline-danger"
+                        className="ml-2 px-3 py-1 rounded-md bg-gray-50 border border-gray-300 text-gray-600 hover:bg-gray-100 transition-colors shadow-sm text-sm font-medium"
                         title="Veto (remove) item"
                         data-testid={`veto-btn-${index}`}
                         disabled={processingVeto === item.id}
@@ -318,14 +315,14 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
                 onBlur={handleSaveNew}
                 onKeyDown={handleNewKeyDown}
                 placeholder={`Enter new ${label.toLowerCase()} item...`}
-                className="flex-1 w-full p-2 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 min-h-[60px]"
+                className="flex-1 w-full p-3 border border-blue-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[60px]"
                 rows={Math.max(2, (newItemValue.match(/\n/g) || []).length + 1)}
                 data-testid="new-item-textarea"
               />
               <div className="flex items-start mt-2 sm:mt-0 sm:ml-2">
                 <button
                   onClick={handleSaveNew}
-                  className="p-1 text-green-600 hover:text-green-800"
+                  className="p-2 rounded-md bg-green-50 border border-green-300 text-green-600 hover:bg-green-100 transition-colors shadow-sm"
                   title="Save new item"
                   data-testid="save-new-btn"
                 >
@@ -333,7 +330,7 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
                 </button>
                 <button
                   onClick={handleCancelNew}
-                  className="p-1 text-red-600 hover:text-red-800 ml-1"
+                  className="p-2 rounded-md bg-red-50 border border-red-300 text-red-600 hover:bg-red-100 transition-colors shadow-sm ml-2"
                   title="Cancel adding"
                   data-testid="cancel-new-btn"
                 >
@@ -345,18 +342,12 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
         )}
         
         {items.length === 0 && !isAddingNew && (
-          <li className="text-gray-500 italic p-2" data-testid="empty-message">
-            No {label.toLowerCase()} items. Click the + button to add one.
+          <li className="text-gray-500 p-3 border border-dashed border-gray-300 rounded-md bg-gray-50 text-center" data-testid="empty-message">
+            No {label.toLowerCase()} items. Click the Add button to create one.
           </li>
         )}
       </ul>
       
-      {/* Help text */}
-      <div className="mt-2 text-xs text-gray-500 block">
-        <p>• Single click to select an item</p>
-        <p>• Double click to edit an item</p>
-        <p>• Press Ctrl+Enter to save while editing</p>
-      </div>
     </div>
   );
 };

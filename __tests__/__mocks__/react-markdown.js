@@ -1,6 +1,8 @@
 // Mock of react-markdown
+const React = require('react');
+
 const ReactMarkdown = ({ children }) => {
-  return <div data-testid="markdown">{children}</div>;
+  return React.createElement('div', { 'data-testid': 'markdown' }, children);
 };
 
 module.exports = ReactMarkdown;
