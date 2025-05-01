@@ -1,0 +1,34 @@
+{
+  "name": "@ix/tasks-core",
+  "version": "0.1.0",
+  "description": "Core tasks components with customization for different business cases",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "peerDependencies": {
+    "next": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "typescript": "^4.5.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "tasks",
+    "mongodb",
+    "react",
+    "next.js"
+  ],
+  "author": "IX Team",
+  "license": "MIT"
+}

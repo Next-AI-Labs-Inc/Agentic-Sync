@@ -7,8 +7,8 @@
     "withGlobalTauri": true
   },
   "package": {
-    "productName": "IX Agent Sync",
-    "version": "0.1.0"
+    "productName": "IXAgentSync_1_1_1",
+    "version": "1.1.1"
   },
   "tauri": {
     "allowlist": {
@@ -58,7 +58,7 @@
         "fullscreen": false,
         "height": 800,
         "resizable": true,
-        "title": "IX Agent Sync",
+        "title": "IX Agent Sync 1.1.1 - Deploy Agent Task Ready",
         "width": 1200
       }
     ]

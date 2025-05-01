@@ -18,6 +18,7 @@ export interface Task {
   description?: string;
   userImpact?: string; // Description of how this task impacts users
   quotes?: string;    // Direct quotes to be displayed in collapsed/expanded views
+  markdown?: string;  // Rich markdown content for the task
   requirements?: string; // List of requirements the solution must fulfill (legacy string format)
   technicalPlan?: string; // Step-by-step implementation plan (legacy string format)
   // New fields for structured items with status tracking
@@ -160,6 +161,7 @@ export interface TaskFormData {
   description: string;
   userImpact?: string;
   quotes?: string;
+  markdown?: string;
   impactedFunctionality?: string; // List of components, behaviors, or user flows affected
   requirements?: string;
   technicalPlan?: string;

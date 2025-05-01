@@ -1,0 +1,318 @@
+{
+  "nodes": [
+    {
+      "id": "TaskCard",
+      "type": "component",
+      "path": "/components/TaskCard.tsx",
+      "imports": [
+        "TaskCardHeader", "TaskStatusBadge", "TaskMetadata", "TaskContent", 
+        "TaskActions", "TaskRequirements", "TaskTechnicalPlan", 
+        "TaskNextSteps", "TaskVerificationSteps", "AgentIntegration", 
+        "ItemSection", "PopoverComponent", "Task", "ItemWithStatus"
+      ],
+      "exports": [
+        "TaskCardHeader", "TaskStatusBadge", "TaskMetadata", "TaskContent",
+        "TaskActions", "TaskRequirements", "TaskTechnicalPlan",
+        "TaskNextSteps", "TaskVerificationSteps", "AgentIntegration",
+        "PopoverComponent", "TaskCardProps", "default"
+      ],
+      "references": 2
+    },
+    {
+      "id": "TaskContext",
+      "type": "context",
+      "path": "/contexts/task/TaskContext.tsx",
+      "imports": [
+        "Task", "TaskFilterStatus", "ProjectFilterType", "SortOption", 
+        "SortDirection", "TaskFormData", "ItemWithStatus", "AgentOptions",
+        "useTaskData", "useTaskFilters", "useTaskOperations", "MemoryDisplay"
+      ],
+      "exports": ["TaskProvider", "useTasks"],
+      "references": 5
+    },
+    {
+      "id": "useTaskData",
+      "type": "hook",
+      "path": "/hooks/task/useTaskData.ts",
+      "imports": [
+        "Task", "taskApiService", "calculateStatusCounts", "deduplicateTasks",
+        "sortByNewestFirst", "useTaskSync", "getMemoryStats"
+      ],
+      "exports": ["useTaskData"],
+      "references": 1
+    },
+    {
+      "id": "useTaskOperations",
+      "type": "hook",
+      "path": "/hooks/task/useTaskOperations.ts",
+      "imports": [
+        "Task", "TaskFormData", "ItemWithStatus", "taskApiService",
+        "taskSyncService", "SyncEventType", "sortByNewestFirst", "deduplicateTasks"
+      ],
+      "exports": ["useTaskOperations"],
+      "references": 1
+    },
+    {
+      "id": "useTaskFilters",
+      "type": "hook",
+      "path": "/hooks/task/useTaskFilters.ts",
+      "imports": [
+        "Task", "TaskFilterStatus", "ProjectFilterType", "SortOption",
+        "SortDirection", "taskFilter", "taskSorter"
+      ],
+      "exports": ["useTaskFilters"],
+      "references": 1
+    },
+    {
+      "id": "taskApiService",
+      "type": "service",
+      "path": "/services/taskApiService.ts",
+      "imports": [
+        "axios", "Task", "TaskFormData", "Initiative", "SystemPrompt", "AgentOptions"
+      ],
+      "exports": [
+        "getTasks", "getTask", "createTask", "createInitiative", "getInitiatives",
+        "deleteInitiative", "updateInitiative", "updateStages", "getStages", 
+        "updateTask", "toggleTaskStar", "deleteTask", "updateTaskStatus", 
+        "markTaskTested", "cleanupDuplicateTasks", "completeTaskAndShutdown", 
+        "addRequirementItem", "updateRequirementItem", "deleteRequirementItem", 
+        "addTechnicalPlanItem", "updateTechnicalPlanItem", "deleteTechnicalPlanItem", 
+        "addNextStepItem", "updateNextStepItem", "deleteNextStepItem", 
+        "addTaskFeedback", "resolveTaskFeedback", "getSystemPrompts", 
+        "getSystemPrompt", "createSystemPrompt", "updateSystemPrompt", 
+        "deleteSystemPrompt", "launchAgentForTask", "default"
+      ],
+      "references": 3
+    },
+    {
+      "id": "taskSyncService",
+      "type": "service",
+      "path": "/services/taskSyncService.ts",
+      "imports": ["eventBus", "Task"],
+      "exports": [
+        "emitTaskCreated", "emitTaskUpdated", "emitTaskDeleted", 
+        "onTaskCreated", "onTaskUpdated", "onTaskDeleted", 
+        "SyncEventType", "default"
+      ],
+      "references": 2
+    },
+    {
+      "id": "TasksPage",
+      "type": "page",
+      "path": "/pages/tasks.tsx",
+      "imports": [
+        "useTasks", "useProjects", "TaskFilters", "TaskCard", 
+        "TaskForm", "List", "withAuth"
+      ],
+      "exports": ["default"],
+      "references": 0
+    },
+    {
+      "id": "AuthContext",
+      "type": "context",
+      "path": "/contexts/AuthContext.tsx",
+      "imports": ["React", "Cookies"],
+      "exports": ["AuthContext", "AuthProvider", "useAuth"],
+      "references": 2
+    },
+    {
+      "id": "ProjectContext",
+      "type": "context",
+      "path": "/contexts/ProjectContext.tsx",
+      "imports": ["React", "Project"],
+      "exports": ["ProjectContext", "ProjectProvider", "useProjects"],
+      "references": 1
+    },
+    {
+      "id": "withAuth",
+      "type": "util",
+      "path": "/utils/withAuth.tsx",
+      "imports": ["useAuth", "useRouter"],
+      "exports": ["withAuth"],
+      "references": 3
+    },
+    {
+      "id": "TaskFilters",
+      "type": "component",
+      "path": "/components/TaskFilters.tsx",
+      "imports": ["Project", "TaskFilterStatus", "ProjectFilterType", "SortOption", "SortDirection"],
+      "exports": ["TaskFiltersProps", "default"],
+      "references": 1
+    },
+    {
+      "id": "TaskForm",
+      "type": "component",
+      "path": "/components/TaskForm.tsx",
+      "imports": ["Project", "TaskFormData"],
+      "exports": ["TaskFormProps", "default"],
+      "references": 1
+    },
+    {
+      "id": "TaskCardHeader",
+      "type": "component",
+      "path": "/components/TaskCard/TaskCardHeader.tsx",
+      "imports": ["Task"],
+      "exports": ["TaskCardHeaderProps", "default"],
+      "references": 1
+    },
+    {
+      "id": "TaskStatusBadge",
+      "type": "component",
+      "path": "/components/TaskCard/TaskStatusBadge.tsx",
+      "imports": ["Task"],
+      "exports": ["TaskStatusBadgeProps", "default"],
+      "references": 1
+    },
+    {
+      "id": "TaskMetadata",
+      "type": "component",
+      "path": "/components/TaskCard/TaskMetadata.tsx",
+      "imports": ["Task"],
+      "exports": ["TaskMetadataProps", "default"],
+      "references": 1
+    },
+    {
+      "id": "TaskContent",
+      "type": "component",
+      "path": "/components/TaskCard/TaskContent.tsx",
+      "imports": ["Task"],
+      "exports": ["TaskContentProps", "default"],
+      "references": 1
+    },
+    {
+      "id": "TaskActions",
+      "type": "component",
+      "path": "/components/TaskCard/TaskActions.tsx",
+      "imports": ["Task"],
+      "exports": ["TaskActionsProps", "default"],
+      "references": 1
+    },
+    {
+      "id": "TaskRequirements",
+      "type": "component",
+      "path": "/components/TaskCard/TaskRequirements.tsx",
+      "imports": ["Task", "ItemWithStatus", "ItemSection"],
+      "exports": ["TaskRequirementsProps", "default"],
+      "references": 1
+    },
+    {
+      "id": "TaskTechnicalPlan",
+      "type": "component",
+      "path": "/components/TaskCard/TaskTechnicalPlan.tsx",
+      "imports": ["Task", "ItemWithStatus", "ItemSection"],
+      "exports": ["TaskTechnicalPlanProps", "default"],
+      "references": 1
+    },
+    {
+      "id": "TaskNextSteps",
+      "type": "component",
+      "path": "/components/TaskCard/TaskNextSteps.tsx",
+      "imports": ["Task", "ItemWithStatus", "ItemSection"],
+      "exports": ["TaskNextStepsProps", "default"],
+      "references": 1
+    },
+    {
+      "id": "TaskVerificationSteps",
+      "type": "component",
+      "path": "/components/TaskCard/TaskVerificationSteps.tsx",
+      "imports": ["Task", "ItemWithStatus", "ItemSection"],
+      "exports": ["TaskVerificationStepsProps", "default"],
+      "references": 1
+    },
+    {
+      "id": "AgentIntegration",
+      "type": "component",
+      "path": "/components/TaskCard/AgentIntegration.tsx",
+      "imports": ["Task"],
+      "exports": ["AgentIntegrationProps", "default"],
+      "references": 1
+    },
+    {
+      "id": "ItemSection",
+      "type": "component",
+      "path": "/components/TaskCard/ItemSection.tsx",
+      "imports": ["ItemWithStatus"],
+      "exports": ["ItemSectionProps", "default"],
+      "references": 4
+    },
+    {
+      "id": "PopoverComponent",
+      "type": "component",
+      "path": "/components/TaskCard/PopoverComponent.tsx",
+      "imports": ["React"],
+      "exports": ["PopoverComponentProps", "default"],
+      "references": 1
+    }
+  ],
+  "edges": [
+    {"source": "TasksPage", "target": "useTasks", "type": "uses"},
+    {"source": "TasksPage", "target": "useProjects", "type": "uses"},
+    {"source": "TasksPage", "target": "TaskFilters", "type": "renders"},
+    {"source": "TasksPage", "target": "TaskCard", "type": "renders"},
+    {"source": "TasksPage", "target": "TaskForm", "type": "renders"},
+    {"source": "TasksPage", "target": "withAuth", "type": "isWrappedBy"},
+    
+    {"source": "TaskContext", "target": "useTaskData", "type": "uses"},
+    {"source": "TaskContext", "target": "useTaskFilters", "type": "uses"},
+    {"source": "TaskContext", "target": "useTaskOperations", "type": "uses"},
+    {"source": "TaskContext", "target": "MemoryDisplay", "type": "renders"},
+    
+    {"source": "useTaskData", "target": "taskApiService", "type": "calls"},
+    {"source": "useTaskData", "target": "useTaskSync", "type": "uses"},
+    
+    {"source": "useTaskOperations", "target": "taskApiService", "type": "calls"},
+    {"source": "useTaskOperations", "target": "taskSyncService", "type": "calls"},
+    
+    {"source": "TaskCard", "target": "TaskCardHeader", "type": "renders"},
+    {"source": "TaskCard", "target": "TaskStatusBadge", "type": "renders"},
+    {"source": "TaskCard", "target": "TaskMetadata", "type": "renders"},
+    {"source": "TaskCard", "target": "TaskContent", "type": "renders"},
+    {"source": "TaskCard", "target": "TaskActions", "type": "renders"},
+    {"source": "TaskCard", "target": "TaskRequirements", "type": "renders"},
+    {"source": "TaskCard", "target": "TaskTechnicalPlan", "type": "renders"},
+    {"source": "TaskCard", "target": "TaskNextSteps", "type": "renders"},
+    {"source": "TaskCard", "target": "TaskVerificationSteps", "type": "renders"},
+    {"source": "TaskCard", "target": "AgentIntegration", "type": "renders"},
+    {"source": "TaskCard", "target": "ItemSection", "type": "imports"},
+    {"source": "TaskCard", "target": "PopoverComponent", "type": "imports"},
+    
+    {"source": "TaskRequirements", "target": "ItemSection", "type": "renders"},
+    {"source": "TaskTechnicalPlan", "target": "ItemSection", "type": "renders"},
+    {"source": "TaskNextSteps", "target": "ItemSection", "type": "renders"},
+    {"source": "TaskVerificationSteps", "target": "ItemSection", "type": "renders"},
+    
+    {"source": "withAuth", "target": "useAuth", "type": "uses"},
+    {"source": "useAuth", "target": "AuthContext", "type": "consumes"}
+  ],
+  "circularDependencies": [
+    {
+      "path": ["TaskContext", "useTaskOperations", "taskSyncService", "eventBus", "useTaskSync", "useTaskData", "TaskContext"],
+      "severity": "medium"
+    }
+  ],
+  "highlyReferenced": [
+    {"id": "ItemSection", "references": 4},
+    {"id": "withAuth", "references": 3},
+    {"id": "taskApiService", "references": 3},
+    {"id": "TaskContext", "references": 5}
+  ],
+  "longDependencyChains": [
+    {
+      "path": ["TasksPage", "TaskCard", "TaskRequirements", "ItemSection"],
+      "length": 4
+    },
+    {
+      "path": ["TasksPage", "withAuth", "useAuth", "AuthContext"],
+      "length": 4
+    }
+  ],
+  "metadata": {
+    "totalComponents": 24,
+    "totalPages": 1,
+    "totalHooks": 3,
+    "totalContexts": 3,
+    "totalServices": 2,
+    "totalUtils": 1,
+    "generatedAt": "2025-03-20T12:00:00Z"
+  }
+}

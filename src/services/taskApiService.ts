@@ -131,6 +131,7 @@ export async function createTask(taskData: TaskFormData) {
       description: taskData.description,
       userImpact: taskData.userImpact,
       impactedFunctionality: taskData.impactedFunctionality,
+      markdown: taskData.markdown,
       requirements: taskData.requirements,
       technicalPlan: taskData.technicalPlan,
       priority: taskData.priority,

@@ -1,0 +1,24 @@
+{
+  "type": "circular_dependency",
+  "severity": "medium",
+  "chain": [
+    "TaskContext", 
+    "useTaskOperations", 
+    "taskSyncService", 
+    "eventBus", 
+    "useTaskSync", 
+    "useTaskData", 
+    "TaskContext"
+  ],
+  "details": {
+    "TaskContext_imports_from_useTaskData": ["useTaskData"],
+    "TaskContext_imports_from_useTaskOperations": ["useTaskOperations"],
+    "useTaskData_imports_from_useTaskSync": ["useTaskSync"],
+    "useTaskData_imports_from_taskApiService": ["taskApiService"],
+    "useTaskOperations_imports_from_taskSyncService": ["taskSyncService"],
+    "useTaskSync_imports_from_useTaskData": ["useTaskData"]
+  },
+  "impact": "This circular dependency creates a potential initialization problem where components in the cycle may access undefined or partially initialized values. It also makes the codebase more difficult to test and refactor.",
+  "suggested_fix": "Extract a shared interface or context that contains only the essential methods and properties needed by all components in the circular chain. Alternatively, consider using a unidirectional data flow approach or event-based communication to break the cycle.",
+  "detected_timestamp": "2025-03-20T15:30:00Z"
+}

@@ -379,12 +379,10 @@ function TaskCard({
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [isEditingUserImpact, setIsEditingUserImpact] = useState(false);
-  const [isEditingMarkdown, setIsEditingMarkdown] = useState(false);
   const [editedInitiative, setEditedInitiative] = useState(task.initiative || '');
   const [editedTitle, setEditedTitle] = useState(task.title);
   const [editedDescription, setEditedDescription] = useState(task.description || '');
   const [editedUserImpact, setEditedUserImpact] = useState(task.userImpact || '');
-  const [editedMarkdown, setEditedMarkdown] = useState(task.markdown || '');
 
   // Copy feedback states
   const [showIdCopied, setShowIdCopied] = useState(false);
@@ -1991,7 +1989,24 @@ function TaskCard({
       rounded-lg shadow-sm border border-gray-200 transition-all duration-200`}
     >
       <div
-        className="p-4"
+        className={`p-4 ${hideExpand ? '' : 'cursor-pointer'}`}
+        onClick={(e) => {
+          // Skip if expand button is hidden
+          if (hideExpand) return;
+
+          // Allow toggling expanded state when clicking the card,
+          // unless it's inside an interactive element
+          if (
+            e.target === e.currentTarget ||
+            (e.target instanceof HTMLElement &&
+              !e.target.closest('.editable-item') &&
+              !e.target.closest('button') &&
+              !e.target.closest('input') &&
+              !e.target.closest('textarea'))
+          ) {
+            handleCardClick(e);
+          }
+        }}
       >
         {/* Close button (top right) */}
         <div className="flex justify-end mb-1">

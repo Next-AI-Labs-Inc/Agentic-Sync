@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Project, Task, TaskFilterStatus, ProjectFilterType, SortOption, SortDirection, SavedFilter } from '@/types';
-import { FaSave, FaTrash, FaFilter, FaBroom, FaEllipsisV, FaCog } from 'react-icons/fa';
+import { FaSave, FaTrash, FaFilter, FaBroom, FaEllipsisV, FaCog, FaSync } from 'react-icons/fa';
 import * as taskApiService from '@/services/taskApiService';
 import { TASK_STATUSES, STATUS_DISPLAY } from '@/constants/taskStatus';
 import { SORT_OPTIONS, SORT_DIRECTIONS, STORAGE_KEYS } from '@/config/constants';
@@ -291,6 +291,14 @@ export default function TaskFilters({
           </div>
           
           <TaskSearchIcon />
+          <button 
+            onClick={refreshTasks}
+            className="px-3 py-1.5 rounded-md text-sm font-medium transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200 w-9 h-9 flex items-center justify-center"
+            aria-label="Refresh tasks"
+            title="Refresh tasks"
+          >
+            <FaSync size={16} />
+          </button>
           <DropdownMenu 
             trigger={
               <button className="px-3 py-1.5 rounded-md text-sm font-medium transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200 w-9 h-9 flex items-center justify-center">

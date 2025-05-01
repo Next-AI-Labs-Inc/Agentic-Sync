@@ -61,6 +61,7 @@ export default function SingleTaskPage() {
           Back to Tasks
         </Link>
         
+        
         <h1 className="text-3xl font-bold text-gray-800 mt-2">Task Details</h1>
         {task && <p className="text-gray-600">Task ID: {task.id}</p>}
       </div>
