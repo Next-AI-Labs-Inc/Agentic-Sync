@@ -22,6 +22,7 @@ interface UseTaskOperationsResult {
   deleteTask: (taskId: string, project: string) => Promise<void>;
   toggleTaskStar: (taskId: string, project: string) => Promise<void>;
   markTaskTested: (taskId: string, project: string) => Promise<void>;
+  markTaskActionable: (taskId: string, project: string) => Promise<void>;
   updateTaskDate: (taskId: string, project: string, newDate: string) => Promise<void>;
   
   // Item management functions
@@ -226,11 +227,22 @@ export function useTaskOperations({
     project: string,
     status: 'inbox' | 'brainstorm' | 'proposed' | 'backlog' | 'maybe' | 'todo' | 'in-progress' | 'on-hold' | 'for-review' | 'done' | 'reviewed' | 'archived'
   ) => {
-    // Get the current task
-    const taskToUpdate = localTaskCache.get(taskId);
+    // Try to get the task from the cache first
+    let taskToUpdate = localTaskCache.get(taskId);
+    
+    // If not in cache, try to find it in the tasks array
     if (!taskToUpdate) {
-      console.error(`Task with ID ${taskId} not found in cache`);
-      return;
+      taskToUpdate = tasks.find(task => task.id === taskId);
+      if (!taskToUpdate) {
+        console.error(`Task with ID ${taskId} not found in cache or tasks array`);
+        setError(`Failed to update task: Task with ID ${taskId} not found`);
+        return;
+      }
+      
+      // Add it to cache for future operations
+      const newCache = new Map(localTaskCache);
+      newCache.set(taskId, taskToUpdate);
+      setLocalTaskCache(newCache);
     }
 
     // Create update data
@@ -274,6 +286,9 @@ export function useTaskOperations({
     try {
       // Perform the actual API update
       await taskApiService.updateTaskStatus(taskId, status);
+      
+      // Log successful task status update for monitoring
+      console.log(`✅ Task ${taskId} status updated successfully to: ${status}`);
 
       // Emit event for real-time sync to other clients
       taskSyncService.emitTaskUpdated(updatedTask);
@@ -281,7 +296,7 @@ export function useTaskOperations({
       // No need to refresh tasks as we've already updated locally
     } catch (error) {
       console.error('Error updating task status:', error);
-      setError('Failed to update task status');
+      setError(`Failed to update task ${taskId} status to ${status}: ${error.message || 'Unknown error'}`);
 
       // Revert to previous state on error
       setTasks(tasks);
@@ -295,11 +310,22 @@ export function useTaskOperations({
    * Delete a task
    */
   const deleteTask = useCallback(async (taskId: string, project: string) => {
-    // Optimistically remove the task from the UI immediately
-    const taskToDelete = localTaskCache.get(taskId);
+    // Try to get the task from the cache first
+    let taskToDelete = localTaskCache.get(taskId);
+    
+    // If not in cache, try to find it in the tasks array
     if (!taskToDelete) {
-      console.error(`Task with ID ${taskId} not found in cache`);
-      return;
+      taskToDelete = tasks.find(task => task.id === taskId);
+      if (!taskToDelete) {
+        console.error(`Task with ID ${taskId} not found in cache or tasks array`);
+        setError(`Failed to delete task: Task with ID ${taskId} not found`);
+        return;
+      }
+      
+      // Add it to cache for future operations
+      const newCache = new Map(localTaskCache);
+      newCache.set(taskId, taskToDelete);
+      setLocalTaskCache(newCache);
     }
 
     // Remove from tasks array using functional update
@@ -334,11 +360,22 @@ export function useTaskOperations({
    * Toggle a task's star status
    */
   const toggleTaskStar = useCallback(async (taskId: string, project: string) => {
-    // Get the current task
-    const taskToUpdate = localTaskCache.get(taskId);
+    // Try to get the task from the cache first
+    let taskToUpdate = localTaskCache.get(taskId);
+    
+    // If not in cache, try to find it in the tasks array
     if (!taskToUpdate) {
-      console.error(`Task with ID ${taskId} not found in cache`);
-      return;
+      taskToUpdate = tasks.find(task => task.id === taskId);
+      if (!taskToUpdate) {
+        console.error(`Task with ID ${taskId} not found in cache or tasks array`);
+        setError(`Failed to update task: Task with ID ${taskId} not found`);
+        return;
+      }
+      
+      // Add it to cache for future operations
+      const newCache = new Map(localTaskCache);
+      newCache.set(taskId, taskToUpdate);
+      setLocalTaskCache(newCache);
     }
 
     // Get current starred status
@@ -392,11 +429,22 @@ export function useTaskOperations({
    * Mark a task as tested
    */
   const markTaskTested = useCallback(async (taskId: string, project: string) => {
-    // Get the current task
-    const taskToUpdate = localTaskCache.get(taskId);
+    // Try to get the task from the cache first
+    let taskToUpdate = localTaskCache.get(taskId);
+    
+    // If not in cache, try to find it in the tasks array
     if (!taskToUpdate) {
-      console.error(`Task with ID ${taskId} not found in cache`);
-      return;
+      taskToUpdate = tasks.find(task => task.id === taskId);
+      if (!taskToUpdate) {
+        console.error(`Task with ID ${taskId} not found in cache or tasks array`);
+        setError(`Failed to mark task as tested: Task with ID ${taskId} not found`);
+        return;
+      }
+      
+      // Add it to cache for future operations
+      const newCache = new Map(localTaskCache);
+      newCache.set(taskId, taskToUpdate);
+      setLocalTaskCache(newCache);
     }
 
     // Create update data with completion info
@@ -443,16 +491,105 @@ export function useTaskOperations({
       refreshTasks();
     }
   }, [tasks, localTaskCache, setTasks, refreshTasks]);
+  
+  /**
+   * Mark a task as actionable (change to todo status)
+   * 
+   * This is a convenience function specifically for marking tasks as actionable,
+   * which is a common operation from various statuses like proposed, backlog, and maybe.
+   */
+  const markTaskActionable = useCallback(async (taskId: string, project: string) => {
+    // Try to get the task from the cache first
+    let taskToUpdate = localTaskCache.get(taskId);
+    
+    // If not in cache, try to find it in the tasks array
+    if (!taskToUpdate) {
+      taskToUpdate = tasks.find(task => task.id === taskId);
+      if (!taskToUpdate) {
+        console.error(`Task with ID ${taskId} not found in cache or tasks array`);
+        setError(`Failed to mark task as actionable: Task with ID ${taskId} not found`);
+        return;
+      }
+      
+      // Add it to cache for future operations
+      const newCache = new Map(localTaskCache);
+      newCache.set(taskId, taskToUpdate);
+      setLocalTaskCache(newCache);
+    }
+    
+    // Only certain statuses can be marked actionable
+    const actionableSourceStatuses = ['proposed', 'backlog', 'maybe'];
+    if (!actionableSourceStatuses.includes(taskToUpdate.status)) {
+      console.error(`Cannot mark task with status ${taskToUpdate.status} as actionable`);
+      return;
+    }
+
+    // Create update data
+    const updateData: Partial<Task> = {
+      status: 'todo', // 'todo' status means it's actionable
+      updatedAt: new Date().toISOString()
+    };
+
+    // Create updated task for optimistic update
+    const updatedTask = { ...taskToUpdate, ...updateData };
+
+    // Update local cache optimistically
+    const newCache = new Map(localTaskCache);
+    newCache.set(taskId, updatedTask);
+    setLocalTaskCache(newCache);
+
+    // Update tasks array optimistically with minimal object creation
+    setTasks(prevTasks => {
+      // Find the index of the task to update
+      const index = prevTasks.findIndex(t => t.id === taskId);
+      if (index === -1) return prevTasks; // Task not found, return unchanged
+      
+      // Create a new array with just the one task replaced
+      const newTasks = [...prevTasks];
+      newTasks[index] = updatedTask;
+      
+      // Sort only when necessary - most operations shouldn't affect sort order
+      return sortByNewestFirst(newTasks);
+    });
+
+    try {
+      // Perform the actual API update using the regular updateTaskStatus method
+      await taskApiService.updateTaskStatus(taskId, 'todo');
+
+      // Emit event for real-time sync to other clients
+      taskSyncService.emitTaskUpdated(updatedTask);
+    } catch (error) {
+      console.error('Error marking task as actionable:', error);
+      setError('Failed to mark task as actionable');
+
+      // Revert to previous state on error
+      setTasks(tasks);
+
+      // Refresh data from server to ensure consistency
+      refreshTasks();
+    }
+  }, [tasks, localTaskCache, setTasks, refreshTasks, setError]);
 
   /**
    * Update a task's creation date
    */
   const updateTaskDate = useCallback(async (taskId: string, project: string, newDate: string) => {
-    // Get the current task
-    const taskToUpdate = localTaskCache.get(taskId);
+    // Try to get the task from the cache first
+    let taskToUpdate = localTaskCache.get(taskId);
+    
+    // If not in cache, try to find it in the tasks array
     if (!taskToUpdate) {
-      console.error(`Task with ID ${taskId} not found in cache`);
-      return;
+      taskToUpdate = tasks.find(task => task.id === taskId);
+      if (!taskToUpdate) {
+        console.error(`Task with ID ${taskId} not found in cache or tasks array`);
+        setError(`Failed to update task date: Task with ID ${taskId} not found`);
+        return;
+      }
+      
+      // Add it to cache for future operations
+      const newCache = new Map(localTaskCache);
+      newCache.set(taskId, taskToUpdate);
+      setLocalTaskCache(newCache);
     }
 
     // Validate the date format
@@ -518,11 +655,22 @@ export function useTaskOperations({
    * Approve a requirement item
    */
   const approveRequirementItem = useCallback(async (taskId: string, itemId: string) => {
-    // Get the current task
-    const taskToUpdate = localTaskCache.get(taskId);
+    // Try to get the task from the cache first
+    let taskToUpdate = localTaskCache.get(taskId);
+    
+    // If not in cache, try to find it in the tasks array
     if (!taskToUpdate) {
-      console.error(`Task with ID ${taskId} not found in cache`);
-      return;
+      taskToUpdate = tasks.find(task => task.id === taskId);
+      if (!taskToUpdate) {
+        console.error(`Task with ID ${taskId} not found in cache or tasks array`);
+        setError(`Failed to approve requirement: Task with ID ${taskId} not found`);
+        return;
+      }
+      
+      // Add it to cache for future operations
+      const newCache = new Map(localTaskCache);
+      newCache.set(taskId, taskToUpdate);
+      setLocalTaskCache(newCache);
     }
 
     // Ensure requirementItems exists
@@ -596,11 +744,22 @@ export function useTaskOperations({
    * Veto (delete) a requirement item
    */
   const vetoRequirementItem = useCallback(async (taskId: string, itemId: string) => {
-    // Get the current task
-    const taskToUpdate = localTaskCache.get(taskId);
+    // Try to get the task from the cache first
+    let taskToUpdate = localTaskCache.get(taskId);
+    
+    // If not in cache, try to find it in the tasks array
     if (!taskToUpdate) {
-      console.error(`Task with ID ${taskId} not found in cache`);
-      return;
+      taskToUpdate = tasks.find(task => task.id === taskId);
+      if (!taskToUpdate) {
+        console.error(`Task with ID ${taskId} not found in cache or tasks array`);
+        setError(`Failed to veto requirement: Task with ID ${taskId} not found`);
+        return;
+      }
+      
+      // Add it to cache for future operations
+      const newCache = new Map(localTaskCache);
+      newCache.set(taskId, taskToUpdate);
+      setLocalTaskCache(newCache);
     }
 
     // Ensure requirementItems exists
@@ -661,11 +820,22 @@ export function useTaskOperations({
    * Update requirement items
    */
   const updateRequirementItems = useCallback(async (taskId: string, items: ItemWithStatus[]) => {
-    // Get the current task
-    const taskToUpdate = localTaskCache.get(taskId);
+    // Try to get the task from the cache first
+    let taskToUpdate = localTaskCache.get(taskId);
+    
+    // If not in cache, try to find it in the tasks array
     if (!taskToUpdate) {
-      console.error(`Task with ID ${taskId} not found in cache`);
-      return;
+      taskToUpdate = tasks.find(task => task.id === taskId);
+      if (!taskToUpdate) {
+        console.error(`Task with ID ${taskId} not found in cache or tasks array`);
+        setError(`Failed to update requirements: Task with ID ${taskId} not found`);
+        return;
+      }
+      
+      // Add it to cache for future operations
+      const newCache = new Map(localTaskCache);
+      newCache.set(taskId, taskToUpdate);
+      setLocalTaskCache(newCache);
     }
 
     const now = new Date().toISOString();
@@ -1119,11 +1289,22 @@ export function useTaskOperations({
    */
   const addTaskFeedback = useCallback(async (taskId: string, content: string) => {
     try {
-      // Get the current task
-      const taskToUpdate = localTaskCache.get(taskId);
+      // Try to get the task from the cache first
+      let taskToUpdate = localTaskCache.get(taskId);
+      
+      // If not in cache, try to find it in the tasks array
       if (!taskToUpdate) {
-        console.error(`Task with ID ${taskId} not found in cache`);
-        return;
+        taskToUpdate = tasks.find(task => task.id === taskId);
+        if (!taskToUpdate) {
+          console.error(`Task with ID ${taskId} not found in cache or tasks array`);
+          setError(`Failed to add feedback: Task with ID ${taskId} not found`);
+          return;
+        }
+        
+        // Add it to cache for future operations
+        const newCache = new Map(localTaskCache);
+        newCache.set(taskId, taskToUpdate);
+        setLocalTaskCache(newCache);
       }
       
       // Add feedback to the task
@@ -1170,11 +1351,21 @@ export function useTaskOperations({
     feedback?: string
   ) => {
     try {
-      // Get the current task
-      const taskToUpdate = localTaskCache.get(taskId);
+      // Try to get the task from the cache first
+      let taskToUpdate = localTaskCache.get(taskId);
+      
+      // If not in cache, try to find it in the tasks array
       if (!taskToUpdate) {
-        console.error(`Task with ID ${taskId} not found in cache`);
-        throw new Error(`Task with ID ${taskId} not found in cache`);
+        taskToUpdate = tasks.find(task => task.id === taskId);
+        if (!taskToUpdate) {
+          console.error(`Task with ID ${taskId} not found in cache or tasks array`);
+          throw new Error(`Task with ID ${taskId} not found in cache or tasks array`);
+        }
+        
+        // Add it to cache for future operations
+        const newCache = new Map(localTaskCache);
+        newCache.set(taskId, taskToUpdate);
+        setLocalTaskCache(newCache);
       }
       
       // Prepare agent options
@@ -1194,7 +1385,7 @@ export function useTaskOperations({
       setError(`Failed to launch agent: ${error.message}`);
       throw error;
     }
-  }, [localTaskCache]);
+  }, [localTaskCache, tasks, setLocalTaskCache, setError]);
 
   return {
     // Task management functions
@@ -1204,6 +1395,7 @@ export function useTaskOperations({
     deleteTask,
     toggleTaskStar,
     markTaskTested,
+    markTaskActionable,
     updateTaskDate,
     
     // Item management functions
