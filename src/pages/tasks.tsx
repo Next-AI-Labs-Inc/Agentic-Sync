@@ -6,12 +6,98 @@ import TaskFilters from "@/components/TaskFilters";
 import TaskCard from "@/components/TaskCard";
 import TaskForm from "@/components/TaskForm";
 import { FixedSizeList as List } from "react-window";
+import { ClickableId } from "@/utils/clickable-id";
+import { Task } from "@/types";
 // import { withAuth } from '@/utils/withAuth';
+
+// CompactTaskItem Component - Shows a single task in one-line format
+const CompactTaskItem = ({ 
+  task, 
+  onStatusChange, 
+  onToggleStar 
+}: { 
+  task: Task; 
+  onStatusChange: (taskId: string, project: string, status: Task['status']) => Promise<void>;
+  onToggleStar?: (taskId: string, project: string) => Promise<void>;
+}) => {
+  // Status colors mapping
+  const statusColors = {
+    'inbox': 'bg-gray-200 text-gray-800',
+    'brainstorm': 'bg-indigo-100 text-indigo-800',
+    'proposed': 'bg-purple-100 text-purple-800',
+    'backlog': 'bg-blue-100 text-blue-800',
+    'maybe': 'bg-gray-100 text-gray-800',
+    'todo': 'bg-yellow-100 text-yellow-800',
+    'in-progress': 'bg-green-100 text-green-800',
+    'on-hold': 'bg-orange-100 text-orange-800',
+    'for-review': 'bg-pink-100 text-pink-800',
+    'done': 'bg-teal-100 text-teal-800',
+    'reviewed': 'bg-blue-100 text-blue-800',
+    'archived': 'bg-gray-100 text-gray-600',
+  };
+
+  // Generate next status based on current status
+  const getNextStatus = (currentStatus: Task['status']): Task['status'] => {
+    const statusFlow: { [key: string]: Task['status'] } = {
+      'inbox': 'brainstorm',
+      'brainstorm': 'proposed',
+      'proposed': 'todo',
+      'backlog': 'todo',
+      'maybe': 'todo',
+      'todo': 'in-progress',
+      'in-progress': 'done',
+      'on-hold': 'in-progress',
+      'for-review': 'done',
+      'done': 'reviewed',
+      'reviewed': 'archived',
+      'archived': 'todo'
+    };
+    
+    return statusFlow[currentStatus] || 'todo';
+  };
+
+  return (
+    <div className="flex items-center py-2 px-3 border-b border-gray-200 hover:bg-gray-50">
+      {/* Star toggle */}
+      <button 
+        onClick={() => onToggleStar && onToggleStar(task.id, task.project)}
+        className="mr-3 text-gray-400 hover:text-yellow-500 focus:outline-none"
+        aria-label={task.starred ? "Unstar task" : "Star task"}
+      >
+        {task.starred ? (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+        )}
+      </button>
+      
+      {/* Task title - takes most of the space */}
+      <div className="flex-grow font-medium truncate">
+        {task.title}
+      </div>
+      
+      {/* Status badge & button to advance status */}
+      <div className="ml-4 flex-shrink-0">
+        <button
+          onClick={() => onStatusChange(task.id, task.project, getNextStatus(task.status))}
+          className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[task.status] || 'bg-gray-100 text-gray-800'}`}
+        >
+          {task.status}
+        </button>
+      </div>
+    </div>
+  );
+};
 
 function TasksPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [windowHeight, setWindowHeight] = useState(800); // Default height for SSR
   const [isClient, setIsClient] = useState(false);
+  const [viewMode, setViewMode] = useState<'card' | 'compact'>('card'); // New state for view toggle
 
   // Handle window size calculation after client-side mount
   useEffect(() => {
@@ -192,9 +278,18 @@ function TasksPage() {
           </div>
         ) : (
           <>
-            <div className="mb-4 text-sm text-gray-500 animate-fade-in flex items-center">
-              {filteredTasks.length}{" "}
-              {filteredTasks.length === 1 ? "task" : "tasks"} found
+            <div className="mb-4 text-sm text-gray-500 animate-fade-in flex items-center justify-between">
+              <div>
+                {filteredTasks.length}{" "}
+                {filteredTasks.length === 1 ? "task" : "tasks"} found
+              </div>
+              <ClickableId
+                id="CO_9104"
+                filePath="/src/pages/tasks.tsx"
+                className="px-3"
+              />
+            </div>
+            <div className="mb-4 text-sm flex">
               {searchTerm && (
                 <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs flex items-center">
                   Search: "{searchTerm}"

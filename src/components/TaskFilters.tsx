@@ -7,6 +7,7 @@ import { SORT_OPTIONS, SORT_DIRECTIONS, STORAGE_KEYS } from '@/config/constants'
 import DropdownMenu, { DropdownMenuItem } from './DropdownMenu';
 import ProjectSelector from './ProjectSelector';
 import TaskSearchIcon from './TaskSearchIcon';
+import { ClickableId } from '@/utils/clickable-id';
 
 interface TaskFiltersProps {
   projects: Project[];
@@ -232,22 +233,29 @@ export default function TaskFilters({
   return (
     <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
-        <div className="flex items-center">
-          <button 
-            onClick={toggleFiltersExpanded}
-            className="mr-2 text-gray-500 hover:text-gray-700 transition-colors"
-            aria-label={filtersExpanded ? "Collapse filters" : "Expand filters"}
-          >
-            <svg 
-              className={`h-5 w-5 transform transition-transform ${filtersExpanded ? 'rotate-0' : '-rotate-90'}`} 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <button 
+              onClick={toggleFiltersExpanded}
+              className="mr-2 text-gray-500 hover:text-gray-700 transition-colors"
+              aria-label={filtersExpanded ? "Collapse filters" : "Expand filters"}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          <h2 className="text-lg font-semibold">Filters</h2>
+              <svg 
+                className={`h-5 w-5 transform transition-transform ${filtersExpanded ? 'rotate-0' : '-rotate-90'}`} 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <h2 className="text-lg font-semibold">Filters</h2>
+          </div>
+          <ClickableId 
+            id="CO_9101" 
+            filePath="/src/components/TaskFilters.tsx"
+            className="self-center"
+          />
         </div>
         <div className="flex items-center gap-2 mt-2 md:mt-0 overflow-x-auto">
           <div className="flex items-center gap-1 mr-1 overflow-x-auto">

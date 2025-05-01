@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Project, ProjectFilterType } from '@/types';
 import { PROJECT_FILTERS } from '@/config/constants';
+import { ClickableId } from '@/utils/clickable-id';
 
 interface ProjectSelectorProps {
   projects: Project[];
@@ -81,15 +82,24 @@ export default function ProjectSelector({
   
   return (
     <div>
-      <label className="form-label">Projects</label>
-      
-      {/* Collapsed view */}
-      <div 
-        className="border border-gray-300 rounded-md p-2 flex justify-between items-center cursor-pointer hover:bg-gray-50"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <div className="text-sm text-gray-700">{getSelectionSummary()}</div>
-        <div className="text-xs text-blue-600">{isExpanded ? 'Collapse' : 'Edit'}</div>
+      <div>
+        <div className="flex items-center mb-1">
+          <label className="form-label mr-2">Projects</label>
+          <ClickableId
+            id="CO_9102"
+            filePath="/src/components/ProjectSelector.tsx"
+            className="self-center ml-2 px-3"
+          />
+        </div>
+        
+        {/* Collapsed view */}
+        <div 
+          className="border border-gray-300 rounded-md p-2 flex justify-between items-center cursor-pointer hover:bg-gray-50"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <div className="text-sm text-gray-700">{getSelectionSummary()}</div>
+          <div className="text-xs text-blue-600">{isExpanded ? 'Collapse' : 'Edit'}</div>
+        </div>
       </div>
       
       {/* Expanded view */}
