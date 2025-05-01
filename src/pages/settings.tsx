@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import SystemPromptManager from '@/components/SystemPromptManager';
+import AppBuilder from '@/components/AppBuilder';
 import { SystemPrompt } from '@/types';
 
 /**
@@ -21,6 +22,16 @@ export default function SettingsPage() {
       setSuccessMessage(null);
     }, 3000);
   };
+  
+  // Handle app build events
+  const handleBuildComplete = (success: boolean, message: string) => {
+    setSuccessMessage(message);
+    
+    // Clear success message after a delay
+    setTimeout(() => {
+      setSuccessMessage(null);
+    }, 5000);
+  };
 
   return (
     <>
@@ -38,7 +49,7 @@ export default function SettingsPage() {
         </Link>
         
         <h1 className="text-3xl font-bold text-gray-800 mt-2">Settings</h1>
-        <p className="text-gray-600">Configure task settings and agent parameters</p>
+        <p className="text-gray-600">Configure task settings and application parameters</p>
       </div>
       
       {/* Success message */}
@@ -70,6 +81,16 @@ export default function SettingsPage() {
             }`}
           >
             Preferences
+          </button>
+          <button
+            onClick={() => setActiveTab('app-builder')}
+            className={`pb-3 px-1 ${
+              activeTab === 'app-builder'
+                ? 'border-b-2 border-primary-500 text-primary-600 font-medium'
+                : 'border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            App Builder
           </button>
         </nav>
       </div>
@@ -122,6 +143,12 @@ export default function SettingsPage() {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+        
+        {activeTab === 'app-builder' && (
+          <div className="app-builder-tab">
+            <AppBuilder onBuildComplete={handleBuildComplete} />
           </div>
         )}
       </div>
