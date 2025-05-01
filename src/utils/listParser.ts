@@ -6,7 +6,7 @@
  * Parses a string with numbered, bulleted, or plain line items into an array of strings
  * 
  * @param listString String containing list items separated by newlines
- * @returns Array of trimmed list items
+ * @returns Array of list items with preserved whitespace
  */
 export function parseListString(listString: string | null | undefined): string[] {
   if (!listString) return [];
@@ -20,9 +20,9 @@ export function parseListString(listString: string | null | undefined): string[]
       // Remove bullet points (-, *, •)
       const withoutBullets = withoutNumbers.replace(/^\s*[-*•]\s*/, '');
       
-      return withoutBullets.trim();
+      return withoutBullets; // Preserve all whitespace
     })
-    .filter(Boolean); // Remove empty lines
+    .filter(line => line.length > 0); // Remove completely empty lines only
 }
 
 /**

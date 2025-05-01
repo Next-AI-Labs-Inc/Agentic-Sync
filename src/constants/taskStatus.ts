@@ -13,6 +13,7 @@ export const TASK_STATUSES = {
   TODO: 'todo',
   IN_PROGRESS: 'in-progress',
   ON_HOLD: 'on-hold',
+  FOR_REVIEW: 'for-review',
   DONE: 'done',
   REVIEWED: 'reviewed',
   ARCHIVED: 'archived',
@@ -21,7 +22,10 @@ export const TASK_STATUSES = {
   ALL: 'all',
   PENDING: 'pending', // All non-completed tasks
   RECENT_COMPLETED: 'recent-completed',
-  SOURCE_TASKS: 'source-tasks' // Group for backlog/brainstorm tasks
+  SOURCE_TASKS: 'source-tasks', // Group for backlog/brainstorm tasks
+  ENGAGED: 'engaged', // Group for actively engaged tasks (todo, in-progress, on-hold)
+  REVIEW: 'review', // Group for tasks in review stage (for-review)
+  COMPLETIONS: 'completions' // Group for completed tasks (done, reviewed)
 } as const;
 
 // Status display names (for UI)
@@ -34,9 +38,13 @@ export const STATUS_DISPLAY_NAMES = {
   [TASK_STATUSES.TODO]: 'Todo',
   [TASK_STATUSES.IN_PROGRESS]: 'In Progress',
   [TASK_STATUSES.ON_HOLD]: 'On Hold',
-  [TASK_STATUSES.DONE]: 'Done',
-  [TASK_STATUSES.REVIEWED]: 'Reviewed',
-  [TASK_STATUSES.ARCHIVED]: 'Archived'
+  [TASK_STATUSES.FOR_REVIEW]: 'Review',
+  [TASK_STATUSES.DONE]: 'Completed',
+  [TASK_STATUSES.REVIEWED]: 'Completions',
+  [TASK_STATUSES.ARCHIVED]: 'Archived',
+  [TASK_STATUSES.ENGAGED]: 'Engaged',
+  [TASK_STATUSES.REVIEW]: 'Review',
+  [TASK_STATUSES.COMPLETIONS]: 'Completions'
 };
 
 // Status color classes for badges
@@ -49,9 +57,13 @@ export const STATUS_COLORS = {
   [TASK_STATUSES.TODO]: 'bg-blue-100 text-blue-800',
   [TASK_STATUSES.IN_PROGRESS]: 'bg-yellow-100 text-yellow-800',
   [TASK_STATUSES.ON_HOLD]: 'bg-amber-100 text-amber-800',
-  [TASK_STATUSES.DONE]: 'bg-green-100 text-green-800',
+  [TASK_STATUSES.FOR_REVIEW]: 'bg-green-100 text-green-800',
+  [TASK_STATUSES.DONE]: 'bg-teal-100 text-teal-800',
   [TASK_STATUSES.REVIEWED]: 'bg-indigo-100 text-indigo-800',
   [TASK_STATUSES.ARCHIVED]: 'bg-gray-100 text-gray-800',
+  [TASK_STATUSES.ENGAGED]: 'bg-yellow-100 text-yellow-800',
+  [TASK_STATUSES.REVIEW]: 'bg-green-100 text-green-800',
+  [TASK_STATUSES.COMPLETIONS]: 'bg-teal-100 text-teal-800',
   DEFAULT: 'bg-gray-100 text-gray-800'
 };
 
@@ -65,9 +77,13 @@ export const STATUS_DESCRIPTIONS = {
   [TASK_STATUSES.TODO]: 'Task is ready to be worked on',
   [TASK_STATUSES.IN_PROGRESS]: 'Task is currently being worked on',
   [TASK_STATUSES.ON_HOLD]: 'Task is temporarily paused',
-  [TASK_STATUSES.DONE]: 'Task has been completed',
-  [TASK_STATUSES.REVIEWED]: 'Task has been completed and reviewed',
-  [TASK_STATUSES.ARCHIVED]: 'Task has been archived and is no longer active'
+  [TASK_STATUSES.FOR_REVIEW]: 'Task is ready for review after completion',
+  [TASK_STATUSES.DONE]: 'Task has been reviewed and accepted as complete',
+  [TASK_STATUSES.REVIEWED]: 'Task has been fully completed and verified',
+  [TASK_STATUSES.ARCHIVED]: 'Task has been archived and is no longer active',
+  [TASK_STATUSES.ENGAGED]: 'Tasks you are actively working on (Todo, In Progress, On Hold)',
+  [TASK_STATUSES.REVIEW]: 'Tasks awaiting review before being completed',
+  [TASK_STATUSES.COMPLETIONS]: 'Tasks that have been completed and verified'
 };
 
 // Status display configuration (for UI presentation)
@@ -120,17 +136,23 @@ export const STATUS_DISPLAY = {
     icon: 'FaPause',
     description: 'Task is temporarily paused'
   },
-  [TASK_STATUSES.DONE]: {
-    label: 'For Review',
+  [TASK_STATUSES.FOR_REVIEW]: {
+    label: 'Review',
     color: 'bg-green-100 text-green-800',
     icon: 'FaCheckCircle',
-    description: 'Task has been completed and is ready for review'
+    description: 'Task is completed and ready for review'
+  },
+  [TASK_STATUSES.DONE]: {
+    label: 'Completed',
+    color: 'bg-teal-100 text-teal-800',
+    icon: 'FaCheck',
+    description: 'Task has been reviewed and accepted as complete'
   },
   [TASK_STATUSES.REVIEWED]: {
-    label: 'Done',
+    label: 'Completions',
     color: 'bg-indigo-100 text-indigo-800',
-    icon: 'FaCheck',
-    description: 'Task has been completed and reviewed'
+    icon: 'FaClipboardCheck',
+    description: 'Task has been completed, reviewed, and verified'
   },
   [TASK_STATUSES.ARCHIVED]: {
     label: 'Archived',
@@ -161,6 +183,24 @@ export const STATUS_DISPLAY = {
     color: 'bg-slate-100 text-slate-800',
     icon: 'FaStream',
     description: 'Source tasks from backlog and brainstorming'
+  },
+  [TASK_STATUSES.ENGAGED]: {
+    label: 'Engaged',
+    color: 'bg-yellow-100 text-yellow-800',
+    icon: 'FaUserClock',
+    description: 'Tasks you are actively working on (Todo, In Progress, On Hold)'
+  },
+  [TASK_STATUSES.REVIEW]: {
+    label: 'Review',
+    color: 'bg-green-100 text-green-800',
+    icon: 'FaClipboardCheck',
+    description: 'Tasks that need review before being accepted as done'
+  },
+  [TASK_STATUSES.COMPLETIONS]: {
+    label: 'Completions',
+    color: 'bg-teal-100 text-teal-800',
+    icon: 'FaCheckDouble',
+    description: 'Tasks that have been completed and verified'
   }
 } as const;
 
@@ -171,8 +211,9 @@ export const NEXT_STATUS = {
   [TASK_STATUSES.BACKLOG]: TASK_STATUSES.TODO,
   [TASK_STATUSES.MAYBE]: TASK_STATUSES.BACKLOG,
   [TASK_STATUSES.TODO]: TASK_STATUSES.IN_PROGRESS,
-  [TASK_STATUSES.IN_PROGRESS]: TASK_STATUSES.DONE,
+  [TASK_STATUSES.IN_PROGRESS]: TASK_STATUSES.FOR_REVIEW,
   [TASK_STATUSES.ON_HOLD]: TASK_STATUSES.IN_PROGRESS,
+  [TASK_STATUSES.FOR_REVIEW]: TASK_STATUSES.DONE,
   [TASK_STATUSES.DONE]: TASK_STATUSES.REVIEWED,
   [TASK_STATUSES.REVIEWED]: TASK_STATUSES.ARCHIVED
 };
@@ -185,7 +226,8 @@ export const PREVIOUS_STATUS = {
   [TASK_STATUSES.TODO]: TASK_STATUSES.PROPOSED,
   [TASK_STATUSES.IN_PROGRESS]: TASK_STATUSES.TODO,
   [TASK_STATUSES.ON_HOLD]: TASK_STATUSES.IN_PROGRESS,
-  [TASK_STATUSES.DONE]: TASK_STATUSES.IN_PROGRESS,
+  [TASK_STATUSES.FOR_REVIEW]: TASK_STATUSES.IN_PROGRESS,
+  [TASK_STATUSES.DONE]: TASK_STATUSES.FOR_REVIEW,
   [TASK_STATUSES.REVIEWED]: TASK_STATUSES.DONE,
   [TASK_STATUSES.ARCHIVED]: TASK_STATUSES.REVIEWED
 };
@@ -198,9 +240,10 @@ export const STATUS_ACTION_TEXT = {
   [TASK_STATUSES.BACKLOG]: 'Move to Todo',
   [TASK_STATUSES.MAYBE]: 'Move to Backlog',
   [TASK_STATUSES.TODO]: 'Start Progress',
-  [TASK_STATUSES.IN_PROGRESS]: 'Mark Done',
+  [TASK_STATUSES.IN_PROGRESS]: 'Send for Review',
   [TASK_STATUSES.ON_HOLD]: 'Resume Progress',
-  [TASK_STATUSES.DONE]: 'Mark Reviewed',
+  [TASK_STATUSES.FOR_REVIEW]: 'Mark Completed',
+  [TASK_STATUSES.DONE]: 'Move to Completions',
   [TASK_STATUSES.REVIEWED]: 'Archive Task',
   
   // Common transitions
@@ -255,20 +298,24 @@ export const STATUS_ACTION_HELP = {
     description: 'Click this button when you begin working on this task so your team knows it\'s actively being worked on.'
   },
   [TASK_STATUSES.IN_PROGRESS]: {
-    title: 'Finished the work?',
+    title: 'Ready for review?',
     description: 'Click this button when you\'ve completed all the work for this task and it\'s ready for someone to review it.'
   },
   [TASK_STATUSES.ON_HOLD]: {
     title: 'Ready to resume work?',
     description: 'Click this button to resume work on this task that was previously put on hold.'
   },
+  [TASK_STATUSES.FOR_REVIEW]: {
+    title: 'Ready to complete?',
+    description: 'After reviewing this task and confirming everything looks good, click this button to mark it as completed.'
+  },
   [TASK_STATUSES.DONE]: {
-    title: 'Reviewed this work?',
-    description: 'After checking this completed task and confirming everything looks good, click this button to mark it as reviewed.'
+    title: 'Move to completions?',
+    description: 'After final verification of this task, click this button to move it to the completions section.'
   },
   [TASK_STATUSES.REVIEWED]: {
     title: 'Archive this task?',
-    description: 'This task has been reviewed and can now be archived to reduce clutter in your active tasks.'
+    description: 'This task has been fully completed and can now be archived to reduce clutter in your active tasks.'
   },
   
   // Common transitions
@@ -332,7 +379,7 @@ export const STATUS_ACTION_HELP = {
   },
   MOVE_TO_REVIEW: {
     title: 'Ready for review?',
-    description: 'Move this task to the For Review stage to indicate it\'s ready for someone to verify.'
+    description: 'Move this task to the For Review stage to indicate it\'s ready for someone to verify your work.'
   },
   UNARCHIVE: {
     title: 'Bring back to active?',
@@ -343,8 +390,8 @@ export const STATUS_ACTION_HELP = {
     description: 'This will permanently remove the task with no way to recover it. Are you sure?'
   },
   MOVE_TO_DONE: {
-    title: 'Mark as Done?',
-    description: 'Move this task to the Done status, indicating the work is complete.'
+    title: 'Mark as Completed?',
+    description: 'Move this task to the Completed status, indicating the work has been reviewed and accepted.'
   }
 };
 
@@ -356,10 +403,11 @@ export const STATUS_COACHING = {
   [TASK_STATUSES.BACKLOG]: "Your waiting list. Is this task a priority now? Mark actionable. Not now but someday? Move to Someday/Maybe. No longer relevant? Archive or delete.",
   [TASK_STATUSES.MAYBE]: "Your future possibilities. Has this become relevant now? Mark actionable. Getting closer to relevant? Move to backlog. Still interesting but very future? Leave here.",
   [TASK_STATUSES.TODO]: "What's your next move here? Ready to work on it now? Start progress. Something blocking it? Put on hold. Not a priority right now? Move to backlog.",
-  [TASK_STATUSES.IN_PROGRESS]: "Focus on completing this. Finished with your part? Move to review. Completely done? Mark done. Stuck? Put on hold with a note about why.",
+  [TASK_STATUSES.IN_PROGRESS]: "Focus on completing this. Finished with your part? Send for review. Stuck? Put on hold with a note about why.",
   [TASK_STATUSES.ON_HOLD]: "Something's blocking this task. Has the blocker been resolved? Resume progress. Will remain blocked for a while? Move to backlog.",
-  [TASK_STATUSES.DONE]: "Nicely done! Ready to put this away? Archive it. Need formal sign-off? Mark reviewed. Need to revisit? Reopen it.",
-  [TASK_STATUSES.REVIEWED]: "This task has passed review. Archive for reference or reopen if anything needs to be addressed.",
+  [TASK_STATUSES.FOR_REVIEW]: "This task is waiting for review. Ready to accept the work? Mark as completed. Need changes? Move back to in-progress with feedback.",
+  [TASK_STATUSES.DONE]: "Review complete! Task has been accepted. Need to finalize? Move to completions. Ready to archive? Archive it. Need to revisit? Reopen it.",
+  [TASK_STATUSES.REVIEWED]: "This task has been fully completed. Archive for reference or reopen if anything needs to be addressed.",
   [TASK_STATUSES.ARCHIVED]: "Reference material kept for history. Need to revive this task? Unarchive it back to the backlog."
 };
 

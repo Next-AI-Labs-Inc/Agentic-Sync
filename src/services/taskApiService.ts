@@ -117,13 +117,17 @@ export async function createTask(taskData: TaskFormData) {
     const apiTaskData = {
       title: taskData.title,
       description: taskData.description,
+      userImpact: taskData.userImpact,
+      impactedFunctionality: taskData.impactedFunctionality,
+      requirements: taskData.requirements,
+      technicalPlan: taskData.technicalPlan,
       priority: taskData.priority,
       project: project,
       status: taskData.status || 'todo', // Default to todo if not specified
       initiative: taskData.initiative,
-      tags: taskData.tags ? taskData.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [],
-      verificationSteps: taskData.verificationSteps ? taskData.verificationSteps.split('\n').map(step => step.trim()).filter(Boolean) : [],
-      nextSteps: taskData.nextSteps ? taskData.nextSteps.split('\n').map(step => step.trim()).filter(Boolean) : [],
+      tags: taskData.tags ? taskData.tags.split(',').map(tag => tag.trim()).filter(t => t.length > 0) : [],
+      verificationSteps: taskData.verificationSteps ? taskData.verificationSteps.split('\n').filter(step => step.length > 0) : [],
+      nextSteps: taskData.nextSteps ? taskData.nextSteps.split('\n').filter(step => step.length > 0) : [],
       createdAt: now, // Explicitly set creation date
       updatedAt: now  // Explicitly set updated date
     };
@@ -328,13 +332,18 @@ export async function deleteTask(id: string) {
 /**
  * Update a task's status
  */
-export async function updateTaskStatus(id: string, status: 'brainstorm' | 'proposed' | 'backlog' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived') {
+export async function updateTaskStatus(id: string, status: 'brainstorm' | 'proposed' | 'backlog' | 'todo' | 'in-progress' | 'on-hold' | 'for-review' | 'done' | 'reviewed' | 'archived') {
   const updateData: Partial<Task> = { status };
   
   // Add timestamps for status changes
-  if (status === 'done') {
+  if (status === 'for-review') {
+    // AI agents mark tasks as for-review when they complete work
+    // No timestamp is added yet as this needs human verification
+  } else if (status === 'done') {
+    // Human reviewers mark for-review tasks as done after verification
     updateData.completedAt = new Date().toISOString();
   } else if (status === 'reviewed') {
+    // Final verification stage after completion
     updateData.reviewedAt = new Date().toISOString();
   }
   
@@ -343,12 +352,14 @@ export async function updateTaskStatus(id: string, status: 'brainstorm' | 'propo
 
 /**
  * Mark a task as tested
+ * 
+ * AI agents should use this function to mark tasks as tested and ready for review
  */
 export async function markTaskTested(id: string) {
   return updateTask(id, { 
     tested: true, 
-    status: 'done',
-    completedAt: new Date().toISOString()
+    status: 'for-review', // AI agents mark tasks as for-review, not done
+    // No completedAt timestamp yet - added when human reviewer marks as done
   });
 }
 

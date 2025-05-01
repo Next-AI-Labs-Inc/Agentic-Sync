@@ -24,6 +24,18 @@ Those belong in the MongoDB task entry.
 
 ---
 
+## [2025-03-18] Task: Fix Next.js Build Process for Reliable Production Deployments
+
+**MongoDB Task ID:** build-process-fix-2025-03-18
+
+**User Impact:** Developers can now reliably build and run the production version of the application without encountering cryptic error messages, improving workflow efficiency and reducing deployment issues.
+
+**Technical Summary:** Fixed critical TypeScript configuration issues by updating target from ES5 to ES2015, created missing build directories, and corrected port configurations in verification scripts.
+
+**Verification:** Run `npm run build` followed by `npm run prod` to verify the application builds and runs correctly on port 3020.
+
+---
+
 ## [2025-03-16] Task: Prevent App Crashes with Automated Next.js Verification System 
 
 **MongoDB Task ID:** 2025-03-16-nextjs-verification-system

@@ -3,7 +3,7 @@ const { existsSync, writeFileSync } = require('fs');
 const path = require('path');
 
 // Configuration
-const PORT = 3045; // Must match port in package.json
+const PORT = 3020; // Must match production port in package.json
 const STARTUP_TIMEOUT = 30000; // 30 seconds max to start up
 const HEALTH_CHECK_URL = `http://localhost:${PORT}`;
 const LOG_FILE = path.join(__dirname, '..', '.app-startup-test.log');
@@ -28,8 +28,8 @@ const appendLog = (message) => {
   }
 };
 
-// Start the Next.js app in development mode
-const app = spawn('npm', ['run', 'dev'], { 
+// Start the Next.js app in production mode
+const app = spawn('npm', ['run', 'prod'], { 
   stdio: ['ignore', 'pipe', 'pipe'],
   env: { ...process.env, FORCE_COLOR: '1' }
 });

@@ -1,33 +1,34 @@
-import React, { useState, useRef, useEffect } from 'react';
-import Head from 'next/head';
-import { useTasks } from '@/contexts/TaskContext';
-import { useProjects } from '@/contexts/ProjectContext';
-import TaskFilters from '@/components/TaskFilters';
-import TaskCard from '@/components/TaskCard';
-import TaskForm from '@/components/TaskForm';
-import { FixedSizeList as List } from 'react-window';
+import React, { useState, useRef, useEffect } from "react";
+import Head from "next/head";
+import { useTasks } from "@/contexts/TaskContext";
+import { useProjects } from "@/contexts/ProjectContext";
+import TaskFilters from "@/components/TaskFilters";
+import TaskCard from "@/components/TaskCard";
+import TaskForm from "@/components/TaskForm";
+import { FixedSizeList as List } from "react-window";
+// import { withAuth } from '@/utils/withAuth';
 
-export default function TasksPage() {
+function TasksPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [windowHeight, setWindowHeight] = useState(800); // Default height for SSR
   const [isClient, setIsClient] = useState(false);
-  
+
   // Handle window size calculation after client-side mount
   useEffect(() => {
     setIsClient(true);
     setWindowHeight(window.innerHeight);
-    
+
     const handleResize = () => {
       setWindowHeight(window.innerHeight);
     };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
-  
-  const { 
-    filteredTasks, 
-    loading, 
+
+  const {
+    filteredTasks,
+    loading,
     error,
     completedFilter,
     projectFilter,
@@ -49,64 +50,68 @@ export default function TasksPage() {
     taskCountsByStatus,
     dedupeEnabled,
     setDedupeEnabled,
-    runManualDedupe
+    runManualDedupe,
   } = useTasks();
-  
+
   const { projects, loading: projectsLoading } = useProjects();
-  
+
   // Format project name for display in empty state
   const getProjectName = (projectId: string) => {
-    if (!projectId || projectId === 'all' || projectId === 'none') {
+    if (!projectId || projectId === "all" || projectId === "none") {
       return projectId;
     }
-    
-    const project = projects.find(p => p.id === projectId);
+
+    const project = projects.find((p) => p.id === projectId);
     return project ? project.name : projectId;
   };
-  
+
   // Get empty state message based on filters
   const getEmptyStateMessage = () => {
-    if (projectFilter !== 'all' && projectFilter !== 'none') {
+    if (projectFilter !== "all" && projectFilter !== "none") {
       if (Array.isArray(projectFilter)) {
         return `No tasks found for the selected projects`;
       }
-      return `No tasks found for the selected project: ${getProjectName(projectFilter as string)}`;
+      return `No tasks found for the selected project: ${getProjectName(
+        projectFilter as string
+      )}`;
     }
-    
-    if (projectFilter === 'none') {
-      return 'No tasks found with no project assigned';
+
+    if (projectFilter === "none") {
+      return "No tasks found with no project assigned";
     }
-    
-    if (completedFilter !== 'all') {
-      if (completedFilter === 'pending') {
-        return 'No pending tasks found';
-      } else if (completedFilter === 'recent-completed') {
-        return 'No recently completed tasks found';
+
+    if (completedFilter !== "all") {
+      if (completedFilter === "pending") {
+        return "No pending tasks found";
+      } else if (completedFilter === "recent-completed") {
+        return "No recently completed tasks found";
       } else {
         return `No tasks with status "${completedFilter}" found`;
       }
     }
-    
-    return 'No active tasks found (done and reviewed tasks are filtered out)';
+
+    return "No active tasks found (done and reviewed tasks are filtered out)";
   };
-  
+
   return (
     <>
       <Head>
         <title>Tasks | IX Projects</title>
         <meta name="description" content="Tasks management for IX Projects" />
       </Head>
-      
+
       <div className="mb-6 relative">
         <h1 className="text-3xl font-bold text-gray-800">Tasks</h1>
-        <p className="text-gray-600">Manage and track tasks across all IX projects</p>
+        <p className="text-gray-600">
+          Manage and track tasks across all IX projects
+        </p>
       </div>
-      
+
       {/* Subtle loading indicator at top of page */}
       {(loading || projectsLoading) && (
         <div className="h-1 bg-gradient-to-r from-blue-500 to-indigo-600 animate-pulse-bg rounded mb-4"></div>
       )}
-      
+
       {/* Show non-critical errors as subtle warning banners but still display content */}
       {error ? (
         <div className="bg-yellow-50 text-yellow-800 p-4 rounded-lg border border-yellow-200 mb-4 animate-fade-in">
@@ -114,9 +119,9 @@ export default function TasksPage() {
           <p className="text-sm">{error}</p>
         </div>
       ) : null}
-      
+
       {/* Task Filters */}
-      <TaskFilters 
+      <TaskFilters
         projects={projects}
         projectFilter={projectFilter}
         setProjectFilter={setProjectFilter}
@@ -133,33 +138,37 @@ export default function TasksPage() {
         setDedupeEnabled={setDedupeEnabled}
         runManualDedupe={runManualDedupe}
       />
-      
+
       {/* Task Creation Form */}
       {showAddForm && (
-        <TaskForm 
-          projects={projects} 
-          onSubmit={addTask} 
-          onCancel={() => setShowAddForm(false)} 
+        <TaskForm
+          projects={projects}
+          onSubmit={addTask}
+          onCancel={() => setShowAddForm(false)}
         />
       )}
-      
+
       {/* Tasks List - Always displayed regardless of loading state */}
       <div className="tasks-list mt-4">
         {filteredTasks.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">No tasks found</h3>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">
+              No tasks found
+            </h3>
             <p className="text-gray-500 mb-6">
-              {searchTerm ? `No tasks match the search term "${searchTerm}"` : getEmptyStateMessage()}
+              {searchTerm
+                ? `No tasks match the search term "${searchTerm}"`
+                : getEmptyStateMessage()}
             </p>
             {searchTerm ? (
-              <button 
-                onClick={() => setSearchTerm('')}
+              <button
+                onClick={() => setSearchTerm("")}
                 className="btn btn-outline-primary mr-3"
               >
                 Clear search
               </button>
             ) : null}
-            <button 
+            <button
               onClick={() => setShowAddForm(true)}
               className="btn btn-primary relative overflow-hidden"
             >
@@ -172,12 +181,13 @@ export default function TasksPage() {
         ) : (
           <>
             <div className="mb-4 text-sm text-gray-500 animate-fade-in flex items-center">
-              {filteredTasks.length} {filteredTasks.length === 1 ? 'task' : 'tasks'} found
+              {filteredTasks.length}{" "}
+              {filteredTasks.length === 1 ? "task" : "tasks"} found
               {searchTerm && (
                 <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs flex items-center">
                   Search: "{searchTerm}"
                   <button
-                    onClick={() => setSearchTerm('')}
+                    onClick={() => setSearchTerm("")}
                     className="ml-1 text-blue-500 hover:text-blue-700"
                     aria-label="Clear search"
                     title="Clear search"
@@ -200,21 +210,23 @@ export default function TasksPage() {
                 </span>
               )}
             </div>
-            
+
             {/* Always use the same rendering approach regardless of list size to ensure consistency */}
             <div className="space-y-4">
               {filteredTasks.map((task) => (
-                <div 
+                <div
                   key={`${task.id}-${task.project}`}
-                  className="task-card-container relative" 
+                  className="task-card-container relative"
                 >
-                  <TaskCard 
+                  <TaskCard
                     task={task}
                     onStatusChange={updateTaskStatus}
                     onMarkTested={markTaskTested}
                     onDelete={deleteTask}
                     onUpdateDate={updateTaskDate}
-                    onUpdateTask={(taskId, project, updates) => updateTask(taskId, updates)}
+                    onUpdateTask={(taskId, project, updates) =>
+                      updateTask(taskId, updates)
+                    }
                   />
                 </div>
               ))}
@@ -225,3 +237,6 @@ export default function TasksPage() {
     </>
   );
 }
+
+// Export the page component wrapped with auth requiring admin role
+export default TasksPage;

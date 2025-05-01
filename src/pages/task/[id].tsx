@@ -96,11 +96,11 @@ export default function SingleTaskPage() {
           <div className="task-single-view">
             <TaskCard 
               task={task}
-              onStatusChange={() => {}} // Read-only view
-              onMarkTested={() => {}}   // Read-only view
-              onDelete={() => {}}       // Read-only view
-              onUpdateDate={() => {}}   // Read-only view
-              onUpdateTask={() => {}}   // Read-only view
+              onStatusChange={() => Promise.resolve()} // Read-only view
+              onMarkTested={() => Promise.resolve()}   // Read-only view
+              onDelete={() => Promise.resolve()}       // Read-only view
+              onUpdateDate={() => Promise.resolve()}   // Read-only view
+              onUpdateTask={() => Promise.resolve()}   // Read-only view
               expanded={true}           // Always show expanded
               hideExpand={true}         // Hide expand button
             />

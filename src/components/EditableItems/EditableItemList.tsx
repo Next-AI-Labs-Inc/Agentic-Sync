@@ -61,13 +61,13 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
     
     if (editIndex === null) return;
     
-    // Only update if the content has actually changed
-    if (editValue.trim() !== parsedItems[editIndex]) {
+    // Only update if the content has actually changed - preserve whitespace
+    if (editValue !== parsedItems[editIndex]) {
       const newItems = [...parsedItems];
-      newItems[editIndex] = editValue.trim();
+      newItems[editIndex] = editValue;
       
-      // Remove if empty
-      if (!newItems[editIndex]) {
+      // Remove if completely empty (allow whitespace-only values)
+      if (newItems[editIndex].length === 0) {
         newItems.splice(editIndex, 1);
       }
       
@@ -106,8 +106,8 @@ const EditableItemList: React.FC<EditableItemListProps> = ({
       e.stopPropagation(); // Prevent event from bubbling to parent elements
     }
     
-    if (newItemValue.trim()) {
-      const newItems = [...parsedItems, newItemValue.trim()];
+    if (newItemValue.length > 0) {
+      const newItems = [...parsedItems, newItemValue];
       setParsedItems(newItems);
       onUpdate(newItems);
     }

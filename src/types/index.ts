@@ -4,9 +4,10 @@ export interface Task {
   title: string;
   description?: string;
   userImpact?: string; // Description of how this task impacts users
+  quotes?: string;    // Direct quotes to be displayed in collapsed/expanded views
   requirements?: string; // List of requirements the solution must fulfill
   technicalPlan?: string; // Step-by-step implementation plan
-  status: 'brainstorm' | 'proposed' | 'backlog' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived';
+  status: 'inbox' | 'brainstorm' | 'proposed' | 'backlog' | 'maybe' | 'todo' | 'in-progress' | 'on-hold' | 'for-review' | 'done' | 'reviewed' | 'archived';
   priority: 'low' | 'medium' | 'high';
   project: string;
   initiative?: string;
@@ -82,7 +83,7 @@ export interface Project {
   _isNew?: boolean; // Flag for UI animations
 }
 
-export type TaskFilterStatus = 'all' | 'brainstorm' | 'proposed' | 'backlog' | 'todo' | 'in-progress' | 'on-hold' | 'done' | 'reviewed' | 'archived' | 'pending' | 'recent-completed' | 'source-tasks';
+export type TaskFilterStatus = 'all' | 'inbox' | 'brainstorm' | 'proposed' | 'backlog' | 'maybe' | 'todo' | 'in-progress' | 'on-hold' | 'for-review' | 'done' | 'reviewed' | 'archived' | 'pending' | 'recent-completed' | 'source-tasks' | 'engaged' | 'review' | 'completions';
 export type ProjectFilterType = 'all' | 'none' | string | string[];
 export type SortOption = 'priority' | 'updated' | 'created' | 'status';
 
@@ -100,11 +101,13 @@ export interface TaskFormData {
   title: string;
   description: string;
   userImpact?: string;
+  quotes?: string;
+  impactedFunctionality?: string; // List of components, behaviors, or user flows affected
   requirements?: string;
   technicalPlan?: string;
   priority: 'low' | 'medium' | 'high';
   project: string;
-  status?: 'proposed' | 'todo' | 'in-progress' | 'done' | 'reviewed';
+  status?: 'inbox' | 'brainstorm' | 'proposed' | 'backlog' | 'maybe' | 'todo' | 'in-progress' | 'for-review';
   initiative: string;
   tags: string;
   verificationSteps: string;

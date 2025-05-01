@@ -565,8 +565,10 @@ function handleDetailsKeypress(key) {
 // Handle keypress in run confirmation view
 function handleRunKeypress(key) {
   if (key.name === 'y') {
+    // Actually execute the command
     executeCommand(selectedCommand);
   } else {
+    // Return to details view if any other key is pressed
     currentView = 'details';
   }
 }
