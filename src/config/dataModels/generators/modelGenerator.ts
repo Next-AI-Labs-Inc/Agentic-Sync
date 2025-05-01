@@ -33,6 +33,8 @@ export async function generateModel(config: DataModelConfig, basePath: string): 
  * Generate model file content
  */
 function generateModelFile(config: DataModelConfig): string {
+  const schemaName = config.dataType === 'knowledgeBase' ? 'KnowledgeBaseSchema' : `${capitalize(config.slug)}Schema`;
+  
   return `/**
  * ${config.displayName} MongoDB Schema
  * 
@@ -42,7 +44,7 @@ function generateModelFile(config: DataModelConfig): string {
 
 import mongoose from 'mongoose';
 
-const ${capitalize(config.slug)}Schema = new mongoose.Schema(
+const ${schemaName} = new mongoose.Schema(
   {
     ${generateSchemaFields(config)}
   },
@@ -53,15 +55,15 @@ const ${capitalize(config.slug)}Schema = new mongoose.Schema(
 );
 
 // Add indexes
-${generateSchemaIndexes(config)}
+${generateSchemaIndexes(config, schemaName)}
 
 // Add virtual for id
-${capitalize(config.slug)}Schema.virtual('id').get(function() {
+${schemaName}.virtual('id').get(function() {
   return this._id.toHexString();
 });
 
 // Ensure virtuals are included in JSON output
-${capitalize(config.slug)}Schema.set('toJSON', {
+${schemaName}.set('toJSON', {
   virtuals: true,
   transform: (doc, ret) => {
     delete ret.__v;
@@ -71,7 +73,7 @@ ${capitalize(config.slug)}Schema.set('toJSON', {
 
 // Export the model
 export default mongoose.models.${capitalize(config.slug)} || 
-  mongoose.model('${capitalize(config.slug)}', ${capitalize(config.slug)}Schema);
+  mongoose.model('${capitalize(config.slug)}', ${schemaName});
 `;
 }
 
@@ -184,7 +186,7 @@ function mapFieldType(type: string): string {
 /**
  * Generate schema indexes
  */
-function generateSchemaIndexes(config: DataModelConfig): string {
+function generateSchemaIndexes(config: DataModelConfig, schemaName: string): string {
   if (!config.model.indexes || config.model.indexes.length === 0) {
     return '// No custom indexes defined';
   }
@@ -196,7 +198,7 @@ function generateSchemaIndexes(config: DataModelConfig): string {
     }, {} as Record<string, number>);
     
     const options = index.unique ? ', { unique: true }' : '';
-    return `${capitalize(config.slug)}Schema.index(${JSON.stringify(fields)}${options});`;
+    return `${schemaName}.index(${JSON.stringify(fields)}${options});`;
   }).join('\n');
 }
 

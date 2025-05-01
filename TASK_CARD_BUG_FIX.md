@@ -135,6 +135,74 @@ Key test cases include:
 - Changing task status
 - Ensuring interactive elements don't trigger expand/collapse
 
+## Testing Infrastructure Fixes
+
+Two issues were discovered when running tests in the project:
+
+1. The tests were failing due to compatibility issues with different test environments
+2. The BackendGenerator test was failing because the schema name wasn't matching the expected value for the Knowledge Base model
+
+### Root Cause: Test Environment Issues
+
+1. The test setup file (`jest.setup.js`) was unconditionally accessing the `window` object, which doesn't exist in Node.js environments
+2. The canvas module was not properly mocked for all test environments
+3. Module path mappings were incomplete in the Jest configuration
+
+### Root Cause: BackendGenerator Test Issue
+
+The test was expecting a schema name of "KnowledgeBaseSchema" for the Knowledge Base model, but the modelGenerator was using a generic naming approach that produced "KbSchema" instead.
+
+### Solutions
+
+1. **Modified test setup file (`jest.setup.js`):**
+   - Added conditional checks for browser environment: `if (typeof window !== 'undefined')`
+   - Only applied browser-specific mocks (localStorage, router) when in a browser environment
+   - Added `jest-canvas-mock` for better handling of canvas operations in tests
+
+2. **Updated Jest configuration (`.jestrc.json`):**
+   - Added proper module mapping for the canvas library
+   - Used the existing canvasMock.js file that was already present in the project
+   - Added missing path mappings for imports:
+     ```json
+     "^@/constants/(.*)$": "<rootDir>/src/constants/$1",
+     "^@/config/(.*)$": "<rootDir>/src/config/$1",
+     "^@/hooks/(.*)$": "<rootDir>/src/hooks/$1",
+     "^@/utils/(.*)$": "<rootDir>/src/utils/$1",
+     ```
+
+3. **Fixed BackendGenerator schema name:**
+   - Updated the modelGenerator to use "KnowledgeBaseSchema" instead of a slug-based name when dataType is 'knowledgeBase'
+   - Modified the generateSchemaIndexes function to accept schemaName as a parameter
+
+4. **Added specialized npm scripts:**
+   - Added a new `test:node` script that runs tests in Node.js environment:
+     ```json
+     "test:node": "jest --config=.jestrc.json --testEnvironment=node"
+     ```
+
+5. **Testing Strategy:**
+   - Pure logic tests (services, utils): Use Node.js environment
+   - UI component tests: Use jsdom environment
+
+### Example running non-UI tests:
+
+```bash
+# Run service tests in Node environment
+npm run test:node -- EventBus.test.ts TaskSyncService.test.ts
+
+# Run utility tests in Node environment
+npm run test:node -- src/utils/task/__tests__/
+```
+
+### Verification
+
+All tests now pass successfully when run in their appropriate environments:
+
+```bash
+# BackendGenerator, EventBus, TaskSyncService, and utility tests in Node environment
+npm run test:node -- __tests__/BackendGenerator.test.ts __tests__/EventBus.test.ts __tests__/TaskSyncService.test.ts src/utils/task/__tests__/
+```
+
 ## Testing Approach
 
 Our test implementation followed these principles:

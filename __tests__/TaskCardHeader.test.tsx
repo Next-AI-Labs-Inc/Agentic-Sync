@@ -62,7 +62,7 @@ describe('TaskCardHeader', () => {
     expect(screen.getByText('12345678...')).toBeInTheDocument();
     
     // Verify status badge is displayed
-    expect(screen.getByText('in-progress')).toBeInTheDocument();
+    expect(screen.getByText('In Progress')).toBeInTheDocument();
   });
 
   /**

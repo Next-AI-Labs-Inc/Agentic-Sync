@@ -97,7 +97,26 @@ async function verifyTauriConcurrentBuilds() {
     
     // Set timeout for the whole verification process
     timeoutId = setTimeout(() => {
-      appendLog(`${colors.red}❌ Verification timed out after ${VERIFICATION_TIMEOUT/1000} seconds${colors.reset}`);
+      appendLog(`${colors.red}❌ TIMEOUT ERROR: Verification timed out after ${VERIFICATION_TIMEOUT/1000} seconds${colors.reset}`);
+      appendLog(`${colors.yellow}The servers did not start and respond within the expected time frame.${colors.reset}`);
+      appendLog(`${colors.yellow}This likely indicates one of the following issues:${colors.reset}`);
+      appendLog(`${colors.yellow}1. System resource constraints (CPU/memory)${colors.reset}`);
+      appendLog(`${colors.yellow}2. Network port conflicts with existing processes${colors.reset}`);
+      appendLog(`${colors.yellow}3. Build or compilation errors blocking server startup${colors.reset}`);
+      appendLog(`${colors.yellow}4. Slow disk I/O affecting application startup time${colors.reset}`);
+      
+      // Check which servers were running at time of timeout
+      const devStatus = devServerResponding ? "responding" : "not responding";
+      const prodStatus = prodServerResponding ? "responding" : "not responding";
+      appendLog(`${colors.cyan}Current server status at timeout:${colors.reset}`);
+      appendLog(`${colors.cyan}- Development server (port ${TAURI_DEV_PORT}): ${devStatus}${colors.reset}`);
+      appendLog(`${colors.cyan}- Production server (port ${TAURI_PROD_PORT}): ${prodStatus}${colors.reset}`);
+      
+      appendLog(`${colors.cyan}RECOMMENDED ACTIONS:${colors.reset}`);
+      appendLog(`${colors.cyan}• Run each server individually to isolate the problem${colors.reset}`);
+      appendLog(`${colors.cyan}• Check for processes already using ports ${TAURI_DEV_PORT} and ${TAURI_PROD_PORT}${colors.reset}`);
+      appendLog(`${colors.cyan}• Verify build succeeds with "npm run build"${colors.reset}`);
+      appendLog(`${colors.cyan}• Monitor system resources during startup${colors.reset}`);
       cleanup(1);
     }, VERIFICATION_TIMEOUT);
     
@@ -246,11 +265,36 @@ async function verifyTauriConcurrentBuilds() {
       }
     }
     
-    // Log final result
+    // Log final result with detailed information
     if (success) {
       appendLog(`${colors.green}✅ VERIFICATION COMPLETE: Tauri production and dev builds can run concurrently${colors.reset}`);
+      appendLog(`${colors.green}✓ Development server confirmed working on port ${TAURI_DEV_PORT}${colors.reset}`);
+      appendLog(`${colors.green}✓ Production server confirmed working on port ${TAURI_PROD_PORT}${colors.reset}`);
+      appendLog(`${colors.green}✓ Both servers run simultaneously without conflicts${colors.reset}`);
     } else {
-      appendLog(`${colors.red}❌ VERIFICATION FAILED: Issue with concurrent operation${colors.reset}`);
+      // Create a detailed failure report
+      appendLog(`${colors.red}❌ VERIFICATION FAILED: Servers could not run concurrently${colors.reset}`);
+      
+      // Determine specific failure mode
+      if (!devServerResponding && !prodServerResponding) {
+        appendLog(`${colors.red}FAILURE DETAILS: Both development and production servers failed to respond${colors.reset}`);
+        appendLog(`${colors.yellow}This indicates a serious system-wide issue preventing server startup.${colors.reset}`);
+      } else if (!devServerResponding) {
+        appendLog(`${colors.red}FAILURE DETAILS: Development server (port ${TAURI_DEV_PORT}) failed to respond${colors.reset}`);
+        appendLog(`${colors.yellow}The production server was working, but the dev server failed.${colors.reset}`);
+      } else if (!prodServerResponding) {
+        appendLog(`${colors.red}FAILURE DETAILS: Production server (port ${TAURI_PROD_PORT}) failed to respond${colors.reset}`);
+        appendLog(`${colors.yellow}The development server was working, but the production server failed.${colors.reset}`);
+      }
+      
+      // Provide actionable next steps
+      appendLog(`${colors.cyan}RECOMMENDED DIAGNOSTICS:${colors.reset}`);
+      appendLog(`${colors.cyan}1. Check system resources (CPU/memory) during server startup${colors.reset}`);
+      appendLog(`${colors.cyan}2. Verify network port availability with "lsof -i :${TAURI_DEV_PORT}" and "lsof -i :${TAURI_PROD_PORT}"${colors.reset}`);
+      appendLog(`${colors.cyan}3. Test servers individually:${colors.reset}`);
+      appendLog(`${colors.cyan}   - npm run dev (for development server)${colors.reset}`);
+      appendLog(`${colors.cyan}   - npm run build && npm run start (for production server)${colors.reset}`);
+      appendLog(`${colors.cyan}4. Check for errors in server logs or browser console${colors.reset}`);
     }
     
     process.exit(exitCode);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { TASK_STATUSES } from '@/constants/taskStatus';
+import { TASK_STATUSES, STATUS_DISPLAY_NAMES, STATUS_COLORS } from '@/constants/taskStatus';
 
 export interface TaskStatusBadgeProps {
   status: 'inbox' | 'brainstorm' | 'proposed' | 'backlog' | 'maybe' | 'todo' | 'in-progress' | 'on-hold' | 'for-review' | 'done' | 'reviewed' | 'archived';
@@ -10,43 +10,17 @@ export interface TaskStatusBadgeProps {
  */
 function TaskStatusBadge({ status }: TaskStatusBadgeProps) {
   // Get status info from constants
-  const statusInfo = TASK_STATUSES.find(s => s.key === status) || {
-    key: status,
-    label: status,
-    color: 'gray',
-    group: 'other'
-  };
+  const statusLabel = STATUS_DISPLAY_NAMES[status] || status;
+  const statusColorClass = STATUS_COLORS[status] || 'bg-gray-100 text-gray-800';
 
-  // Build class name based on status color
-  const getColorClass = () => {
-    switch (statusInfo.color) {
-      case 'blue':
-        return 'bg-blue-100 text-blue-800';
-      case 'green':
-        return 'bg-green-100 text-green-800';
-      case 'yellow':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'orange':
-        return 'bg-orange-100 text-orange-800';
-      case 'red':
-        return 'bg-red-100 text-red-800';
-      case 'purple':
-        return 'bg-purple-100 text-purple-800';
-      case 'pink':
-        return 'bg-pink-100 text-pink-800';
-      case 'indigo':
-        return 'bg-indigo-100 text-indigo-800';
-      case 'gray':
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+  // No color switch needed anymore, we use the pre-defined class from constants
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getColorClass()}`}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColorClass}`}
+      data-testid="status-badge"
     >
-      {statusInfo.label}
+      {statusLabel}
     </span>
   );
 }

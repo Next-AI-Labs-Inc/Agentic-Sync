@@ -1,109 +1,193 @@
-App verification started at 2025-03-20T02:37:00.679Z
-[2025-03-20T02:37:00.681Z] Starting verification process...
-[2025-03-20T02:37:00.682Z] 
+App verification started at 2025-03-20T03:53:32.175Z
+[2025-03-20T03:53:32.177Z] Starting verification process...
+[2025-03-20T03:53:32.177Z] 
 === Running verify-app-build ===
 
-[2025-03-20T02:37:00.710Z] 🧪 Verifying Next.js app build...
-[2025-03-20T02:37:00.710Z] 📋 Logs will be saved to: /Users/jedi/react_projects/ix/tasks/.app-build-test.log
-[2025-03-20T02:37:00.712Z] Building Next.js app...
-[2025-03-20T02:37:00.906Z] [stdout] > tasks@1.0.0 build
+[2025-03-20T03:53:32.202Z] 🧪 Verifying Next.js app build...
+[2025-03-20T03:53:32.202Z] 📋 Logs will be saved to: /Users/jedi/react_projects/ix/tasks/.app-build-test.log
+[2025-03-20T03:53:32.205Z] Building Next.js app...
+[2025-03-20T03:53:32.296Z] > tasks@1.0.0 prebuild
+> npm run verify:imports
+[2025-03-20T03:53:32.394Z] > tasks@1.0.0 verify:imports
+> node scripts/verify-component-imports.js
+[2025-03-20T03:53:32.433Z] 🔍 Checking component imports...
+[2025-03-20T03:53:32.449Z] 📂 Checking 92 files for component imports...
+[2025-03-20T03:53:32.467Z] ✅ All component imports are consistent
+[2025-03-20T03:53:32.473Z] > tasks@1.0.0 build
 > NEXT_LINT=false NODE_OPTIONS='--max-old-space-size=4096' NEXT_TELEMETRY_DISABLED=1 next build
-[2025-03-20T02:37:01.251Z] [stdout] [1m[38;2;173;127;168m ▲ Next.js 14.1.3[39m[22m
-[2025-03-20T02:37:01.251Z] [stdout] - Environments: .env.local
+[2025-03-20T03:53:32.840Z] [1m[38;2;173;127;168m ▲ Next.js 14.1.3[39m[22m
+[2025-03-20T03:53:32.840Z] - Environments: .env.local
 
  [37m[1m [22m[39m Skipping validation of types
  [37m[1m [22m[39m Skipping linting
-[2025-03-20T02:37:01.423Z] [stdout] [37m[1m [22m[39m Creating an optimized production build ...
-[2025-03-20T02:37:03.448Z] [stderr] [31mFailed to compile.
-[39m
-./src/pages/index.tsx
-[31m[1mModule not found[22m[39m: Can't resolve '[32m@ix/loading-spinner[39m'
-
-https://nextjs.org/docs/messages/module-not-found
-
-./src/pages/tasks-core.tsx
-[31m[1mModule not found[22m[39m: Can't resolve '[32m@ix/loading-spinner[39m'
-
-https://nextjs.org/docs/messages/module-not-found
-[2025-03-20T02:37:03.449Z] [stderr]
-[2025-03-20T02:37:03.449Z] [stderr]
-[2025-03-20T02:37:03.449Z] [stderr] > Build failed because of webpack errors
-[2025-03-20T02:37:03.461Z] Build process exited with code 1
-[2025-03-20T02:37:03.462Z] ❌ VERIFICATION FAILED: Build exited with code 1
-[2025-03-20T02:37:03.462Z] 🛑 Terminated build process
-[2025-03-20T02:37:03.462Z] ❌ VERIFICATION FAILED: Next.js app build has errors
-[2025-03-20T02:37:03.464Z] ❌ verify-app-build failed with code 1
-[2025-03-20T02:37:03.464Z] 
+[2025-03-20T03:53:33.030Z] [37m[1m [22m[39m Creating an optimized production build ...
+[2025-03-20T03:53:34.109Z] [32m[1m✓[22m[39m Compiled successfully
+[2025-03-20T03:53:34.110Z] [37m[1m [22m[39m Collecting page data ...
+[2025-03-20T03:53:34.274Z] Initializing real-time task sync service...
+[2025-03-20T03:53:34.276Z] Initializing real-time task sync service...
+[2025-03-20T03:53:34.276Z] Setting up real-time event simulation
+[2025-03-20T03:53:34.279Z] Setting up real-time event simulation
+[2025-03-20T03:53:34.280Z] Initializing real-time task sync service...
+[2025-03-20T03:53:34.281Z] Setting up real-time event simulation
+[2025-03-20T03:53:34.287Z] Initializing real-time task sync service...
+[2025-03-20T03:53:34.287Z] Setting up real-time event simulation
+[2025-03-20T03:53:34.290Z] Initializing real-time task sync service...
+[2025-03-20T03:53:34.290Z] Setting up real-time event simulation
+[2025-03-20T03:53:34.291Z] Initializing real-time task sync service...
+[2025-03-20T03:53:34.291Z] Setting up real-time event simulation
+[2025-03-20T03:53:34.291Z] Initializing real-time task sync service...
+Setting up real-time event simulation
+[2025-03-20T03:53:34.300Z] Initializing real-time task sync service...
+Setting up real-time event simulation
+[2025-03-20T03:53:34.311Z] Initializing real-time task sync service...
+[2025-03-20T03:53:34.312Z] Setting up real-time event simulation
+[2025-03-20T03:53:34.362Z] 📡 Task API Configuration:
+- Environment: DEVELOPMENT
+- API URL: http://localhost:3002
+- API Key: dev...
+[2025-03-20T03:53:34.365Z] 📡 Task API Configuration:
+- Environment: DEVELOPMENT
+- API URL: http://localhost:3002
+- API Key: dev...
+[2025-03-20T03:53:34.374Z] 📡 Task API Configuration:
+- Environment: DEVELOPMENT
+- API URL: http://localhost:3002
+- API Key: dev...
+📡 Task API Configuration:
+- Environment: DEVELOPMENT
+- API URL: http://localhost:3002
+- API Key: dev...
+[2025-03-20T03:53:34.376Z] 📡 Task API Configuration:
+- Environment: DEVELOPMENT
+- API URL: http://localhost:3002
+- API Key: dev...
+[2025-03-20T03:53:34.407Z] 📡 Task API Configuration:
+- Environment: DEVELOPMENT
+- API URL: http://localhost:3002
+- API Key: dev...
+[2025-03-20T03:53:34.408Z] 📡 Task API Configuration:
+- Environment: DEVELOPMENT
+- API URL: http://localhost:3002
+- API Key: dev...
+[2025-03-20T03:53:34.420Z] 📡 Task API Configuration:
+- Environment: DEVELOPMENT
+- API URL: http://localhost:3002
+- API Key: dev...
+[2025-03-20T03:53:34.425Z] 📡 Task API Configuration:
+- Environment: DEVELOPMENT
+- API URL: http://localhost:3002
+- API Key: dev...
+[2025-03-20T03:53:34.651Z] [37m[1m [22m[39m Generating static pages (0/11) ...
+[2025-03-20T03:53:34.700Z] [37m[1m [22m[39m Generating static pages (2/11)
+[2025-03-20T03:53:34.711Z] [37m[1m [22m[39m Generating static pages (5/11)
+[2025-03-20T03:53:34.716Z] [37m[1m [22m[39m Generating static pages (8/11)
+[2025-03-20T03:53:34.795Z] [32m[1m✓[22m[39m Generating static pages (11/11)
+[2025-03-20T03:53:35.378Z] [37m[1m [22m[39m Finalizing page optimization ...
+[2025-03-20T03:53:35.378Z] [37m[1m [22m[39m Collecting build traces ...
+[2025-03-20T03:53:38.735Z] [4mRoute (pages)[24m                                       [4mSize[24m     [4mFirst Load JS[24m
+┌ ○ /                                               911 B           [37m[1m129 kB[22m[39m
+├   /_app                                           0 B             [37m[1m128 kB[22m[39m
+├ ○ /404                                            197 B           [37m[1m129 kB[22m[39m
+├ λ /api/complete-task                              0 B             [37m[1m128 kB[22m[39m
+├ λ /api/docs                                       0 B             [37m[1m128 kB[22m[39m
+├ λ /api/initiatives                                0 B             [37m[1m128 kB[22m[39m
+├ λ /api/initiatives/[id]                           0 B             [37m[1m128 kB[22m[39m
+├ λ /api/tasks/documentation                        0 B             [37m[1m128 kB[22m[39m
+├ ○ /data-models                                    6.09 kB         [37m[1m134 kB[22m[39m
+├ ○ /docs                                           4.09 kB         [37m[1m171 kB[22m[39m
+├ ○ /minimal                                        2.03 kB         [37m[1m190 kB[22m[39m
+├ ○ /settings                                       3.08 kB         [37m[1m131 kB[22m[39m
+├ ○ /task-detail                                    1.41 kB         [37m[1m183 kB[22m[39m
+├ ○ /task/[id]                                      3.33 kB         [37m[1m185 kB[22m[39m
+├ ○ /tasks                                          3 kB            [37m[1m191 kB[22m[39m
+└ ○ /tasks-core                                     1.84 kB         [37m[1m190 kB[22m[39m
++ First Load JS shared by all                       [37m[1m135 kB[22m[39m
+  ├ chunks/npm.axios-a0b767b81e49d717.js            13.4 kB
+  ├ chunks/npm.next-2898f16f-2722141f901bdd01.js    18.9 kB
+  ├ chunks/npm.next-f67df17f-47f8537d57a234aa.js    15.3 kB
+  ├ chunks/npm.react-dom-299bbbfcaede34d5.js        41.3 kB
+  ├ chunks/pages/_app-f3956634-e491ec58325626cd.js  16.4 kB
+  └ other shared chunks (total)                     30.1 kB
+[2025-03-20T03:53:38.736Z] ○  (Static)   prerendered as static content
+λ  (Dynamic)  server-rendered on demand using Node.js
+[2025-03-20T03:53:38.752Z] Build process exited with code 0
+[2025-03-20T03:53:38.752Z] ✅ VERIFICATION PASSED: Next.js app built successfully
+[2025-03-20T03:53:38.752Z] 🛑 Terminated build process
+[2025-03-20T03:53:38.752Z] ✅ VERIFICATION PASSED: Next.js app built successfully
+   ✓ Code compiled without errors
+[2025-03-20T03:53:38.753Z] ✓ All pages generated successfully
+[2025-03-20T03:53:38.753Z] ✓ Build artifacts created correctly
+[2025-03-20T03:53:38.754Z] ✅ verify-app-build passed!
+[2025-03-20T03:53:38.755Z] 
 === Running verify-app-startup ===
 
-[2025-03-20T02:37:03.491Z] 🧪 Verifying Next.js app startup...
-[2025-03-20T02:37:03.491Z] 📋 Logs will be saved to: /Users/jedi/react_projects/ix/tasks/.app-startup-test.log
-[2025-03-20T02:37:03.493Z] Waiting for Next.js app to start...
-[2025-03-20T02:37:03.698Z] [stdout] > tasks@1.0.0 prod
-> PROD_MODE=true node scripts/run-with-auth.js
-[2025-03-20T02:37:03.731Z] [stdout] [36m╔════════════════════════════════════════════════════╗
-║  IX Tasks Production Mode with Auth          ║
-╚════════════════════════════════════════════════════╝[0m
-[2025-03-20T02:37:03.731Z] [stdout] [32mStarting Auth Service on port 3010...[0m
-[34mWill start Tasks App on port 3020 after Auth Service is ready...[0m
-[2025-03-20T02:37:03.733Z] [stdout] [36mServices are starting...[0m
-[32mYou will be able to access:[0m
-- Tasks App: [34mhttp://localhost:3020[0m
-[2025-03-20T02:37:03.733Z] ✅ SUCCESS: App started successfully!
-[2025-03-20T02:37:03.733Z] Performing health check on http://localhost:3020...
-[2025-03-20T02:37:03.738Z] [stdout] - Auth Service: [34mhttp://localhost:3010[0m
-[2025-03-20T02:37:03.749Z] Health check response: 500
-[2025-03-20T02:37:03.749Z] ❌ Health check failed: Server responded with status 500
-[2025-03-20T02:37:03.940Z] [stdout] > auth-service@0.1.0 dev
-> next dev -p 3010
-[2025-03-20T02:37:04.267Z] [stderr] [31m[1m⨯[22m[39m Failed to start server
-[2025-03-20T02:37:04.268Z] [stderr] Error: listen EADDRINUSE: address already in use :::3010
-    at Server.setupListenHandle [as _listen2] (node:net:1740:16)
-    at listenInCluster (node:net:1788:12)
-    at Server.listen (node:net:1876:7)
-    at /Users/jedi/react_projects/ix/auth-service/node_modules/next/dist/server/lib/start-server.js:279:16
-    at new Promise (<anonymous>)
-    at startServer (/Users/jedi/react_projects/ix/auth-service/node_modules/next/dist/server/lib/start-server.js:190:11)
-    at /Users/jedi/react_projects/ix/auth-service/node_modules/next/dist/server/lib/start-server.js:309:52
-    at Span.traceAsyncFn (/Users/jedi/react_projects/ix/auth-service/node_modules/next/dist/trace/trace.js:151:26)
-    at process.<anonymous> (/Users/jedi/react_projects/ix/auth-service/node_modules/next/dist/server/lib/start-server.js:309:35)
-    at process.emit (node:events:512:28) {
-  code: 'EADDRINUSE',
-  errno: -48,
-  syscall: 'listen',
-  address: '::',
-  port: 3010
-}
-[2025-03-20T02:37:04.274Z] [stdout] [?25h
-[2025-03-20T02:37:04.274Z] [stdout]
-[2025-03-20T02:37:04.279Z] [stdout] [33mAuth service exited with code 0[0m
-[2025-03-20T02:37:04.285Z] Next.js process exited with code 0
-[2025-03-20T02:37:04.285Z] 🛑 Terminated Next.js process
-[2025-03-20T02:37:04.285Z] ❌ VERIFICATION FAILED: Next.js app has errors on startup
-[2025-03-20T02:37:04.287Z] ❌ verify-app-startup failed with code 1
-[2025-03-20T02:37:04.287Z] 
+[2025-03-20T03:53:38.782Z] 🧪 Verifying Next.js app startup...
+[2025-03-20T03:53:38.782Z] 📋 Logs will be saved to: /Users/jedi/react_projects/ix/tasks/.app-startup-test.log
+[2025-03-20T03:53:38.784Z] 🚀 Starting app verification...
+[2025-03-20T03:53:38.785Z] ⏳ STARTUP PHASE: Initializing server (this may take up to 30 seconds)
+[2025-03-20T03:53:38.785Z] Waiting for Next.js app to start...
+[2025-03-20T03:53:38.785Z] 🔍 DETECTED: Server already running on port 3020
+[2025-03-20T03:53:38.785Z] ✅ Using existing server for verification (no need to start a new one)
+[2025-03-20T03:53:38.785Z] 🔍 CHECKING: Application health at http://localhost:3020
+[2025-03-20T03:53:38.803Z] 📊 SERVER RESPONSE: HTTP 200 (OK)
+[2025-03-20T03:53:38.803Z] ✅ HEALTH CHECK PASSED: Server is responding normally
+[2025-03-20T03:53:40.807Z] ✅ VERIFICATION PASSED: Next.js app started successfully (2s)
+[2025-03-20T03:53:40.808Z] ✓ Server started without errors
+[2025-03-20T03:53:40.808Z] ✓ Health check passed
+[2025-03-20T03:53:40.809Z] ✓ App is responding to HTTP requests
+[2025-03-20T03:53:40.811Z] ✅ verify-app-startup passed!
+[2025-03-20T03:53:40.812Z] 
 === Running verify-app-concurrent ===
 
-[2025-03-20T02:37:04.314Z] [36m🧪 Verifying concurrent Tauri builds...[0m
-[2025-03-20T02:37:04.314Z] [34m📋 Logs will be saved to: /Users/jedi/react_projects/ix/tasks/.app-concurrent-test.log[0m
-[2025-03-20T02:37:04.316Z] [34mChecking if ports are already in use...[0m
-[2025-03-20T02:37:04.318Z] [33mWarning: Port 3020 is already in use[0m
-[2025-03-20T02:37:04.318Z] [32mStarting production Next.js server on port 3030...[0m
-[2025-03-20T02:37:04.488Z] [PROD] [1m[38;2;173;127;168m ▲ Next.js 14.1.3[39m[22m
-[2025-03-20T02:37:04.489Z] [PROD] - Local:        http://localhost:3030
-[2025-03-20T02:37:04.550Z] [PROD ERR] [Error: ENOENT: no such file or directory, open '/Users/jedi/react_projects/ix/tasks/.next/BUILD_ID'] {
-  errno: -2,
-  code: 'ENOENT',
-  syscall: 'open',
-  path: '/Users/jedi/react_projects/ix/tasks/.next/BUILD_ID'
+[2025-03-20T03:53:40.837Z] [36m🧪 Verifying concurrent Tauri builds...[0m
+[2025-03-20T03:53:40.837Z] [34m📋 Logs will be saved to: /Users/jedi/react_projects/ix/tasks/.app-concurrent-test.log[0m
+[2025-03-20T03:53:40.838Z] [34mChecking if ports are already in use...[0m
+[2025-03-20T03:53:40.840Z] [33mWarning: Port 3020 is already in use[0m
+[2025-03-20T03:53:40.840Z] [32mStarting production Next.js server on port 3030...[0m
+[2025-03-20T03:53:40.991Z] [PROD] [1m[38;2;173;127;168m ▲ Next.js 14.1.3[39m[22m
+[2025-03-20T03:53:40.991Z] [PROD] - Local:        http://localhost:3030
+[2025-03-20T03:53:41.079Z] [PROD] Initializing real-time task sync service...
+[2025-03-20T03:53:41.079Z] [PROD] Setting up real-time event simulation
+[2025-03-20T03:53:41.091Z] [PROD] [32m[1m✓[22m[39m Ready in 221ms
+[2025-03-20T03:53:41.092Z] [32m✅ Production server started successfully on port 3030[0m
+[2025-03-20T03:53:41.092Z] [34mStarting Tauri dev server on port 3020...[0m
+[2025-03-20T03:53:41.118Z] [PROD] 📡 Task API Configuration:
+- Environment: DEVELOPMENT
+- API URL: http://localhost:3002
+- API Key: dev...
+[2025-03-20T03:53:41.407Z] [DEV ERR] [31m[1m⨯[22m[39m Failed to start server
+[2025-03-20T03:53:41.408Z] [DEV ERR] Error: listen EADDRINUSE: address already in use :::3020
+[90m    at Server.setupListenHandle [as _listen2] (node:net:1937:16)[39m
+[90m    at listenInCluster (node:net:1994:12)[39m
+[90m    at Server.listen (node:net:2099:7)[39m
+    at [90m/Users/jedi/react_projects/ix/tasks/[39mnode_modules/[4mnext[24m/dist/server/lib/start-server.js:279:16
+    at new Promise (<anonymous>)
+    at startServer [90m(/Users/jedi/react_projects/ix/tasks/[39mnode_modules/[4mnext[24m/dist/server/lib/start-server.js:190:11[90m)[39m
+    at [90m/Users/jedi/react_projects/ix/tasks/[39mnode_modules/[4mnext[24m/dist/server/lib/start-server.js:309:52
+    at Span.traceAsyncFn [90m(/Users/jedi/react_projects/ix/tasks/[39mnode_modules/[4mnext[24m/dist/trace/trace.js:151:26[90m)[39m
+    at process.<anonymous> [90m(/Users/jedi/react_projects/ix/tasks/[39mnode_modules/[4mnext[24m/dist/server/lib/start-server.js:309:35[90m)[39m
+[90m    at process.emit (node:events:507:28)[39m {
+  code: [32m'EADDRINUSE'[39m,
+  errno: [33m-48[39m,
+  syscall: [32m'listen'[39m,
+  address: [32m'::'[39m,
+  port: [33m3020[39m
 }
-[2025-03-20T02:37:04.553Z] [31m❌ Production server exited with code 1[0m
-[2025-03-20T02:37:04.553Z] [36mCleaning up processes...[0m
-[2025-03-20T02:37:04.553Z] [36mTerminated production server[0m
-[2025-03-20T02:37:04.554Z] [31m❌ VERIFICATION FAILED: Issue with concurrent operation[0m
-[2025-03-20T02:37:04.555Z] ❌ verify-app-concurrent failed with code 1
-[2025-03-20T02:37:04.555Z] 
-❌ VERIFICATION FAILED! Your app has issues that need to be fixed.
-[2025-03-20T02:37:04.555Z] - Build verification failed. Check .app-build-test.log for details.
-[2025-03-20T02:37:04.555Z] - Startup verification failed. Check .app-startup-test.log for details.
-[2025-03-20T02:37:04.555Z] - Concurrent operation verification failed. Check .app-concurrent-test.log for details.
+[2025-03-20T03:53:41.415Z] [DEV] [?25h
+[2025-03-20T03:53:41.416Z] [DEV]
+[2025-03-20T03:54:40.840Z] [31m❌ Verification timed out after 60 seconds[0m
+[2025-03-20T03:54:40.841Z] [36mCleaning up processes...[0m
+[2025-03-20T03:54:40.843Z] [36mTerminated production server[0m
+[36mTerminated dev server[0m
+[31m❌ VERIFICATION FAILED: Issue with concurrent operation[0m
+[2025-03-20T03:54:40.846Z] ❌ verify-app-concurrent failed with code 1
+[2025-03-20T03:54:40.846Z] 
+❌ VERIFICATION SUMMARY: TESTS FAILED
+[2025-03-20T03:54:40.847Z] ✅ Build test passed
+[2025-03-20T03:54:40.847Z] ✅ Startup test passed
+[2025-03-20T03:54:40.847Z] ❌ CONCURRENT OPERATIONS TEST FAILED
+[2025-03-20T03:54:40.847Z]    The application failed to handle multiple operations properly.
+[2025-03-20T03:54:40.847Z]    Check .app-concurrent-test.log for detailed error messages.
+[2025-03-20T03:54:40.847Z]    Common issues: Race conditions, timing issues, resource conflicts
+[2025-03-20T03:54:40.847Z] 
+📋 Review the logs above and in the log files for specific errors

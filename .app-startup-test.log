@@ -1,43 +1,14 @@
-App startup verification started at 2025-03-20T02:37:03.491Z
-[2025-03-20T02:37:03.493Z] Waiting for Next.js app to start...
-[2025-03-20T02:37:03.698Z] [stdout] > tasks@1.0.0 prod
-> PROD_MODE=true node scripts/run-with-auth.js
-[2025-03-20T02:37:03.731Z] [stdout] [36m╔════════════════════════════════════════════════════╗
-║  IX Tasks Production Mode with Auth          ║
-╚════════════════════════════════════════════════════╝[0m
-[2025-03-20T02:37:03.731Z] [stdout] [32mStarting Auth Service on port 3010...[0m
-[34mWill start Tasks App on port 3020 after Auth Service is ready...[0m
-[2025-03-20T02:37:03.733Z] [stdout] [36mServices are starting...[0m
-[32mYou will be able to access:[0m
-- Tasks App: [34mhttp://localhost:3020[0m
-[2025-03-20T02:37:03.733Z] ✅ SUCCESS: App started successfully!
-[2025-03-20T02:37:03.733Z] Performing health check on http://localhost:3020...
-[2025-03-20T02:37:03.738Z] [stdout] - Auth Service: [34mhttp://localhost:3010[0m
-[2025-03-20T02:37:03.749Z] Health check response: 500
-[2025-03-20T02:37:03.749Z] ❌ Health check failed: Server responded with status 500
-[2025-03-20T02:37:03.940Z] [stdout] > auth-service@0.1.0 dev
-> next dev -p 3010
-[2025-03-20T02:37:04.267Z] [stderr] [31m[1m⨯[22m[39m Failed to start server
-[2025-03-20T02:37:04.268Z] [stderr] Error: listen EADDRINUSE: address already in use :::3010
-    at Server.setupListenHandle [as _listen2] (node:net:1740:16)
-    at listenInCluster (node:net:1788:12)
-    at Server.listen (node:net:1876:7)
-    at /Users/jedi/react_projects/ix/auth-service/node_modules/next/dist/server/lib/start-server.js:279:16
-    at new Promise (<anonymous>)
-    at startServer (/Users/jedi/react_projects/ix/auth-service/node_modules/next/dist/server/lib/start-server.js:190:11)
-    at /Users/jedi/react_projects/ix/auth-service/node_modules/next/dist/server/lib/start-server.js:309:52
-    at Span.traceAsyncFn (/Users/jedi/react_projects/ix/auth-service/node_modules/next/dist/trace/trace.js:151:26)
-    at process.<anonymous> (/Users/jedi/react_projects/ix/auth-service/node_modules/next/dist/server/lib/start-server.js:309:35)
-    at process.emit (node:events:512:28) {
-  code: 'EADDRINUSE',
-  errno: -48,
-  syscall: 'listen',
-  address: '::',
-  port: 3010
-}
-[2025-03-20T02:37:04.274Z] [stdout] [?25h
-[2025-03-20T02:37:04.274Z] [stdout] 
-[2025-03-20T02:37:04.279Z] [stdout] [33mAuth service exited with code 0[0m
-[2025-03-20T02:37:04.285Z] Next.js process exited with code 0
-[2025-03-20T02:37:04.285Z] 🛑 Terminated Next.js process
-[2025-03-20T02:37:04.285Z] ❌ VERIFICATION FAILED: Next.js app has errors on startup
+App startup verification started at 2025-03-20T03:53:38.782Z
+[2025-03-20T03:53:38.784Z] 🚀 Starting app verification...
+[2025-03-20T03:53:38.785Z] ⏳ STARTUP PHASE: Initializing server (this may take up to 30 seconds)
+[2025-03-20T03:53:38.785Z] Waiting for Next.js app to start...
+[2025-03-20T03:53:38.785Z] 🔍 DETECTED: Server already running on port 3020
+[2025-03-20T03:53:38.785Z] ✅ Using existing server for verification (no need to start a new one)
+[2025-03-20T03:53:38.785Z] 🔍 CHECKING: Application health at http://localhost:3020
+[2025-03-20T03:53:38.803Z] 📊 SERVER RESPONSE: HTTP 200 (OK)
+[2025-03-20T03:53:38.803Z] ✅ HEALTH CHECK PASSED: Server is responding normally
+[2025-03-20T03:53:40.806Z] 
+✅ VERIFICATION PASSED: Next.js app started successfully (2s)
+[2025-03-20T03:53:40.808Z]    ✓ Server started without errors
+[2025-03-20T03:53:40.808Z]    ✓ Health check passed
+[2025-03-20T03:53:40.809Z]    ✓ App is responding to HTTP requests

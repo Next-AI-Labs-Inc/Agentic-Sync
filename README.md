@@ -9,6 +9,15 @@ A comprehensive task management system aligned with the Getting Things Done (GTD
 - **Initiatives View**: Functional but being updated to match Tasks UI pattern
 - **Documentation**: Currently only the home page is available. Sub-pages have been temporarily disabled due to routing issues and will be reimplemented in a future update.
 
+## Shared Components System
+
+The IX Tasks application uses a modular component architecture for shared components:
+
+- **Modular Architecture**: Individual components are packaged separately instead of as a monolithic library
+- **Local Development**: Components are referenced via local file paths for seamless development
+- **Automated Migration**: Utilities to manage the transition from monolithic to modular imports
+- **Import Verification**: Tools to ensure consistent component usage patterns
+
 ## Repository Setup
 
 This repository is configured to sync with both personal and organization remotes automatically through git hooks. When pushing to main, changes are propagated to both repositories.
@@ -134,6 +143,15 @@ Key documentation includes:
 # Install dependencies
 npm install
 
+# Set up shared components
+npm run setup:components
+
+# Migrate import statements (if needed)
+npm run migrate:imports
+
+# Verify import consistency
+npm run verify:imports
+
 # Run the development server
 npm run dev
 ```
@@ -149,6 +167,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - **Animation**: CSS animations and React state transitions
 - **Event System**: EventBus pattern for memory-efficient real-time updates
 - **Memory Management**: Custom hooks with cleanup to prevent memory leaks
+- **Component Architecture**: Modular component packages with local file references
 
 ### Memory Optimization
 

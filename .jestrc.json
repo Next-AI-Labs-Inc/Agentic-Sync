@@ -6,6 +6,9 @@
   "transform": {
     "^.+\\.(js|jsx|ts|tsx)$": ["babel-jest", { "presets": ["next/babel"] }]
   },
+  "transformIgnorePatterns": [
+    "node_modules/(?!(react-markdown|vfile|vfile-message|unist-util-stringify-position|unified|bail|is-plain-obj|trough|remark-parse|mdast-util-from-markdown|micromark|decode-named-character-reference|mdast-util-to-string|micromark-util-chunked|micromark-util-combine-extensions|micromark-util-decode-numeric-character-reference|remark-rehype|hast-util-raw|mdast-util-to-hast|micromark-extension-gfm|@sindresorhus|mdast-util-gfm|ccount|escape-string-regexp|mdast-util-find-and-replace|markdown-table|mdast-util-gfm-table|micromark-extension-gfm-table|character-entities|character-entities-legacy|character-reference-invalid|unist-builder|zwitch)/)"
+  ],
   "testEnvironment": "jest-environment-jsdom",
   "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
   "moduleNameMapper": {
@@ -14,7 +17,12 @@
     "^@/services/(.*)$": "<rootDir>/src/services/$1",
     "^@/types/(.*)$": "<rootDir>/src/types/$1",
     "^@/types$": "<rootDir>/src/types/index.ts",
-    "canvas": "<rootDir>/__tests__/__mocks__/canvasMock.js"
+    "^@/constants/(.*)$": "<rootDir>/src/constants/$1",
+    "^@/config/(.*)$": "<rootDir>/src/config/$1",
+    "^@/hooks/(.*)$": "<rootDir>/src/hooks/$1",
+    "^@/utils/(.*)$": "<rootDir>/src/utils/$1",
+    "canvas": "<rootDir>/__tests__/__mocks__/canvasMock.js",
+    "react-markdown": "<rootDir>/__tests__/__mocks__/react-markdown.js"
   },
   "testPathIgnorePatterns": ["__mocks__", "node_modules", "jest.config"],
   "testFailureExitCode": 0

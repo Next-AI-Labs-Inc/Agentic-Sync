@@ -253,6 +253,7 @@ export default function TaskFilters({
           <div className="flex items-center gap-1 mr-1 overflow-x-auto">
             {/* View Controls Row */}
             <button
+              data-testid="filter-all-active"
               onClick={() => setCompletedFilter(TASK_STATUSES.ALL)}
               className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
                 ${completedFilter === TASK_STATUSES.ALL ? STATUS_DISPLAY[TASK_STATUSES.ALL].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
@@ -263,19 +264,9 @@ export default function TaskFilters({
               </span>}
             </button>
             
-            <button
-              onClick={() => setCompletedFilter(TASK_STATUSES.PENDING)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
-                ${completedFilter === TASK_STATUSES.PENDING ? STATUS_DISPLAY[TASK_STATUSES.PENDING].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-            >
-              {STATUS_DISPLAY[TASK_STATUSES.PENDING].label}
-              {taskCountsByStatus && <span className="ml-1.5 bg-white bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs">
-                {([TASK_STATUSES.PROPOSED, TASK_STATUSES.BACKLOG, TASK_STATUSES.BRAINSTORM, TASK_STATUSES.TODO, TASK_STATUSES.IN_PROGRESS, TASK_STATUSES.ON_HOLD] as const)
-                  .reduce((acc, status) => acc + (taskCountsByStatus[status] || 0), 0)}
-              </span>}
-            </button>
             
             <button
+              data-testid="filter-today"
               onClick={() => setCompletedFilter(TASK_STATUSES.TODAY)}
               className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
                 ${completedFilter === TASK_STATUSES.TODAY ? STATUS_DISPLAY[TASK_STATUSES.TODAY].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
@@ -287,6 +278,7 @@ export default function TaskFilters({
             </button>
             
             <button
+              data-testid="filter-archived"
               onClick={() => setCompletedFilter(TASK_STATUSES.ARCHIVED)}
               className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center whitespace-nowrap
                 ${completedFilter === TASK_STATUSES.ARCHIVED ? STATUS_DISPLAY[TASK_STATUSES.ARCHIVED].color : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
@@ -321,7 +313,7 @@ export default function TaskFilters({
       {/* Collapsible filter content */}
       <div 
         className={`transition-all duration-300 ease-in-out overflow-hidden ${
-          filtersExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
+          filtersExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
       

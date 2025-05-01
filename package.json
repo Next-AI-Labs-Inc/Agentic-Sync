@@ -9,6 +9,7 @@
     "start": "next dev -p 3020",
     "lint": "next lint",
     "test": "jest --config=.jestrc.json",
+    "test:node": "jest --config=.jestrc.json --testEnvironment=node",
     "test:watch": "jest --watch --config=.jestrc.json",
     "test:coverage": "jest --coverage --config=.jestrc.json",
     "generate-icons": "node scripts/create-simple-icons.js",
