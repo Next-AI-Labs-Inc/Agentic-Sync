@@ -30,33 +30,46 @@ export default function ProjectSelector({
   
   // Handle individual project selection
   const handleProjectSelection = (projectId: string) => {
+    // Get valid project IDs
+    const validProjectIds = projects.map(p => p.id);
+    
+    // Build new selected projects list
     const newSelectedProjects = selectedProjects.includes(projectId)
       ? selectedProjects.filter(id => id !== projectId)
       : [...selectedProjects, projectId];
     
-    onChange(newSelectedProjects);
+    // Filter to only valid projects
+    const validSelectedProjects = newSelectedProjects.filter(id => validProjectIds.includes(id));
+    
+    onChange(validSelectedProjects);
     
     // Update the global filter
-    if (newSelectedProjects.length === 0) {
+    if (validSelectedProjects.length === 0) {
       updateGlobalFilter(PROJECT_FILTERS.NONE);
-    } else if (newSelectedProjects.length === projects.length) {
+    } else if (validSelectedProjects.length === projects.length) {
       updateGlobalFilter(PROJECT_FILTERS.ALL);
-    } else if (newSelectedProjects.length === 1) {
-      updateGlobalFilter(newSelectedProjects[0]);
+    } else if (validSelectedProjects.length === 1) {
+      updateGlobalFilter(validSelectedProjects[0]);
     } else {
-      updateGlobalFilter(newSelectedProjects);
+      updateGlobalFilter(validSelectedProjects);
     }
   };
   
   // Handle select all/none
   const handleSelectAll = () => {
-    if (selectedProjects.length === projects.length) {
+    // Get a list of valid project IDs
+    const validProjectIds = projects.map(p => p.id);
+    
+    // Filter selected projects to only include valid ones
+    const validSelectedProjects = selectedProjects.filter(id => validProjectIds.includes(id));
+    
+    if (validSelectedProjects.length === projects.length) {
       // Deselect all
       onChange([]);
       updateGlobalFilter(PROJECT_FILTERS.NONE);
     } else {
       // Select all
-      onChange(projects.map(p => p.id));
+      onChange(validProjectIds);
       updateGlobalFilter(PROJECT_FILTERS.ALL);
     }
   };
@@ -68,15 +81,21 @@ export default function ProjectSelector({
   
   // Format selected projects for summary display
   const getSelectionSummary = () => {
-    if (selectedProjects.length === 0) {
+    // Get a list of valid project IDs from the current projects list
+    const validProjectIds = projects.map(p => p.id);
+    
+    // Filter selected projects to only include valid ones
+    const validSelectedProjects = selectedProjects.filter(id => validProjectIds.includes(id));
+    
+    if (validSelectedProjects.length === 0) {
       return 'No projects selected';
-    } else if (selectedProjects.length === projects.length) {
+    } else if (validSelectedProjects.length === projects.length) {
       return 'All projects';
-    } else if (selectedProjects.length === 1) {
-      const project = projects.find(p => p.id === selectedProjects[0]);
+    } else if (validSelectedProjects.length === 1) {
+      const project = projects.find(p => p.id === validSelectedProjects[0]);
       return project ? project.name : 'Unknown project';
     } else {
-      return `${selectedProjects.length} projects selected`;
+      return `${validSelectedProjects.length} projects selected`;
     }
   };
   
