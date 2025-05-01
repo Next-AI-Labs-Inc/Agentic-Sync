@@ -11,7 +11,11 @@ import { Task } from "@/types";
 // import { withAuth } from '@/utils/withAuth';
 
 // Helper function to open task detail
-const openTaskDetail = (taskId: string) => {
+const openTaskDetail = (taskId: string, task?: Task) => {
+  // Store task data in localStorage to avoid unnecessary API calls
+  if (task) {
+    localStorage.setItem(`task_cache_${taskId}`, JSON.stringify(task));
+  }
   window.location.href = `/task/${taskId}`;
 };
 
@@ -83,7 +87,7 @@ const CompactTaskItem = ({
       {/* Task title - takes most of the space */}
       <div 
         className="flex-grow font-medium truncate cursor-pointer" 
-        onClick={() => openTaskDetail(task.id)}
+        onClick={() => openTaskDetail(task.id, task)}
         title="Open task details"
       >
         {task.title}

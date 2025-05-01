@@ -73,6 +73,39 @@ export default function SingleTaskPage() {
     if (id && typeof id === 'string') {
       setLoading(true);
       
+      // First check if we have cached task data
+      const cachedTaskJson = localStorage.getItem(`task_cache_${id}`);
+      
+      if (cachedTaskJson) {
+        try {
+          // Try to parse the cached task data
+          const cachedTask = JSON.parse(cachedTaskJson);
+          
+          // Check if the cached task has sufficient data
+          if (cachedTask && cachedTask.id) {
+            console.log('Using cached task data:', cachedTask);
+            
+            // Normalize the task to ensure consistent structure
+            const normalizedTask = {
+              ...cachedTask,
+              id: cachedTask._id || cachedTask.id
+            };
+            
+            // Set the task from cache
+            setTask(normalizedTask);
+            setLoading(false);
+            
+            // Clean up the cache after using it
+            localStorage.removeItem(`task_cache_${id}`);
+            return; // Skip API call if we have valid cache data
+          }
+        } catch (cacheError) {
+          console.error('Error parsing cached task data:', cacheError);
+          // Continue to API call if cache parsing fails
+        }
+      }
+      
+      // If no cache or insufficient cache data, fetch from API
       getTask(id)
         .then(taskData => {
           // Ensure the task has an ID property
