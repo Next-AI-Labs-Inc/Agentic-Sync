@@ -27,6 +27,7 @@ import EditableItemList from './EditableItems/EditableItemList';
 import ApprovalItemList from './EditableItems/ApprovalItemList';
 import AgentLauncher from './AgentLauncher';
 import FeedbackForm from './FeedbackForm';
+import { ClickableId } from '@/utils/clickable-id';
 
 // Utility function to safely get action help content
 const getActionHelp = (
@@ -348,6 +349,53 @@ function Popover({ content, position = 'top', children, className = '' }: Popove
   );
 }
 
+// Centralized function to handle task section visibility and button visibility
+// Returns an object with:
+// - visible: boolean - if the section should be shown
+// - showButton: boolean - if the "add" button should be shown
+const determineTaskSectionVisibility = (sectionName, task, isEditing, activeSections) => {
+  // Check if section has content
+  let hasContent = false;
+  
+  switch(sectionName) {
+    case 'verificationSteps':
+      hasContent = task.verificationSteps && task.verificationSteps.length > 0;
+      break;
+    case 'requirements':
+      hasContent = (task.requirementItems && task.requirementItems.length > 0) || 
+                  (task.requirements && task.requirements.length > 0);
+      break;
+    case 'technicalPlan':
+      hasContent = (task.technicalPlanItems && task.technicalPlanItems.length > 0) || 
+                  (task.technicalPlan && task.technicalPlan.length > 0);
+      break;
+    case 'nextSteps':
+      hasContent = (task.nextStepItems && task.nextStepItems.length > 0) || 
+                  (task.nextSteps && task.nextSteps.length > 0);
+      break;
+    default:
+      // For other sections like markdown, just return true to not affect them
+      return { visible: true, showButton: false };
+  }
+  
+  // Section is visible if:
+  // - It has content, OR
+  // - User has explicitly clicked to edit it (tracked in activeSections)
+  const isActive = activeSections && activeSections[sectionName];
+  const visible = hasContent || isActive;
+  
+  // Show add button if:
+  // - Edit mode is enabled, AND
+  // - Section has no content, AND
+  // - Section is not being actively edited
+  const showButton = isEditing && !hasContent && !isActive;
+  
+  return {
+    visible,
+    showButton
+  };
+};
+
 function TaskCard({
   task,
   onStatusChange,
@@ -390,6 +438,24 @@ function TaskCard({
   // Copy feedback states
   const [showIdCopied, setShowIdCopied] = useState(false);
   const [showUrlCopied, setShowUrlCopied] = useState(false);
+  
+  // Track which sections are being actively edited
+  const [editingSections, setEditingSections] = useState({
+    verificationSteps: false,
+    requirements: false,
+    technicalPlan: false,
+    nextSteps: false
+  });
+  
+  // Reset editing state when task ID changes
+  useEffect(() => {
+    setEditingSections({
+      verificationSteps: false,
+      requirements: false,
+      technicalPlan: false,
+      nextSteps: false
+    });
+  }, [task.id]);
 
   // Initialize date value once when editing starts
   useEffect(() => {
@@ -2018,8 +2084,8 @@ function TaskCard({
         className="p-4"
         onClick={handleCardClick}
       >
-        {/* Close button (top right) */}
-        <div className="flex justify-end mb-1">
+        {/* Top row with controls */}
+        <div className="flex justify-between mb-1">
           {!hideExpand && (
             <button
               onClick={(e) => {
@@ -2080,6 +2146,11 @@ function TaskCard({
               )}
 
               <div className="flex items-center space-x-1">
+                <ClickableId 
+                  id="CO_9106" 
+                  filePath="/src/components/TaskCard.tsx" 
+                  className="mr-2"
+                />
                 <Link
                   href={`/task/${task.id}`}
                   className="btn-icon"
@@ -2163,6 +2234,11 @@ function TaskCard({
             {/* Only show gear if no initiative */}
             {!task.initiative && (
               <div className="flex items-center space-x-1">
+                <ClickableId 
+                  id="CO_9106" 
+                  filePath="/src/components/TaskCard.tsx" 
+                  className="mr-2"
+                />
                 <Link
                   href={`/task/${task.id}`}
                   className="btn-icon"
@@ -2496,7 +2572,7 @@ function TaskCard({
 
           {/* Markdown Content */}
           {((task.markdown && task.markdown.length > 0) || isEditingMarkdown || expanded) && (
-            <div className="mt-4 text-base block" style={{display: 'block'}} onClick={(e) => e.stopPropagation()}>
+            <div id={`markdown-${task.id}`} className="mt-4 text-base block" style={{display: 'block'}} onClick={(e) => e.stopPropagation()}>
               <div className="flex justify-between items-center">
                 <h4 className="font-medium text-gray-700 mb-1 block" style={{display: 'block'}}>Details</h4>
                 {!isEditingMarkdown && !task.markdown && onUpdateTask && (
@@ -2513,7 +2589,8 @@ function TaskCard({
                 )}
               </div>
               <div
-                className="prose prose-sm max-w-none text-gray-600 group cursor-pointer whitespace-pre-wrap break-words min-h-[48px]"
+                className="prose prose-sm max-w-none text-gray-600 group cursor-pointer whitespace-pre-wrap break-words min-h-[48px] block"
+                style={{display: 'block'}}
                 onClick={(e) => {
                   if (onUpdateTask && !isEditingMarkdown) {
                     e.stopPropagation();
@@ -2543,11 +2620,11 @@ function TaskCard({
                     />
                     
                     {/* Live preview that looks identical to the non-editing view */}
-                    <div className="relative z-0 pointer-events-none min-h-[48px]">
+                    <div className="relative z-0 pointer-events-none min-h-[48px] block" style={{display: 'block'}}>
                       {editedMarkdown ? (
-                        <ReactMarkdown className="prose prose-sm max-w-none">{editedMarkdown}</ReactMarkdown>
+                        <ReactMarkdown className="prose prose-sm max-w-none block" style={{display: 'block'}}>{editedMarkdown}</ReactMarkdown>
                       ) : (
-                        <p className="text-gray-400 italic">Start typing to add markdown content...</p>
+                        <p className="text-gray-400 italic block" style={{display: 'block'}}>Start typing to add markdown content...</p>
                       )}
                     </div>
                     
@@ -2560,7 +2637,7 @@ function TaskCard({
                   <>
                     {task.markdown ? (
                       <>
-                        <ReactMarkdown className="prose prose-sm max-w-none">{task.markdown}</ReactMarkdown>
+                        <ReactMarkdown className="prose prose-sm max-w-none block" style={{display: 'block'}}>{task.markdown}</ReactMarkdown>
                         {onUpdateTask && (
                           <span className="ml-2 text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
                             click to edit
@@ -2576,9 +2653,118 @@ function TaskCard({
             </div>
           )}
 
-          {/* Verification Steps - Editable Item List */}
-          {((task.verificationSteps && task.verificationSteps.length > 0) || onUpdateTask) && (
-            <div className="mt-4 text-base block" style={{display: 'block'}} onClick={(e) => e.stopPropagation()}>
+          {/* Quick Add Section - Buttons to add various items */}
+          {onUpdateTask && expanded && (
+            <div className="mt-6 mb-2 flex flex-wrap gap-x-2 gap-y-2 border-t border-gray-100 pt-3 pb-1">
+              {determineTaskSectionVisibility('verificationSteps', task, onUpdateTask, editingSections).showButton && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Mark this section as being edited
+                    setEditingSections(prev => ({
+                      ...prev,
+                      verificationSteps: true
+                    }));
+                    
+                    // Focus on verification steps section
+                    setTimeout(() => {
+                      const verificationSection = document.getElementById(`verification-steps-${task.id}`);
+                      if (verificationSection) {
+                        verificationSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }
+                    }, 100);
+                  }}
+                  className="text-blue-500 hover:text-blue-700 text-sm font-medium transition px-3 py-1 rounded-md hover:bg-blue-50"
+                >
+                  + Verification Steps
+                </button>
+              )}
+              
+              {determineTaskSectionVisibility('requirements', task, onUpdateTask, editingSections).showButton && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Mark this section as being edited
+                    setEditingSections(prev => ({
+                      ...prev,
+                      requirements: true
+                    }));
+                    
+                    // Focus on requirements section
+                    setTimeout(() => {
+                      const requirementsSection = document.getElementById(`requirements-${task.id}`);
+                      if (requirementsSection) {
+                        requirementsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }
+                    }, 100);
+                  }}
+                  className="text-blue-500 hover:text-blue-700 text-sm font-medium transition px-3 py-1 rounded-md hover:bg-blue-50"
+                >
+                  + Requirements
+                </button>
+              )}
+              
+              {determineTaskSectionVisibility('technicalPlan', task, onUpdateTask, editingSections).showButton && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Mark this section as being edited
+                    setEditingSections(prev => ({
+                      ...prev,
+                      technicalPlan: true
+                    }));
+                    
+                    // Focus on technical plan section
+                    setTimeout(() => {
+                      const technicalSection = document.getElementById(`technical-plan-${task.id}`);
+                      if (technicalSection) {
+                        technicalSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }
+                    }, 100);
+                  }}
+                  className="text-blue-500 hover:text-blue-700 text-sm font-medium transition px-3 py-1 rounded-md hover:bg-blue-50"
+                >
+                  + Technical Plan
+                </button>
+              )}
+              
+              {determineTaskSectionVisibility('nextSteps', task, onUpdateTask, editingSections).showButton && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Mark this section as being edited
+                    setEditingSections(prev => ({
+                      ...prev,
+                      nextSteps: true
+                    }));
+                    
+                    // Focus on next steps section
+                    setTimeout(() => {
+                      const nextStepsSection = document.getElementById(`next-steps-${task.id}`);
+                      if (nextStepsSection) {
+                        nextStepsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }
+                    }, 100);
+                  }}
+                  className="text-blue-500 hover:text-blue-700 text-sm font-medium transition px-3 py-1 rounded-md hover:bg-blue-50"
+                >
+                  + Next Steps
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Verification Steps - Handled by centralized layout logic */}
+          {determineTaskSectionVisibility('verificationSteps', task, onUpdateTask, editingSections).visible && (
+            <div id={`verification-steps-${task.id}`} className="mt-4 text-base block" style={{display: 'block'}} onClick={(e) => e.stopPropagation()}>
+              <div className="flex justify-end">
+                <ClickableId 
+                  id="CO_9108" 
+                  filePath="/src/components/TaskCard.tsx"
+                  className="mb-1" 
+                  text="And specifically, the location in the code which has the header Verification Steps followed by <ul className='list-disc pl-5 text-gray-600 block'> so that agents can find that exact place"
+                />
+              </div>
               {onUpdateTask ? (
                 <EditableItemList
                   label="Verification Steps"
@@ -2594,6 +2780,14 @@ function TaskCard({
                       onUpdateTask(task.id, task.project, {
                         verificationSteps: newItems.map(item => item.content)
                       });
+                      
+                      // If items are empty, reset editing state for this section
+                      if (newItems.length === 0) {
+                        setEditingSections(prev => ({
+                          ...prev,
+                          verificationSteps: false
+                        }));
+                      }
                     }
                   }}
                 />
@@ -2610,12 +2804,9 @@ function TaskCard({
             </div>
           )}
 
-          {/* Requirements - With Approval Status */}
-          {/* Show new structured items if they exist, otherwise show the legacy format */}
-          {((task.requirementItems && task.requirementItems.length > 0) ||
-            task.requirements ||
-            onUpdateTask) && (
-            <div className="mt-4 text-base block" style={{display: 'block'}} onClick={(e) => e.stopPropagation()}>
+          {/* Requirements - With Approval Status - Handled by centralized layout logic */}
+          {determineTaskSectionVisibility('requirements', task, onUpdateTask, editingSections).visible && (
+            <div id={`requirements-${task.id}`} className="mt-4 text-base block" style={{display: 'block'}} onClick={(e) => e.stopPropagation()}>
               {onUpdateTask &&
               onApproveRequirementItem &&
               onVetoRequirementItem &&
@@ -2627,6 +2818,14 @@ function TaskCard({
                   onUpdate={(newItems) => {
                     if (onUpdateRequirementItems) {
                       onUpdateRequirementItems(task.id, newItems);
+                      
+                      // If items are empty, reset editing state for this section
+                      if (newItems.length === 0) {
+                        setEditingSections(prev => ({
+                          ...prev,
+                          requirements: false
+                        }));
+                      }
                     }
                   }}
                   onApprove={(itemId) => {
@@ -2690,12 +2889,9 @@ function TaskCard({
             </div>
           )}
 
-          {/* Technical Plan - With Approval Status */}
-          {/* Show new structured items if they exist, otherwise show the legacy format */}
-          {((task.technicalPlanItems && task.technicalPlanItems.length > 0) ||
-            task.technicalPlan ||
-            onUpdateTask) && (
-            <div className="mt-4 text-base block" style={{display: 'block'}} onClick={(e) => e.stopPropagation()}>
+          {/* Technical Plan - With Approval Status - Handled by centralized layout logic */}
+          {determineTaskSectionVisibility('technicalPlan', task, onUpdateTask, editingSections).visible && (
+            <div id={`technical-plan-${task.id}`} className="mt-4 text-base block" style={{display: 'block'}} onClick={(e) => e.stopPropagation()}>
               {onUpdateTask &&
               onApproveTechnicalPlanItem &&
               onVetoTechnicalPlanItem &&
@@ -2707,6 +2903,14 @@ function TaskCard({
                   onUpdate={(newItems) => {
                     if (onUpdateTechnicalPlanItems) {
                       onUpdateTechnicalPlanItems(task.id, newItems);
+                      
+                      // If items are empty, reset editing state for this section
+                      if (newItems.length === 0) {
+                        setEditingSections(prev => ({
+                          ...prev,
+                          technicalPlan: false
+                        }));
+                      }
                     }
                   }}
                   onApprove={(itemId) => {
@@ -2770,12 +2974,9 @@ function TaskCard({
             </div>
           )}
 
-          {/* Next Steps - With Approval Status */}
-          {/* Show new structured items if they exist, otherwise show the legacy format */}
-          {((task.nextStepItems && task.nextStepItems.length > 0) ||
-            (task.nextSteps && task.nextSteps.length > 0) ||
-            onUpdateTask) && (
-            <div className="mt-4 text-base block" style={{display: 'block'}} onClick={(e) => e.stopPropagation()}>
+          {/* Next Steps - With Approval Status - Handled by centralized layout logic */}
+          {determineTaskSectionVisibility('nextSteps', task, onUpdateTask, editingSections).visible && (
+            <div id={`next-steps-${task.id}`} className="mt-4 text-base block" style={{display: 'block'}} onClick={(e) => e.stopPropagation()}>
               {onUpdateTask &&
               onApproveNextStepItem &&
               onVetoNextStepItem &&
@@ -2787,6 +2988,14 @@ function TaskCard({
                   onUpdate={(newItems) => {
                     if (onUpdateNextStepItems) {
                       onUpdateNextStepItems(task.id, newItems);
+                      
+                      // If items are empty, reset editing state for this section
+                      if (newItems.length === 0) {
+                        setEditingSections(prev => ({
+                          ...prev,
+                          nextSteps: false
+                        }));
+                      }
                     }
                   }}
                   onApprove={(itemId) => {

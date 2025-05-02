@@ -7,6 +7,7 @@ import TaskCard from '@/components/TaskCard';
 import BuildDocumentation from '@/components/BuildDocumentation';
 import { Task } from '@/types';
 import { TaskProvider, useTasks } from '@/contexts/TaskContext';
+import { ClickableId } from '@/utils/clickable-id';
 
 /**
  * Task detail component that uses the TaskContext
@@ -257,7 +258,14 @@ export default function SingleTaskPage({ initialTask, error: initialError, id: s
           Back to Tasks
         </Link>
         
-        <h1 className="text-3xl font-bold text-gray-800 mt-2">Task Details</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-gray-800 mt-2">Task Details</h1>
+          <ClickableId 
+            id="CO_9105" 
+            filePath="/src/pages/task/[id].tsx" 
+            className="self-center"
+          />
+        </div>
         {task && <p className="text-gray-600">Task ID: {task.id}</p>}
       </div>
       
