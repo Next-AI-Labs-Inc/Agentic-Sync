@@ -763,6 +763,88 @@ function TaskCard({
   const renderStageActions = () => {
     const actions = [];
 
+    // Add status dropdown menu for all statuses
+    actions.push(
+      <DropdownMenu
+        key="status-dropdown"
+        trigger={
+          <button className="btn-outline-secondary">
+            <FaCog className="mr-1" size={12} />
+            Status
+          </button>
+        }
+        items={[
+          {
+            id: 'status-inbox',
+            label: 'Inbox',
+            onClick: () => handleStatusChange('inbox')(),
+            description: 'Move to Inbox'
+          },
+          {
+            id: 'status-brainstorm',
+            label: 'Brainstorm',
+            onClick: () => handleStatusChange('brainstorm')(),
+            description: 'Move to Brainstorm'
+          },
+          {
+            id: 'status-proposed',
+            label: 'Proposed',
+            onClick: () => handleStatusChange('proposed')(),
+            description: 'Move to Proposed'
+          },
+          {
+            id: 'status-backlog',
+            label: 'Backlog',
+            onClick: () => handleStatusChange('backlog')(),
+            description: 'Move to Backlog'
+          },
+          {
+            id: 'status-maybe',
+            label: 'Maybe',
+            onClick: () => handleStatusChange('maybe')(),
+            description: 'Move to Someday/Maybe'
+          },
+          {
+            id: 'status-todo',
+            label: 'Todo',
+            onClick: () => handleStatusChange('todo')(),
+            description: 'Move to Todo'
+          },
+          {
+            id: 'status-in-progress',
+            label: 'In Progress',
+            onClick: () => handleStatusChange('in-progress')(),
+            description: 'Move to In Progress'
+          },
+          {
+            id: 'status-on-hold',
+            label: 'On Hold',
+            onClick: () => handleStatusChange('on-hold')(),
+            description: 'Put On Hold'
+          },
+          {
+            id: 'status-done',
+            label: 'Done',
+            onClick: () => handleStatusChange('done')(),
+            description: 'Mark as Done'
+          },
+          {
+            id: 'status-reviewed',
+            label: 'Reviewed',
+            onClick: () => handleStatusChange('reviewed')(),
+            description: 'Mark as Reviewed'
+          },
+          {
+            id: 'status-archived',
+            label: 'Archive',
+            onClick: () => handleStatusChange('archived')(),
+            description: 'Archive this task'
+          }
+        ]}
+        label="Change task status"
+      />
+    );
+
     // Import coaching message from constants if expanded view
     const renderCoachingMessage = () => {
       if (expanded && STATUS_COACHING && STATUS_COACHING[task.status]) {

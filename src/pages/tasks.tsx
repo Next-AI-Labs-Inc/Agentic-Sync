@@ -149,16 +149,20 @@ const CompactTaskItem = ({
       </button>
       
       {/* Task title - uses standard Next.js Link with explicit empty query to prevent param inheritance */}
-      <Link 
-        href={{
-          pathname: `/task/${task.id}`,
-          query: {} // Explicitly empty query to prevent inheriting URL params
+      <div 
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          router.push({
+            pathname: `/task/${task.id}`,
+            query: {} // Explicitly empty query to prevent inheriting URL params
+          });
         }}
         className="flex-grow font-medium truncate cursor-pointer"
         title="Open task details"
       >
         {task.title}
-      </Link>
+      </div>
       
       {/* Status badge & button to advance status */}
       <div className="ml-4 flex-shrink-0">
@@ -287,28 +291,26 @@ function TasksPage() {
   const getEmptyStateMessage = () => {
     if (projectFilter !== "all" && projectFilter !== "none") {
       if (Array.isArray(projectFilter)) {
-        return `No tasks found for the selected projects`;
+        return `Nothing here yet.`;
       }
-      return `No tasks found for the selected project: ${getProjectName(
-        projectFilter as string
-      )}`;
+      return `Nothing here yet.`;
     }
 
     if (projectFilter === "none") {
-      return "No tasks found with no project assigned";
+      return "Nothing here yet.";
     }
 
     if (completedFilter !== "all") {
       if (completedFilter === "pending") {
-        return "No pending tasks found";
+        return "Nothing here yet.";
       } else if (completedFilter === "recent-completed") {
-        return "No recently completed tasks found";
+        return "Nothing here yet.";
       } else {
-        return `No tasks with status "${completedFilter}" found`;
+        return `Nothing here yet.`;
       }
     }
 
-    return "No active tasks found (done and reviewed tasks are filtered out)";
+    return "Nothing here yet.";
   };
 
   return (
@@ -364,6 +366,9 @@ function TasksPage() {
           projects={projects}
           onSubmit={addTask}
           onCancel={() => setShowAddForm(false)}
+          initialStatus={completedFilter !== 'all' && completedFilter !== 'pending' && completedFilter !== 'recent-completed' ? completedFilter : undefined}
+          initialProject={typeof projectFilter === 'string' && projectFilter !== 'all' && projectFilter !== 'none' ? projectFilter : 
+                         Array.isArray(projectFilter) && projectFilter.length === 1 ? projectFilter[0] : undefined}
         />
       )}
 
@@ -372,7 +377,7 @@ function TasksPage() {
         {filteredTasks.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-8 text-center">
             <h3 className="text-xl font-semibold text-gray-800 mb-2">
-              No tasks found
+              
             </h3>
             <p className="text-gray-500 mb-6">
               {searchTerm
@@ -392,7 +397,7 @@ function TasksPage() {
               className="btn btn-primary relative overflow-hidden"
             >
               <span className="flex items-center">
-                <span className="mr-1">+</span> Create your first task
+                <span className="mr-1">+</span> Create a Task
                 <span className="absolute inset-0 bg-white bg-opacity-30 transform scale-0 transition-transform duration-300 rounded-full hover:scale-0 active:scale-100 origin-center"></span>
               </span>
             </button>

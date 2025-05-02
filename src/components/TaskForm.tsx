@@ -6,17 +6,24 @@ interface TaskFormProps {
   projects: Project[];
   onSubmit: (taskData: TaskFormData) => Promise<void>;
   onCancel: () => void;
+  initialStatus?: string;
+  initialProject?: string;
 }
 
 // Key for storing the last used project in localStorage
 const LAST_PROJECT_KEY = 'taskForm_lastProject';
 
-export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps) {
+export default function TaskForm({ projects, onSubmit, onCancel, initialStatus, initialProject }: TaskFormProps) {
   // Empty array as we removed initiatives
   const initiatives = [];
   
-  // Get the initial project - auto-select if only one project exists
+  // Get the initial project - prefer the passed initialProject, then auto-select if only one project exists
   const getInitialProject = () => {
+    // If initialProject is provided and it exists, use it
+    if (initialProject && (initialProject === 'none' || projects.some(p => p.id === initialProject))) {
+      return initialProject;
+    }
+    
     // If there's only one project, use it
     if (projects.length === 1) {
       return projects[0].id;
@@ -45,7 +52,7 @@ export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps
     technicalPlan: '',
     priority: 'medium',
     project: getInitialProject(),
-    status: 'todo',
+    status: initialStatus || 'todo',
     initiative: '',
     tags: '',
     verificationSteps: '',
@@ -60,6 +67,8 @@ export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
+  
+  // Status is now always in default view
   const titleInputRef = useRef<HTMLInputElement>(null);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -115,8 +124,9 @@ export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps
     // Save the form data for background submission
     const taskDataToSubmit = { ...formData };
     
-    // Reset form but keep project and expanded state
+    // Reset form but keep project, status, and expanded state
     const currentProject = formData.project;
+    const currentStatus = formData.status;
     setFormData({
       title: '',
       description: '',
@@ -126,7 +136,7 @@ export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps
       technicalPlan: '',
       priority: 'medium',
       project: currentProject, // Keep the same project
-      status: 'todo',
+      status: currentStatus, // Keep the same status
       initiative: '',
       tags: '',
       verificationSteps: '',
@@ -254,6 +264,48 @@ export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps
           <div className="mt-1 text-xs text-gray-500">
             Select an existing area or type a new one above
           </div>
+        </div>
+        
+        {/* Status */}
+        <div className="mb-4">
+          <label htmlFor="status" className="form-label">
+            Status <span className="text-red-500">*</span>
+          </label>
+          <select
+            id="status"
+            name="status"
+            value={formData.status}
+            onChange={handleChange}
+            className="form-select"
+          >
+            {/* Collection */}
+            <option value="inbox">Inbox</option>
+            <option value="brainstorm">Brainstorm</option>
+            
+            {/* Maybe */}
+            <option value="maybe">Maybe</option>
+            <option value="on-hold">On Hold</option>
+            
+            {/* Source Tasks */}
+            <option value="backlog">Backlog</option>
+            
+            {/* Proposed */}
+            <option value="proposed">Proposed</option>
+            
+            {/* Actionable */}
+            <option value="todo">To Do</option>
+            
+            {/* Engaged */}
+            <option value="in-progress">In Progress</option>
+            
+            {/* Review */}
+            <option value="for-review">For Review</option>
+            
+            {/* Completions */}
+            <option value="done">Done</option>
+            <option value="reviewed">Reviewed</option>
+            <option value="archived">Archived</option>
+          </select>
         </div>
         
         {/* More Options Toggle */}
@@ -395,27 +447,9 @@ export default function TaskForm({ projects, onSubmit, onCancel }: TaskFormProps
                 </select>
               </div>
               
-              {/* Status */}
+              {/* Priority only (status moved to default view) */}
               <div>
-                <label htmlFor="status" className="form-label">
-                  Status <span className="text-red-500">*</span>
-                </label>
-                <select
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  className="form-select"
-                >
-                  <option value="brainstorm">Brainstorm</option>
-                  <option value="proposed">Proposed</option>
-                  <option value="backlog">Backlog</option>
-                  <option value="todo">To Do</option>
-                  <option value="in-progress">In Progress</option>
-                  <option value="on-hold">On Hold</option>
-                  <option value="done">For Review</option>
-                  <option value="reviewed">Done</option>
-                </select>
+                {/* This div is intentionally kept empty but maintains the grid layout */}
               </div>
             </div>
             
