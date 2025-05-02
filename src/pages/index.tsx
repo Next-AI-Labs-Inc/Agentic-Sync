@@ -6,7 +6,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 export default function HomePage() {
   const router = useRouter();
   
-  // Redirect to tasks page
+  // Redirect to tasks page - this makes /tasks the home page
   useEffect(() => {
     router.push('/tasks');
   }, [router]);

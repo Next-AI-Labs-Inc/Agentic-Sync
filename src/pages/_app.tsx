@@ -8,16 +8,64 @@ import Head from 'next/head';
 // KPI feature removed
 import Layout from '@/components/Layout';
 import { TaskTrackerProvider, useTaskTracker } from '@/components/TaskTracker';
-import RouteTransition from '@/components/RouteTransition';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { taskSyncService } from '@/services/taskSyncService';
+import RouteTransition from '@/components/RouteTransition';
+import Router from 'next/router';
 
-// Disable all console.log statements in production or when optimization flag is set
+// Preserve original console methods
+const originalConsole = {
+  log: console.log,
+  debug: console.debug,
+  info: console.info,
+  error: console.error
+};
+
+// Store original console methods for debugging purposes
+if (typeof window !== 'undefined') {
+  window._originalConsole = originalConsole;
+}
+
+// Enable router error logging even in production
+const routingErrorLogger = (message, ...args) => {
+  // Always log routing errors
+  if (
+    typeof message === 'string' && 
+    (message.includes('router') || message.includes('route') || message.includes('fetch')) && 
+    (message.includes('error') || message.includes('fail') || message.includes('abort'))
+  ) {
+    originalConsole.error('[ROUTER_DEBUG]', message, ...args);
+    
+    // Store in session for debugging
+    if (typeof window !== 'undefined') {
+      const routerErrors = JSON.parse(sessionStorage.getItem('ix_router_errors') || '[]');
+      routerErrors.push({
+        timestamp: new Date().toISOString(),
+        message,
+        args: JSON.stringify(args)
+      });
+      sessionStorage.setItem('ix_router_errors', JSON.stringify(routerErrors.slice(-20))); // Keep last 20
+    }
+    
+    return;
+  }
+  
+  // For non-routing errors in production, use empty function
+  if (process.env.NODE_ENV === 'production' || process.env.NEXT_PUBLIC_OPTIMIZE_CPU === 'true') {
+    return;
+  }
+  
+  // Otherwise use original console in development
+  originalConsole.error(message, ...args);
+};
+
+// Disable standard logs in production but keep routing error logs
 if (process.env.NODE_ENV === 'production' || process.env.NEXT_PUBLIC_OPTIMIZE_CPU === 'true') {
   console.log = () => {};
   console.debug = () => {};
   console.info = () => {};
+  console.error = routingErrorLogger;
 }
 
 // Component to expose global functions
@@ -66,18 +114,6 @@ export default function App({ Component, pageProps }: AppProps) {
     // Immediate state update for quick initial render
     setIsHydrated(true);
     
-    // Disable throttling warning by adding browser check
-    if (typeof window !== 'undefined') {
-      // Add warning suppression for navigation throttling
-      console.warn = (function(originalWarn) {
-        return function(...args: any[]) {
-          if (typeof args[0] === 'string' && args[0].includes('Throttling navigation')) {
-            return; // Ignore throttling navigation warnings
-          }
-          originalWarn.apply(console, args);
-        };
-      })(console.warn);
-    }
   }, []);
 
   return (
@@ -94,18 +130,16 @@ export default function App({ Component, pageProps }: AppProps) {
               <TaskTrackerProvider>
                 <GlobalFunctionsExposer />
                 <Layout>
-                  <RouteTransition>
-                    {isHydrated ? (
-                      <Component {...pageProps} />
-                    ) : (
-                      // Skeleton placeholder while hydrating
-                      <div className="animate-pulse space-y-4">
-                        <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-                        <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                        <div className="h-64 bg-gray-100 rounded"></div>
-                      </div>
-                    )}
-                  </RouteTransition>
+                  {isHydrated ? (
+                    <Component {...pageProps} />
+                  ) : (
+                    // Skeleton placeholder while hydrating
+                    <div className="animate-pulse space-y-4">
+                      <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+                      <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                      <div className="h-64 bg-gray-100 rounded"></div>
+                    </div>
+                  )}
                 </Layout>
               </TaskTrackerProvider>
             </TaskProvider>

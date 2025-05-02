@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { 
   Task, 
   TaskFilterStatus, 
@@ -49,43 +49,31 @@ interface TaskFiltersHookResult {
 export function useTaskFilters({
   initialTasks
 }: TaskFiltersHookProps): TaskFiltersHookResult {
-  const router = useRouter();
+  // IMPORTANT: Hooks must be called in exactly the same order on every render
   
-  // Filter state
+  // 1. Router and state hooks first
+  const router = useRouter();
   const [completedFilter, setCompletedFilter] = useState<TaskFilterStatus>('all');
   const [projectFilter, setProjectFilter] = useState<ProjectFilterType>('all');
   const [sortBy, setSortBy] = useState<SortOption>('created');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [searchTerm, setSearchTerm] = useState<string>('');
-
-  // Load filter preferences from localStorage on initial render
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    try {
-      const savedPreferences = localStorage.getItem(STORAGE_KEYS.FILTER_PREFERENCES);
-      if (savedPreferences) {
-        const preferences = JSON.parse(savedPreferences);
-
-        // Don't apply saved filters if there are URL params
-        const hasUrlParams = Object.keys(router.query).some((param) =>
-          ['filter', 'project', 'sort', 'direction'].includes(param)
-        );
-
-        if (!hasUrlParams) {
-          preferences.completedFilter && setCompletedFilter(preferences.completedFilter);
-          preferences.projectFilter && setProjectFilter(preferences.projectFilter);
-          preferences.sortBy && setSortBy(preferences.sortBy);
-          preferences.sortDirection && setSortDirection(preferences.sortDirection);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to load filter preferences:', err);
-    }
-  }, [router.query]);
-
-  // Save filter preferences to localStorage and update URL
-  const saveFilterPreferences = useCallback(() => {
+  
+  // 2. Refs next - keep all refs together at the top
+  const isInitialRender = useRef(true);
+  const debounceTimerRef = useRef<NodeJS.Timeout>();
+  
+  // 3. memoizations 
+  const twoDaysAgoMemo = useMemo(() => getRecentCompletedThreshold(), []);
+  
+  const filterPredicates = useMemo(() => 
+    createFilterPredicates(twoDaysAgoMemo), 
+  [twoDaysAgoMemo]);
+  
+  // 4. Callback functions
+  
+  // Storage preference function
+  const savePreferencesToStorage = useCallback(() => {
     if (typeof window === 'undefined') return;
 
     const preferences = {
@@ -94,57 +82,54 @@ export function useTaskFilters({
       sortBy,
       sortDirection
     };
-    localStorage.setItem(STORAGE_KEYS.FILTER_PREFERENCES, JSON.stringify(preferences));
-
-    // Update URL with filter params
-    const query: Record<string, string | string[]> = {};
-
-    if (completedFilter !== 'all') {
-      query.filter = completedFilter;
+    
+    try {
+      localStorage.setItem(STORAGE_KEYS.FILTER_PREFERENCES, JSON.stringify(preferences));
+    } catch (err) {
+      console.error('Failed to save filter preferences:', err);
     }
-
-    if (projectFilter !== 'all') {
-      query.project = Array.isArray(projectFilter)
-        ? projectFilter
-        : projectFilter === 'none'
-        ? 'none'
-        : projectFilter;
-    }
-
-    if (sortBy !== 'created') {
-      query.sort = sortBy;
-    }
-
-    if (sortDirection !== 'desc') {
-      query.direction = sortDirection;
-    }
-
-    router.replace(
-      {
-        pathname: router.pathname,
-        query
-      },
-      undefined,
-      { shallow: true }
-    );
-  }, [completedFilter, projectFilter, sortBy, sortDirection, router]);
-
-  // Save filter preferences when they change
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      saveFilterPreferences();
-    }
-  }, [completedFilter, projectFilter, sortBy, sortDirection, saveFilterPreferences]);
-
-  // Memoize date for recent-completed filter calculation
-  const twoDaysAgoMemo = useMemo(() => getRecentCompletedThreshold(), []);
-
-  // Pre-compute filter predicates for better performance
-  const filterPredicates = useMemo(() => 
-    createFilterPredicates(twoDaysAgoMemo), 
-  [twoDaysAgoMemo]);
+  }, [completedFilter, projectFilter, sortBy, sortDirection]);
   
-  // Apply all filters and sorting to get the filtered tasks
+  // URL update function - DISABLED to prevent query params in URLs
+  const updateUrlParams = useCallback(() => {
+    // Do nothing - URL params completely disabled
+    return;
+  }, []);
+  
+  // Combined function for backward compatibility
+  const saveFilterPreferences = useCallback(() => {
+    savePreferencesToStorage();
+    
+    // Skip URL update on initial render
+    if (!isInitialRender.current) {
+      updateUrlParams();
+    }
+  }, [savePreferencesToStorage, updateUrlParams]);
+  
+  // 5. Effects - Each with a single clear responsibility
+  
+  // Load preferences from localStorage DISABLED to prevent URL/routing issues 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    // Mark initial render complete only - all preference loading disabled
+    isInitialRender.current = false;
+    
+    // Cleanup function to clear any debounce timer
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []); // Empty deps - only run on mount
+  
+  // Save preferences when filters change
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    saveFilterPreferences();
+  }, [completedFilter, projectFilter, sortBy, sortDirection, saveFilterPreferences]);
+  
+  // 6. Final memoized result - the filtered tasks
   const filteredTasks = useMemo(() => {
     if (!initialTasks.length) return [];
 
@@ -173,6 +158,7 @@ export function useTaskFilters({
     filterPredicates
   ]);
 
+  // Return all the filter state and methods
   return {
     // Filter states
     completedFilter,

@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Head from "next/head";
+import { useRouter } from "next/router";
+import Link from "next/link";
 import { useTasks } from "@/contexts/TaskContext";
 import { useProjects } from "@/contexts/ProjectContext";
 import TaskFilters from "@/components/TaskFilters";
@@ -10,27 +12,87 @@ import { ClickableId } from "@/utils/clickable-id";
 import { Task } from "@/types";
 // import { withAuth } from '@/utils/withAuth';
 
-// Helper function to open task detail
-const openTaskDetail = (taskId: string, task?: Task) => {
-  // Store task data in localStorage to avoid unnecessary API calls
-  if (task) {
-    localStorage.setItem(`task_cache_${taskId}`, JSON.stringify(task));
-  }
+// Helper function for detailed router debugging
+const debugRouter = (router: any, taskId: string) => {
+  // Use originalConsole if available to ensure logs are shown even in production
+  const logger = (window as any)._originalConsole?.error || console.error;
   
-  // Use the standard query parameter format
-  window.location.href = `/task-detail?id=${taskId}`;
+  logger('[ROUTER_DEBUG] ---NAVIGATION DEBUG---');
+  logger(`[ROUTER_DEBUG] TaskID: ${taskId}`);
+  logger(`[ROUTER_DEBUG] Router available routes:`, router.components);
+  logger(`[ROUTER_DEBUG] Router events:`, router.events);
+  logger(`[ROUTER_DEBUG] Router state:`, {
+    pathname: router.pathname,
+    asPath: router.asPath,
+    route: router.route,
+    query: router.query,
+    locale: router.locale,
+    isReady: router.isReady,
+    isFallback: router.isFallback
+  });
+  
+  // Check for the existence of /task/[id] in router state
+  const hasTaskRoute = Object.keys(router.components || {}).some(path => 
+    path === '/task/[id]' || path.startsWith('/task/')
+  );
+  logger(`[ROUTER_DEBUG] Has task route in components: ${hasTaskRoute}`);
+  
+  // Log any potentially conflicting routes
+  const possibleConflictingRoutes = Object.keys(router.components || {}).filter(path => 
+    path.includes('task')
+  );
+  logger(`[ROUTER_DEBUG] Possible conflicting routes:`, possibleConflictingRoutes);
+  
+  // Store in session storage for later inspection
+  if (typeof window !== 'undefined') {
+    try {
+      const routerDebugInfo = {
+        timestamp: new Date().toISOString(),
+        taskId,
+        components: router.components ? Object.keys(router.components) : [],
+        state: {
+          pathname: router.pathname,
+          asPath: router.asPath,
+          route: router.route,
+          query: router.query,
+          hasTaskRoute,
+          conflictingRoutes: possibleConflictingRoutes
+        }
+      };
+      
+      // Save to session storage
+      const debugHistory = JSON.parse(sessionStorage.getItem('ix_router_debug') || '[]');
+      debugHistory.push(routerDebugInfo);
+      sessionStorage.setItem('ix_router_debug', JSON.stringify(debugHistory.slice(-20))); // Keep last 20
+      
+      // Also add a UI indicator if needed
+      const debugElement = document.getElementById('router-debug-indicator');
+      if (debugElement) {
+        debugElement.classList.remove('hidden');
+      }
+    } catch (e) {
+      logger('[ROUTER_DEBUG] Error storing debug info:', e);
+    }
+  }
 };
 
 // CompactTaskItem Component - Shows a single task in one-line format
 const CompactTaskItem = ({ 
   task, 
   onStatusChange, 
-  onToggleStar 
+  onToggleStar,
+  router
 }: { 
   task: Task; 
   onStatusChange: (taskId: string, project: string, status: Task['status']) => Promise<void>;
   onToggleStar?: (taskId: string, project: string) => Promise<void>;
+  router: any;
 }) => {
+  // For diagnostics only
+  const handleDiagnosticClick = () => {
+    console.log('Diagnostic click on task title');
+    debugRouter(router, task.id);
+  };
   // Status colors mapping
   const statusColors = {
     'inbox': 'bg-gray-200 text-gray-800',
@@ -86,14 +148,17 @@ const CompactTaskItem = ({
         )}
       </button>
       
-      {/* Task title - takes most of the space */}
-      <div 
-        className="flex-grow font-medium truncate cursor-pointer" 
-        onClick={() => openTaskDetail(task.id, task)}
+      {/* Task title - uses standard Next.js Link with explicit empty query to prevent param inheritance */}
+      <Link 
+        href={{
+          pathname: `/task/${task.id}`,
+          query: {} // Explicitly empty query to prevent inheriting URL params
+        }}
+        className="flex-grow font-medium truncate cursor-pointer"
         title="Open task details"
       >
         {task.title}
-      </div>
+      </Link>
       
       {/* Status badge & button to advance status */}
       <div className="ml-4 flex-shrink-0">
@@ -109,6 +174,7 @@ const CompactTaskItem = ({
 };
 
 function TasksPage() {
+  const router = useRouter();
   const [showAddForm, setShowAddForm] = useState(false);
   const [windowHeight, setWindowHeight] = useState(800); // Default height for SSR
   const [isClient, setIsClient] = useState(false);
@@ -377,33 +443,82 @@ function TasksPage() {
                 />
               </div>
             </div>
-            <div className="mb-4 text-sm flex">
-              {searchTerm && (
-                <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs flex items-center">
-                  Search: "{searchTerm}"
-                  <button
-                    onClick={() => setSearchTerm("")}
-                    className="ml-1 text-blue-500 hover:text-blue-700"
-                    aria-label="Clear search"
-                    title="Clear search"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-3 w-3"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+            <div className="mb-4 text-sm flex justify-between">
+              <div>
+                {searchTerm && (
+                  <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs flex items-center">
+                    Search: "{searchTerm}"
+                    <button
+                      onClick={() => setSearchTerm("")}
+                      className="ml-1 text-blue-500 hover:text-blue-700"
+                      aria-label="Clear search"
+                      title="Clear search"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </span>
-              )}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-3 w-3"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </span>
+                )}
+              </div>
+              {/* Router Debug Indicator */}
+              <div id="router-debug-indicator" className="hidden">
+                <button 
+                  onClick={() => {
+                    // Display the routing debug info from session storage
+                    const debugInfo = JSON.parse(sessionStorage.getItem('ix_router_debug') || '[]');
+                    const routingErrors = JSON.parse(sessionStorage.getItem('ix_router_errors') || '[]');
+                    
+                    // Use original console to ensure visibility
+                    if ((window as any)._originalConsole) {
+                      (window as any)._originalConsole.error('=== ROUTER DEBUG INFO ===', debugInfo);
+                      (window as any)._originalConsole.error('=== ROUTER ERRORS ===', routingErrors);
+                    } else {
+                      console.error('=== ROUTER DEBUG INFO ===', debugInfo);
+                      console.error('=== ROUTER ERRORS ===', routingErrors);
+                    }
+                    
+                    // Create a UI display
+                    const debugModal = document.createElement('div');
+                    debugModal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+                    debugModal.innerHTML = `
+                      <div class="bg-white rounded-lg shadow-xl p-6 max-w-4xl max-h-[80vh] overflow-auto">
+                        <h2 class="text-lg font-bold mb-4">Router Debug Information</h2>
+                        <div class="mb-4">
+                          <h3 class="font-semibold mb-2">Routing Errors (${routingErrors.length})</h3>
+                          <pre class="bg-red-50 p-3 rounded text-sm overflow-auto max-h-40">${JSON.stringify(routingErrors, null, 2)}</pre>
+                        </div>
+                        <div>
+                          <h3 class="font-semibold mb-2">Navigation History (${debugInfo.length})</h3>
+                          <pre class="bg-gray-50 p-3 rounded text-sm overflow-auto max-h-60">${JSON.stringify(debugInfo, null, 2)}</pre>
+                        </div>
+                        <div class="mt-4 flex justify-end">
+                          <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" id="close-debug-modal">Close</button>
+                        </div>
+                      </div>
+                    `;
+                    document.body.appendChild(debugModal);
+                    
+                    document.getElementById('close-debug-modal')?.addEventListener('click', () => {
+                      document.body.removeChild(debugModal);
+                    });
+                  }}
+                  className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full border border-yellow-300 hover:bg-yellow-200"
+                >
+                  Router Debug Info
+                </button>
+              </div>
             </div>
 
             {viewMode === 'card' ? (
@@ -449,12 +564,44 @@ function TasksPage() {
                 {/* Compact task list */}
                 <div className="compact-task-list">
                   {filteredTasks.map((task) => (
-                    <CompactTaskItem
-                      key={`${task.id}-${task.project}-compact`}
-                      task={task}
-                      onStatusChange={updateTaskStatus}
-                      onToggleStar={toggleTaskStar}
-                    />
+                    <div key={`${task.id}-${task.project}-compact-wrapper`}>
+                      <CompactTaskItem
+                        key={`${task.id}-${task.project}-compact`}
+                        task={task}
+                        onStatusChange={updateTaskStatus}
+                        onToggleStar={toggleTaskStar}
+                        router={router}
+                      /* Add debugging button temporarily */
+                      extraButtons={
+                        <div className="mt-1 mb-1">
+                          <button
+                            onClick={() => {
+                              console.log("Navigating to legacy URL format");
+                              router.push({
+                                pathname: '/task-detail',
+                                query: { id: task.id } // Only include id, no other params
+                              }, undefined, { shallow: false });
+                            }}
+                            className="px-2 py-1 bg-red-500 text-white text-xs rounded mr-2"
+                          >
+                            Legacy URL
+                          </button>
+                          <button
+                            onClick={() => {
+                              console.log("Navigating to new URL format");
+                              router.push({
+                                pathname: `/task/${task.id}`,
+                                query: {} // Explicitly empty query
+                              }, undefined, { shallow: false });
+                            }}
+                            className="px-2 py-1 bg-green-500 text-white text-xs rounded"
+                          >
+                            New URL
+                          </button>
+                        </div>
+                      }
+                      />
+                    </div>
                   ))}
                 </div>
               </div>

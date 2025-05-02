@@ -9,6 +9,8 @@ const nextConfig = {
     // Disable TypeScript checking during build
     ignoreBuildErrors: true,
   },
+  // Explicitly define page paths to ensure dynamic routes are properly registered
+  pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
   // Optimize memory usage for webpack
   webpack: (config, { dev, isServer }) => {
     // Optimize production builds for memory usage

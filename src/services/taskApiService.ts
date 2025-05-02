@@ -296,36 +296,90 @@ export async function updateInitiative(id: number, updateData: Partial<Initiativ
 
 /**
  * Update the stages array
+ * 
+ * This implementation properly uses the server API to store task stages,
+ * rather than using localStorage which doesn't work consistently with SSR.
  */
 export async function updateStages(stages: string[]) {
   try {
-    // Store stages in localStorage for now
-    // In a real implementation, these would be stored on the server
-    localStorage.setItem('taskStages', JSON.stringify(stages));
-    return { success: true };
+    // Send stages to API for persistent storage
+    const response = await apiClient.post('/api/developer/config/stages', { stages });
+    return response.data;
   } catch (error: any) {
     console.error('Error updating stages:', error);
+    
+    // Fallback to client-side storage if API fails
+    // This ensures the app continues to work during API issues
+    if (typeof window !== 'undefined') {
+      console.log('API failed, using fallback client storage for stages');
+      // Use sessionStorage instead of localStorage for better security
+      sessionStorage.setItem('taskStages_fallback', JSON.stringify(stages));
+    }
+    
+    // Still throw the error to inform calling code of the API failure
     throw error;
   }
 }
 
 /**
  * Get available stages
+ * 
+ * This implementation properly uses the server API to retrieve task stages,
+ * with proper SSR support and fallbacks.
  */
 export async function getStages(): Promise<string[]> {
+  // Default stages to use if server doesn't have any stored
+  const defaultStages = [
+    'brainstorm', 'proposed', 'backlog', 'todo', 
+    'in-progress', 'on-hold', 'done', 'reviewed', 'archived'
+  ];
+  
   try {
-    // Retrieve stages from localStorage
-    // In a real implementation, these would come from the server
-    const storedStages = localStorage.getItem('taskStages');
-    if (storedStages) {
-      return JSON.parse(storedStages);
+    // Get stages from the API
+    const response = await apiClient.get('/api/developer/config/stages');
+    
+    // If API returns stages, use them
+    if (response.data && Array.isArray(response.data.stages) && response.data.stages.length > 0) {
+      return response.data.stages;
     }
     
-    // Default stages if none are stored
-    return ['brainstorm', 'proposed', 'backlog', 'todo', 'in-progress', 'on-hold', 'done', 'reviewed', 'archived'];
+    // Check for fallback storage
+    if (typeof window !== 'undefined') {
+      const fallbackStages = sessionStorage.getItem('taskStages_fallback');
+      if (fallbackStages) {
+        try {
+          const parsed = JSON.parse(fallbackStages);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed;
+          }
+        } catch (e) {
+          console.error('Error parsing fallback stages:', e);
+        }
+      }
+    }
+    
+    // If no stages found in API or fallback, return defaults
+    return defaultStages;
   } catch (error: any) {
-    console.error('Error fetching stages:', error);
-    return ['brainstorm', 'proposed', 'backlog', 'todo', 'in-progress', 'on-hold', 'done', 'reviewed', 'archived'];
+    console.error('Error fetching stages from API:', error);
+    
+    // Check for fallback storage
+    if (typeof window !== 'undefined') {
+      const fallbackStages = sessionStorage.getItem('taskStages_fallback');
+      if (fallbackStages) {
+        try {
+          const parsed = JSON.parse(fallbackStages);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed;
+          }
+        } catch (e) {
+          console.error('Error parsing fallback stages:', e);
+        }
+      }
+    }
+    
+    // Return default stages as last resort
+    return defaultStages;
   }
 }
 
@@ -748,69 +802,118 @@ export async function resolveTaskFeedback(taskId: string, feedbackId: string) {
 /**
  * Get all system prompts
  * 
+ * Fetches system prompts from the API with proper SSR support
+ * 
  * @returns Array of system prompts
  */
 export async function getSystemPrompts() {
+  // Define default prompts to use if API fails
+  const defaultPrompts = [
+    {
+      id: 'default-implementation',
+      name: 'Default Implementation Prompt',
+      content: 'You are an AI assistant tasked with implementing this feature. Review the task details, requirements, and technical plan, then implement the solution.',
+      type: 'implementation',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isDefault: true
+    },
+    {
+      id: 'default-demo',
+      name: 'Default Demo Prompt',
+      content: 'You are an AI assistant tasked with demonstrating how this feature works. Set up the necessary environment, execute the relevant commands, and show the feature in action.',
+      type: 'demo',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isDefault: true
+    },
+    {
+      id: 'default-feedback',
+      name: 'Default Feedback Prompt',
+      content: 'You are an AI assistant tasked with addressing feedback on this task. Review the task and feedback, then implement the necessary changes.',
+      type: 'feedback',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isDefault: true
+    }
+  ];
+  
   try {
-    // This would typically be an API call, but for now we'll use localStorage
-    const storedPrompts = localStorage.getItem('systemPrompts');
-    if (storedPrompts) {
-      return JSON.parse(storedPrompts);
+    // Fetch prompts from API
+    const response = await apiClient.get('/api/developer/system-prompts');
+    
+    // If API returns prompts, use them
+    if (response.data && Array.isArray(response.data.prompts) && response.data.prompts.length > 0) {
+      return response.data.prompts;
     }
     
-    // Default prompts if none are stored
-    const defaultPrompts = [
-      {
-        id: 'default-implementation',
-        name: 'Default Implementation Prompt',
-        content: 'You are an AI assistant tasked with implementing this feature. Review the task details, requirements, and technical plan, then implement the solution.',
-        type: 'implementation',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        isDefault: true
-      },
-      {
-        id: 'default-demo',
-        name: 'Default Demo Prompt',
-        content: 'You are an AI assistant tasked with demonstrating how this feature works. Set up the necessary environment, execute the relevant commands, and show the feature in action.',
-        type: 'demo',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        isDefault: true
-      },
-      {
-        id: 'default-feedback',
-        name: 'Default Feedback Prompt',
-        content: 'You are an AI assistant tasked with addressing feedback on this task. Review the task and feedback, then implement the necessary changes.',
-        type: 'feedback',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        isDefault: true
+    // If API returns no prompts, create defaults on server
+    try {
+      const createResponse = await apiClient.post('/api/developer/system-prompts/batch', {
+        prompts: defaultPrompts
+      });
+      
+      if (createResponse.data && Array.isArray(createResponse.data.prompts)) {
+        return createResponse.data.prompts;
       }
-    ];
+    } catch (createError) {
+      console.error('Failed to create default prompts on server:', createError);
+    }
     
-    // Store defaults
-    localStorage.setItem('systemPrompts', JSON.stringify(defaultPrompts));
+    // Return defaults as last resort
     return defaultPrompts;
-  } catch (error: any) {
-    console.error('Error fetching system prompts:', error);
-    throw error;
+  } catch (error) {
+    console.error('Error fetching system prompts from API:', error);
+    
+    // Check if we have any stored in session for emergency fallback
+    if (typeof window !== 'undefined') {
+      try {
+        const storedPrompts = sessionStorage.getItem('systemPrompts_fallback');
+        if (storedPrompts) {
+          const parsed = JSON.parse(storedPrompts);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed;
+          }
+        }
+      } catch (parseError) {
+        console.error('Error parsing stored prompts:', parseError);
+      }
+    }
+    
+    // Store defaults in session storage as emergency fallback
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('systemPrompts_fallback', JSON.stringify(defaultPrompts));
+    }
+    
+    return defaultPrompts;
   }
 }
 
 /**
  * Get a system prompt by ID
  * 
+ * Fetches a specific system prompt by ID from the API
+ * 
  * @param id Prompt ID
  * @returns System prompt
  */
 export async function getSystemPrompt(id: string) {
   try {
+    // Try to get the prompt directly from the API
+    const response = await apiClient.get(`/api/developer/system-prompts/${id}`);
+    
+    if (response.data && response.data.prompt) {
+      return response.data.prompt;
+    }
+    
+    // If direct API call fails, try getting from all prompts
     const prompts = await getSystemPrompts();
     const prompt = prompts.find((p: any) => p.id === id);
+    
     if (!prompt) {
       throw new Error(`System prompt with ID ${id} not found`);
     }
+    
     return prompt;
   } catch (error: any) {
     console.error(`Error fetching system prompt ${id}:`, error);
@@ -821,26 +924,39 @@ export async function getSystemPrompt(id: string) {
 /**
  * Create a new system prompt
  * 
+ * Creates a new system prompt via the API
+ * 
  * @param promptData Prompt data
  * @returns Created system prompt
  */
 export async function createSystemPrompt(promptData: Omit<SystemPrompt, 'id' | 'createdAt' | 'updatedAt'>) {
   try {
-    const prompts = await getSystemPrompts();
-    const now = new Date().toISOString();
+    // Create prompt via API
+    const response = await apiClient.post('/api/developer/system-prompts', promptData);
     
-    const newPrompt = {
-      ...promptData,
-      id: `prompt-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      createdAt: now,
-      updatedAt: now
-    };
+    if (response.data && response.data.prompt) {
+      // Update local cache if we're using it as fallback
+      if (typeof window !== 'undefined') {
+        try {
+          const storedPrompts = sessionStorage.getItem('systemPrompts_fallback');
+          if (storedPrompts) {
+            const prompts = JSON.parse(storedPrompts);
+            if (Array.isArray(prompts)) {
+              sessionStorage.setItem(
+                'systemPrompts_fallback', 
+                JSON.stringify([...prompts, response.data.prompt])
+              );
+            }
+          }
+        } catch (e) {
+          console.error('Error updating fallback cache:', e);
+        }
+      }
+      
+      return response.data.prompt;
+    }
     
-    // Add to prompts and save
-    const updatedPrompts = [...prompts, newPrompt];
-    localStorage.setItem('systemPrompts', JSON.stringify(updatedPrompts));
-    
-    return newPrompt;
+    throw new Error('API returned invalid data when creating prompt');
   } catch (error: any) {
     console.error('Error creating system prompt:', error);
     throw error;
@@ -850,31 +966,40 @@ export async function createSystemPrompt(promptData: Omit<SystemPrompt, 'id' | '
 /**
  * Update a system prompt
  * 
+ * Updates an existing system prompt via the API
+ * 
  * @param id Prompt ID
  * @param updateData Update data
  * @returns Updated system prompt
  */
 export async function updateSystemPrompt(id: string, updateData: Partial<SystemPrompt>) {
   try {
-    const prompts = await getSystemPrompts();
-    const promptIndex = prompts.findIndex((p: any) => p.id === id);
+    // Update prompt via API
+    const response = await apiClient.put(`/api/developer/system-prompts/${id}`, updateData);
     
-    if (promptIndex === -1) {
-      throw new Error(`System prompt with ID ${id} not found`);
+    if (response.data && response.data.prompt) {
+      // Update local cache if we're using it as fallback
+      if (typeof window !== 'undefined') {
+        try {
+          const storedPrompts = sessionStorage.getItem('systemPrompts_fallback');
+          if (storedPrompts) {
+            const prompts = JSON.parse(storedPrompts);
+            if (Array.isArray(prompts)) {
+              const updatedPrompts = prompts.map(p => 
+                p.id === id ? { ...p, ...updateData, updatedAt: new Date().toISOString() } : p
+              );
+              sessionStorage.setItem('systemPrompts_fallback', JSON.stringify(updatedPrompts));
+            }
+          }
+        } catch (e) {
+          console.error('Error updating fallback cache:', e);
+        }
+      }
+      
+      return response.data.prompt;
     }
     
-    // Update the prompt
-    const updatedPrompt = {
-      ...prompts[promptIndex],
-      ...updateData,
-      updatedAt: new Date().toISOString()
-    };
-    
-    // Update prompts array and save
-    prompts[promptIndex] = updatedPrompt;
-    localStorage.setItem('systemPrompts', JSON.stringify(prompts));
-    
-    return updatedPrompt;
+    throw new Error('API returned invalid data when updating prompt');
   } catch (error: any) {
     console.error(`Error updating system prompt ${id}:`, error);
     throw error;
@@ -884,23 +1009,39 @@ export async function updateSystemPrompt(id: string, updateData: Partial<SystemP
 /**
  * Delete a system prompt
  * 
+ * Deletes a system prompt via the API
+ * 
  * @param id Prompt ID
  * @returns Success status
  */
 export async function deleteSystemPrompt(id: string) {
   try {
-    const prompts = await getSystemPrompts();
-    
-    // Don't allow deleting default prompts
-    const prompt = prompts.find((p: any) => p.id === id);
+    // First check if this is a default prompt
+    const prompt = await getSystemPrompt(id);
     if (prompt && prompt.isDefault) {
       throw new Error('Cannot delete default system prompts');
     }
     
-    const filteredPrompts = prompts.filter((p: any) => p.id !== id);
-    localStorage.setItem('systemPrompts', JSON.stringify(filteredPrompts));
+    // Delete prompt via API
+    const response = await apiClient.delete(`/api/developer/system-prompts/${id}`);
     
-    return { success: true };
+    // Update local cache if we're using it as fallback
+    if (typeof window !== 'undefined') {
+      try {
+        const storedPrompts = sessionStorage.getItem('systemPrompts_fallback');
+        if (storedPrompts) {
+          const prompts = JSON.parse(storedPrompts);
+          if (Array.isArray(prompts)) {
+            const filteredPrompts = prompts.filter(p => p.id !== id);
+            sessionStorage.setItem('systemPrompts_fallback', JSON.stringify(filteredPrompts));
+          }
+        }
+      } catch (e) {
+        console.error('Error updating fallback cache:', e);
+      }
+    }
+    
+    return response.data || { success: true };
   } catch (error: any) {
     console.error(`Error deleting system prompt ${id}:`, error);
     throw error;

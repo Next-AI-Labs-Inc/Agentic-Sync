@@ -58,71 +58,133 @@ function TaskDetail({ task }: { task: Task }) {
 }
 
 /**
+ * Get server-side props for the task detail page
+ * This provides initial data for the page from the server
+ */
+export const getServerSideProps = async (context) => {
+  const { id } = context.params;
+  
+  console.log('TASK DETAIL SSR - getServerSideProps called', { 
+    params: context.params,
+    id,
+    requestUrl: context.req.url,
+    query: context.query,
+    resolvedUrl: context.resolvedUrl
+  });
+  
+  try {
+    console.log('TASK DETAIL SSR - Fetching task data');
+    const task = await getTask(id);
+    
+    if (!task) {
+      console.log('TASK DETAIL SSR - Task not found');
+      return {
+        props: {
+          initialTask: null,
+          error: 'Task not found',
+          id,
+          routeInfo: {
+            resolvedUrl: context.resolvedUrl,
+            actualPath: `/task/${id}`
+          }
+        }
+      };
+    }
+    
+    // Normalize the task to ensure consistent structure
+    const normalizedTask = {
+      ...task,
+      id: task._id || task.id
+    };
+    
+    console.log('TASK DETAIL SSR - Task found and normalized');
+    return {
+      props: {
+        initialTask: normalizedTask,
+        error: null,
+        id, // Always pass the ID from the URL as a prop for direct access
+        routeInfo: {
+          resolvedUrl: context.resolvedUrl,
+          actualPath: `/task/${id}`
+        },
+        debug: {
+          path: `/task/${id}`,
+          params: context.params,
+          fetchTime: new Date().toISOString()
+        }
+      }
+    };
+  } catch (error) {
+    console.error('TASK DETAIL SSR - Error fetching task:', error);
+    return {
+      props: {
+        initialTask: null,
+        error: 'Failed to load task. Please try again later.',
+        id, // Always pass the ID even on error
+        routeInfo: {
+          resolvedUrl: context.resolvedUrl,
+          actualPath: `/task/${id}`
+        },
+        debug: {
+          error: error.message || 'Unknown error',
+          path: `/task/${id}`,
+          params: context.params
+        }
+      }
+    };
+  }
+};
+
+/**
  * Individual task view page
  * This page displays a single task by ID
  */
-export default function SingleTaskPage() {
+export default function SingleTaskPage({ initialTask, error: initialError, id: staticId, routeInfo }) {
   const router = useRouter();
-  const { id } = router.query;
-  const [task, setTask] = useState<Task | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Use the ID provided from getServerSideProps if available (more reliable)
+  // Fall back to router.query only if we're missing the static ID
+  const routerId = router.query.id;
+  const id = staticId || (Array.isArray(routerId) ? routerId[0] : routerId);
   
+  const [task, setTask] = useState(initialTask);
+  const [loading, setLoading] = useState(!initialTask);
+  const [error, setError] = useState(initialError);
+  
+  // Improve debugging
   useEffect(() => {
-    // Only proceed when we have an ID from the router
-    if (!id) {
-      return; // Router query params might not be available yet
-    }
-    
-    // Get the actual ID value from the query parameter
-    const taskId = Array.isArray(id) ? id[0] : id;
-    
-    if (taskId) {
+    console.log('Task detail component mounted with params:', {
+      staticId,
+      routerId,
+      effectiveId: id,
+      initialTask: !!initialTask,
+      routerIsReady: router.isReady,
+      routeInfo
+    });
+  }, []);
+  
+  // Primary data fetching effect
+  useEffect(() => {
+    // Only fetch if we don't have initial data and have an ID
+    if (!initialTask && id) {
+      // This log shows if we actually have a working ID parameter
+      console.log('Task detail page - useEffect triggered with ID:', id);
+      
       setLoading(true);
       
-      // First check if we have cached task data
-      const cachedTaskJson = localStorage.getItem(`task_cache_${taskId}`);
-      
-      if (cachedTaskJson) {
-        try {
-          // Try to parse the cached task data
-          const cachedTask = JSON.parse(cachedTaskJson);
-          
-          // Check if the cached task has sufficient data
-          if (cachedTask && cachedTask.id) {
-            console.log('Using cached task data:', cachedTask);
-            
-            // Normalize the task to ensure consistent structure
-            const normalizedTask = {
-              ...cachedTask,
-              id: cachedTask._id || cachedTask.id
-            };
-            
-            // Set the task from cache
-            setTask(normalizedTask);
-            setLoading(false);
-            
-            // Clean up the cache after using it
-            localStorage.removeItem(`task_cache_${taskId}`);
-            return; // Skip API call if we have valid cache data
-          }
-        } catch (cacheError) {
-          console.error('Error parsing cached task data:', cacheError);
-          // Continue to API call if cache parsing fails
-        }
-      }
-      
-      // If no cache or insufficient cache data, fetch from API
-      getTask(taskId)
+      // Fetch from API
+      console.log('Fetching task data from API for ID:', id);
+      getTask(id)
         .then(taskData => {
           // Ensure the task has an ID property
           if (taskData) {
+            console.log('Task data received from API:', taskData);
             const normalizedTask = {
               ...taskData,
               id: taskData._id || taskData.id
             };
             setTask(normalizedTask);
           } else {
+            console.error('Task not found in API response');
             setError('Task not found');
           }
         })
@@ -133,8 +195,13 @@ export default function SingleTaskPage() {
         .finally(() => {
           setLoading(false);
         });
+    } else {
+      console.log('Task detail page - using initialTask data:', {
+        hasInitialData: !!initialTask,
+        id
+      });
     }
-  }, [id]);
+  }, [id, initialTask, router.isReady]);
 
   return (
     <>
@@ -189,7 +256,7 @@ export default function SingleTaskPage() {
       
       {/* Task display */}
       {!loading && !error && task && (
-        <TaskProvider initialCache={new Map([[task.id, task]])}>
+        <TaskProvider initialTasks={[task]}>
           <TaskDetail task={task} />
         </TaskProvider>
       )}

@@ -1,37 +1,17 @@
-import React, { ReactNode, useState, useCallback } from 'react';
+import React, { ReactNode } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
+import UserTaskTracker from './UserTaskTracker';
 
-// Custom navigation wrapper to prevent double-click issues
+// Using proper Next.js Link component while maintaining backward compatibility
 const SafeLink = ({ href, className, children }: { href: string, className?: string, children: ReactNode }) => {
-  const router = useRouter();
-  const [isNavigating, setIsNavigating] = useState(false);
-  
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    
-    if (isNavigating || router.pathname === href) return;
-    
-    setIsNavigating(true);
-    router.push(href).finally(() => {
-      // Reset after a delay to prevent multiple rapid clicks
-      setTimeout(() => setIsNavigating(false), 500);
-    });
-  }, [href, router, isNavigating]);
-  
   return (
-    <a 
-      href={href} 
-      onClick={handleClick} 
-      className={className}
-      style={{ pointerEvents: isNavigating ? 'none' : 'auto' }}
-    >
+    <Link href={href} className={className}>
       {children}
-    </a>
+    </Link>
   );
 };
-import UserTaskTracker from './UserTaskTracker';
 
 interface LayoutProps {
   children: ReactNode;
