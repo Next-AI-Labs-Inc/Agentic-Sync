@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
-
-// LocalStorage key for commands visibility
-const COMMANDS_VISIBILITY_KEY = 'task_commands_visibility';
+import { useLocalStorageBoolean, STORAGE_KEYS } from '@/utils/localStorage-helpers';
 
 interface CommandToggleProps {
   initialVisible?: boolean;
@@ -10,58 +8,35 @@ interface CommandToggleProps {
 }
 
 const CommandToggle: React.FC<CommandToggleProps> = ({ initialVisible = true, onChange }) => {
-  // State for commands visibility
-  const [commandsVisible, setCommandsVisible] = useState<boolean>(initialVisible);
+  // Use our helper hook for localStorage
+  const [commandsVisible, setCommandsVisible, toggleCommandsVisible] = useLocalStorageBoolean(
+    STORAGE_KEYS.COMMANDS_VISIBILITY,
+    initialVisible
+  );
   
   // Use ref to prevent infinite loops with the onChange effect
   const initialLoadRef = useRef(true);
 
-  // Load visibility state from localStorage on mount only
+  // Call onChange when visibility changes
   useEffect(() => {
-    try {
-      const savedState = localStorage.getItem(COMMANDS_VISIBILITY_KEY);
-      if (savedState !== null) {
-        const isVisible = savedState === 'true';
-        setCommandsVisible(isVisible);
-        
-        // Only call onChange during initial load
-        if (onChange && initialLoadRef.current) {
-          onChange(isVisible);
-          initialLoadRef.current = false;
-        }
-      }
-    } catch (error) {
-      console.error('Error loading commands visibility state:', error);
-    }
-  }, [onChange]);
-
-  // Save visibility state to localStorage when it changes
-  // This is a separate effect to avoid triggering onChange
-  useEffect(() => {
-    if (!initialLoadRef.current) { // Skip saving during initial load
-      try {
-        localStorage.setItem(COMMANDS_VISIBILITY_KEY, String(commandsVisible));
-      } catch (error) {
-        console.error('Error saving commands visibility state:', error);
+    if (onChange) {
+      if (initialLoadRef.current) {
+        initialLoadRef.current = false;
+      } else {
+        onChange(commandsVisible);
       }
     }
-  }, [commandsVisible]);
+  }, [commandsVisible, onChange]);
 
   // Toggle commands visibility
-  const toggleCommandsVisibility = (e: React.MouseEvent) => {
+  const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card expansion
-    const newVisibility = !commandsVisible;
-    setCommandsVisible(newVisibility);
-    
-    // Notify parent component of change
-    if (onChange) {
-      onChange(newVisibility);
-    }
+    toggleCommandsVisible();
   };
 
   return (
     <button
-      onClick={toggleCommandsVisibility}
+      onClick={handleToggle}
       className="btn-outline-secondary command-toggle"
       title={commandsVisible ? "Hide commands" : "Show commands"}
     >

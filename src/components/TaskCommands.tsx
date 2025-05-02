@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FaChevronDown, FaChevronUp, FaTrash, FaArrowRight } from 'react-icons/fa';
 import { Task } from '@/types/Task';
 import { STATUS_ACTION_HELP } from '@/config/taskStatus';
 import Popover, { POPOVER_POSITIONS } from './Popover';
-
-// LocalStorage key for commands visibility
-const COMMANDS_VISIBILITY_KEY = 'task_commands_visibility';
+import { useLocalStorageBoolean, STORAGE_KEYS } from '@/utils/localStorage-helpers';
 
 export interface TaskCommandsProps {
   task: Task;
@@ -20,34 +18,16 @@ const TaskCommands: React.FC<TaskCommandsProps> = ({
   onDelete,
   onMarkTested
 }) => {
-  // State for commands visibility
-  const [commandsVisible, setCommandsVisible] = useState<boolean>(true);
-
-  // Load visibility state from localStorage on mount
-  useEffect(() => {
-    try {
-      const savedState = localStorage.getItem(COMMANDS_VISIBILITY_KEY);
-      if (savedState !== null) {
-        setCommandsVisible(savedState === 'true');
-      }
-    } catch (error) {
-      console.error('Error loading commands visibility state:', error);
-    }
-  }, []);
-
-  // Save visibility state to localStorage when it changes
-  useEffect(() => {
-    try {
-      localStorage.setItem(COMMANDS_VISIBILITY_KEY, String(commandsVisible));
-    } catch (error) {
-      console.error('Error saving commands visibility state:', error);
-    }
-  }, [commandsVisible]);
-
-  // Toggle commands visibility
-  const toggleCommandsVisibility = (e: React.MouseEvent) => {
+  // Use our helper hook instead of raw localStorage
+  const [commandsVisible, setCommandsVisible, toggleCommandsVisible] = useLocalStorageBoolean(
+    STORAGE_KEYS.COMMANDS_VISIBILITY,
+    false
+  );
+  
+  // Wrapper for toggle to stop propagation
+  const handleToggleVisibility = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card expansion
-    setCommandsVisible(prev => !prev);
+    toggleCommandsVisible();
   };
 
   // Status change handlers with transition effects
@@ -294,7 +274,7 @@ const TaskCommands: React.FC<TaskCommandsProps> = ({
     <div className="mt-3 relative">
       <div className="flex justify-between items-center mb-2">
         <button
-          onClick={toggleCommandsVisibility}
+          onClick={handleToggleVisibility}
           className="text-gray-500 hover:text-gray-700 transition-colors flex items-center text-sm"
           title={commandsVisible ? "Hide commands" : "Show commands"}
         >
@@ -311,9 +291,13 @@ const TaskCommands: React.FC<TaskCommandsProps> = ({
       </div>
       
       {/* Render commands if visible */}
-      {commandsVisible && (
+      {commandsVisible ? (
         <div className="flex flex-wrap gap-2">
           {renderCommands()}
+        </div>
+      ) : task.status === 'todo' && (
+        <div className="text-gray-500 text-sm px-2 py-3 bg-gray-50 rounded border border-gray-200 italic">
+          <p>What's your next move here? Ready to work on it now? Start progress. Something blocking it? Put on hold. Not a priority right now? Move to backlog.</p>
         </div>
       )}
     </div>

@@ -8,6 +8,7 @@ import BuildDocumentation from '@/components/BuildDocumentation';
 import { Task } from '@/types';
 import { TaskProvider, useTasks } from '@/contexts/TaskContext';
 import { ClickableId } from '@/utils/clickable-id';
+import ControlsToggle from '@/components/ControlsToggle';
 
 /**
  * Task detail component that uses the TaskContext
@@ -262,11 +263,14 @@ export default function SingleTaskPage({ initialTask, error: initialError, id: s
         
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-gray-800 mt-2">Task Details</h1>
-          <ClickableId 
-            id="CO_9105" 
-            filePath="/src/pages/task/[id].tsx" 
-            className="self-center"
-          />
+          <div className="flex items-center gap-3">
+            <ControlsToggle />
+            <ClickableId 
+              id="CO_9105" 
+              filePath="/src/pages/task/[id].tsx" 
+              className="self-center"
+            />
+          </div>
         </div>
         {task && <p className="text-gray-600">Task ID: {task.id}</p>}
       </div>

@@ -9,6 +9,8 @@ import TaskCard from "@/components/TaskCard";
 import TaskForm from "@/components/TaskForm";
 import { FixedSizeList as List } from "react-window";
 import { ClickableId } from "@/utils/clickable-id";
+import { useLocalStorage, useLocalStorageBoolean, STORAGE_KEYS } from "@/utils/localStorage-helpers";
+import ControlsToggle from "@/components/ControlsToggle";
 import { Task } from "@/types";
 // import { withAuth } from '@/utils/withAuth';
 
@@ -182,24 +184,13 @@ function TasksPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [windowHeight, setWindowHeight] = useState(800); // Default height for SSR
   const [isClient, setIsClient] = useState(false);
-  // Get saved view mode from localStorage, only once on initial render
-  const getSavedViewMode = () => {
-    if (typeof window !== 'undefined') {
-      const savedMode = localStorage.getItem('ix_tasks_view_mode');
-      return (savedMode === 'card' || savedMode === 'compact') ? savedMode : 'card';
-    }
-    return 'card';
-  };
   
-  const [viewMode, setViewMode] = useState<'card' | 'compact'>(getSavedViewMode());
+  // Important: We're using functions in useState initializers to ensure
+  // localStorage values are used immediately on first render
   
-  // Save view mode to localStorage when it changes
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('ix_tasks_view_mode', viewMode);
-    }
-  }, [viewMode]);
-
+  // Only need viewMode state here now, since ControlsToggle manages its own state
+  const [viewMode, setViewMode] = useLocalStorage<'card' | 'compact'>(STORAGE_KEYS.VIEW_MODE, 'card');
+  
   // Handle window size calculation after client-side mount
   useEffect(() => {
     setIsClient(true);
@@ -427,6 +418,9 @@ function TasksPage() {
                 >
                   <span className="mr-1">+</span> Add Task
                 </button>
+                
+                {/* Show Controls Toggle Button */}
+                <ControlsToggle className="mr-3" />
                 
                 {/* View Mode Toggle */}
                 <div className="mr-3 flex items-center gap-2 bg-white p-1 rounded-md border border-gray-200">
