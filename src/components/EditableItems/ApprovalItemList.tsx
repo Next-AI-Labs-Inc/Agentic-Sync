@@ -2,12 +2,24 @@ import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { FaEdit, FaPlus, FaTrash, FaCheck, FaTimes, FaCheckCircle, FaBan } from 'react-icons/fa';
 import { ItemWithStatus } from '@/types';
 
+/**
+ * ApprovalItemList Component
+ * 
+ * This component displays a list of items that can be approved, vetoed, edited, or added to.
+ * It supports both interactive and read-only modes.
+ * 
+ * User Experience:
+ * - In interactive mode, users can add new items, edit existing ones, and approve/veto proposed items
+ * - In read-only mode, buttons are visually disabled to indicate they cannot be interacted with
+ * - Approved items are visually distinguished with a green left border and an "Approved" badge
+ */
 interface ApprovalItemListProps {
-  items: ItemWithStatus[];
-  label: string;
-  onUpdate: (newItems: ItemWithStatus[]) => void;
-  onApprove: (itemId: string) => void;
-  onVeto: (itemId: string) => void;
+  items: ItemWithStatus[];          // List of items to display  
+  label: string;                    // Section label (e.g., "Requirements")
+  onUpdate: (newItems: ItemWithStatus[]) => void; // Handler to update the entire list
+  onApprove: (itemId: string) => void; // Handler to approve a specific item
+  onVeto: (itemId: string) => void;    // Handler to veto (remove) a specific item
+  readOnly?: boolean;               // Whether the component should be in read-only mode
 }
 
 const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
@@ -15,7 +27,8 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
   label,
   onUpdate,
   onApprove,
-  onVeto
+  onVeto,
+  readOnly = false
 }) => {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [editValue, setEditValue] = useState('');
@@ -94,38 +107,50 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
   
   // Handle approve
   const handleApprove = useCallback((itemId: string) => async (e: React.MouseEvent) => {
+    console.log('APPROVE FLOW: Button clicked for item', itemId);
     e.preventDefault();
     e.stopPropagation();
     
     // Set processing state
+    console.log('APPROVE FLOW: Setting processing state', itemId);
     setProcessingApprove(itemId);
     
     try {
+      console.log('APPROVE FLOW: Calling onApprove handler with itemId', itemId);
+      console.log('APPROVE FLOW: onApprove handler type:', typeof onApprove);
       await onApprove(itemId);
+      console.log('APPROVE FLOW: onApprove handler completed successfully');
     } catch (error) {
       // Log the error but don't crash
-      console.error('Error approving item:', error);
+      console.error('APPROVE FLOW: Error approving item:', error);
     } finally {
       // Reset processing state
+      console.log('APPROVE FLOW: Resetting processing state');
       setProcessingApprove(null);
     }
   }, [onApprove]);
   
   // Handle veto (delete)
   const handleVeto = useCallback((itemId: string) => async (e: React.MouseEvent) => {
+    console.log('VETO FLOW: Button clicked for item', itemId);
     e.preventDefault();
     e.stopPropagation();
     
     // Set processing state
+    console.log('VETO FLOW: Setting processing state', itemId);
     setProcessingVeto(itemId);
     
     try {
+      console.log('VETO FLOW: Calling onVeto handler with itemId', itemId);
+      console.log('VETO FLOW: onVeto handler type:', typeof onVeto);
       await onVeto(itemId);
+      console.log('VETO FLOW: onVeto handler completed successfully');
     } catch (error) {
       // Log the error but don't crash
-      console.error('Error vetoing item:', error);
+      console.error('VETO FLOW: Error vetoing item:', error);
     } finally {
       // Reset processing state
+      console.log('VETO FLOW: Resetting processing state');
       setProcessingVeto(null);
     }
   }, [onVeto]);
@@ -205,9 +230,14 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
         <h4 className="font-medium text-gray-700">{label}</h4>
         <button
           onClick={handleAddNew}
-          className="p-2 rounded-md bg-blue-50 border border-blue-300 text-blue-600 hover:bg-blue-100 transition-colors shadow-sm flex items-center gap-1 text-sm font-medium"
-          title={`Add new ${label.toLowerCase()} item`}
+          className={`p-2 rounded-md flex items-center gap-1 text-sm font-medium ${
+            readOnly 
+              ? 'bg-gray-50 border border-gray-300 text-gray-400 cursor-not-allowed' 
+              : 'bg-blue-50 border border-blue-300 text-blue-600 hover:bg-blue-100 transition-colors shadow-sm'
+          }`}
+          title={readOnly ? `View-only mode` : `Add new ${label.toLowerCase()} item`}
           data-testid="add-item-btn"
+          disabled={readOnly}
         >
           <FaPlus size={12} /> Add
         </button>
@@ -256,14 +286,16 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
               <>
                 <div 
                   className={`flex-1 p-3 rounded-md border border-gray-200 shadow-sm transition-all duration-200 
-                    cursor-pointer whitespace-pre-wrap break-words 
+                    whitespace-pre-wrap break-words 
                     ${
                       item.status === 'approved' 
                         ? 'text-gray-800 border-l-4 border-l-green-500' 
-                        : 'text-gray-700 hover:bg-blue-50 hover:border-blue-300 hover:shadow-md focus:bg-blue-50 focus:border-blue-400 focus:shadow-md'
+                        : readOnly
+                          ? 'text-gray-700 cursor-default'
+                          : 'text-gray-700 cursor-pointer hover:bg-blue-50 hover:border-blue-300 hover:shadow-md focus:bg-blue-50 focus:border-blue-400 focus:shadow-md'
                     }`}
-                  onDoubleClick={handleEdit(index)}
-                  tabIndex={0}
+                  onDoubleClick={readOnly ? undefined : handleEdit(index)}
+                  tabIndex={readOnly ? -1 : 0}
                   data-testid={`item-content-${index}`}
                 >
                   {item.content}
@@ -279,19 +311,27 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
                     <>
                       <button
                         onClick={handleApprove(item.id)}
-                        className="px-3 py-1 rounded-md bg-blue-50 border border-blue-300 text-blue-600 hover:bg-blue-100 transition-colors shadow-sm text-sm font-medium"
-                        title="Approve item"
+                        className={`px-3 py-1 rounded-md text-sm font-medium ${
+                          readOnly || processingApprove === item.id
+                            ? 'bg-gray-50 border border-gray-300 text-gray-400 cursor-not-allowed'
+                            : 'bg-blue-50 border border-blue-300 text-blue-600 hover:bg-blue-100 transition-colors shadow-sm'
+                        }`}
+                        title={readOnly ? "View-only mode" : "Approve item"}
                         data-testid={`approve-btn-${index}`}
-                        disabled={processingApprove === item.id}
+                        disabled={readOnly || processingApprove === item.id}
                       >
                         {processingApprove === item.id ? 'Processing...' : 'Approve'}
                       </button>
                       <button
                         onClick={handleVeto(item.id)}
-                        className="ml-2 px-3 py-1 rounded-md bg-gray-50 border border-gray-300 text-gray-600 hover:bg-gray-100 transition-colors shadow-sm text-sm font-medium"
-                        title="Veto (remove) item"
+                        className={`ml-2 px-3 py-1 rounded-md text-sm font-medium ${
+                          readOnly || processingVeto === item.id
+                            ? 'bg-gray-50 border border-gray-300 text-gray-400 cursor-not-allowed'
+                            : 'bg-gray-50 border border-gray-300 text-gray-600 hover:bg-gray-100 transition-colors shadow-sm'
+                        }`}
+                        title={readOnly ? "View-only mode" : "Veto (remove) item"}
                         data-testid={`veto-btn-${index}`}
-                        disabled={processingVeto === item.id}
+                        disabled={readOnly || processingVeto === item.id}
                       >
                         {processingVeto === item.id ? 'Processing...' : 'Veto'}
                       </button>

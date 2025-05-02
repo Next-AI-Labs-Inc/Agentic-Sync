@@ -1,0 +1,57 @@
+--- TaskCard.tsx	2023-05-02 00:00:00.000000000 -0000
++++ TaskCard.tsx	2023-05-02 00:00:00.000000000 -0000
+@@ -54,6 +54,7 @@
+ import HoverPreview from '@/components/HoverPreview';
+ import StatusSelector from '@/components/StatusSelector';
+ import { CARD_TYPE_DETAILS } from '@/config/constants';
++import CommandToggle from '@/components/CommandToggle';
+ 
+ // Types and Interfaces
+ export interface TaskCardProps {
+@@ -379,6 +380,9 @@
+   const [isEditingUserImpact, setIsEditingUserImpact] = useState(false);
+   const [isEditingMarkdown, setIsEditingMarkdown] = useState(false);
+ 
++  // State for command visibility
++  const [commandsVisible, setCommandsVisible] = useState(true);
++
+   // Create refs for textarea autosize
+   const titleRef = useRef<HTMLTextAreaElement>(null);
+   const descriptionRef = useRef<HTMLTextAreaElement>(null);
+@@ -838,6 +842,11 @@
+     }
+   };
+ 
++  // Handle command visibility toggle
++  const handleCommandVisibilityToggle = (isVisible: boolean) => {
++    setCommandsVisible(isVisible);
++  };
++
+   // Determine stage-appropriate actions
+   const renderStageActions = () => {
+     const actions = [];
+@@ -2038,10 +2047,20 @@
+ 
+     return (
+       <>
+-        {expanded && renderCoachingMessage()}
+-        <div className="mt-3 flex flex-wrap gap-2 justify-end">
+-          {actions}
+-          {/* Add agent actions after regular actions */}
++        {expanded && (
++          <>
++            {renderCoachingMessage()}
++            <div className="mt-3 flex justify-between items-center">
++              <CommandToggle onToggle={handleCommandVisibilityToggle} />
++              <span className="text-sm text-gray-500">CO_9106</span>
++            </div>
++          </>
++        )}
++        
++        {/* Only show commands if they're visible */}
++        {commandsVisible && <div className="mt-3 flex flex-wrap gap-2 justify-end">
++            {actions}
++            {/* Add agent actions after regular actions */}
+           {agentActionButtons.length > 0 && agentActionButtons}
+         </div>
+ 

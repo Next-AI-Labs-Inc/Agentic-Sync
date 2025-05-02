@@ -58,16 +58,18 @@ function TaskDetail({ task }: { task: Task }) {
           }
         }}
         onToggleStar={() => Promise.resolve()}   // Read-only view
-        // Item approval functions (read-only)
-        onApproveRequirementItem={() => Promise.resolve()}
-        onVetoRequirementItem={() => Promise.resolve()}
-        onUpdateRequirementItems={() => Promise.resolve()}
-        onApproveTechnicalPlanItem={() => Promise.resolve()}
-        onVetoTechnicalPlanItem={() => Promise.resolve()}
-        onUpdateTechnicalPlanItems={() => Promise.resolve()}
-        onApproveNextStepItem={() => Promise.resolve()}
-        onVetoNextStepItem={() => Promise.resolve()}
-        onUpdateNextStepItems={() => Promise.resolve()}
+        // Use readOnly mode instead of empty handlers
+        readOnly={true}
+        // Pass real handlers that will never be called due to readOnly mode
+        onApproveRequirementItem={addTaskFeedback} // These won't actually be called
+        onVetoRequirementItem={addTaskFeedback}    // due to readOnly=true, but
+        onUpdateRequirementItems={(id, items) => Promise.resolve()} // need to be passed
+        onApproveTechnicalPlanItem={addTaskFeedback} // to satisfy type requirements
+        onVetoTechnicalPlanItem={addTaskFeedback}
+        onUpdateTechnicalPlanItems={(id, items) => Promise.resolve()}
+        onApproveNextStepItem={addTaskFeedback}
+        onVetoNextStepItem={addTaskFeedback}
+        onUpdateNextStepItems={(id, items) => Promise.resolve()}
         // Agent integration functions - properly passed from context
         onAddFeedback={addTaskFeedback}
         onLaunchAgent={async (taskId, mode, feedback) => {

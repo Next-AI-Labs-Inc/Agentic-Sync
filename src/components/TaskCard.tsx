@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { format, formatDistanceToNow } from 'date-fns';
 import {
   FaCheckCircle,
@@ -27,6 +27,7 @@ import EditableItemList from './EditableItems/EditableItemList';
 import ApprovalItemList from './EditableItems/ApprovalItemList';
 import AgentLauncher from './AgentLauncher';
 import FeedbackForm from './FeedbackForm';
+import CommandToggle from './CommandToggle';
 import { ClickableId } from '@/utils/clickable-id';
 
 // Utility function to safely get action help content
@@ -49,6 +50,16 @@ import {
   STATUS_COACHING
 } from '@/constants/taskStatus';
 
+/**
+ * TaskCard Props Interface
+ * 
+ * Defines all the properties that can be passed to the TaskCard component.
+ * 
+ * User Experience:
+ * - In interactive mode, all action buttons (status, approve, veto, etc.) are fully functional
+ * - In readOnly mode (detail view), buttons are visually disabled and show tooltips indicating view-only mode
+ * - Users can still view all task information in both modes
+ */
 interface TaskCardProps {
   task: Task;
   onStatusChange: (
@@ -91,6 +102,7 @@ interface TaskCardProps {
   ) => Promise<void>;
   expanded?: boolean; // Whether the card is expanded by default
   hideExpand?: boolean; // Whether to hide the expand/collapse button
+  readOnly?: boolean; // Whether the card is in read-only mode (disables approve/veto buttons)
 }
 
 // Reusable Popover Component
@@ -415,7 +427,8 @@ function TaskCard({
   onVetoNextStepItem,
   onUpdateNextStepItems,
   expanded: defaultExpanded = false,
-  hideExpand = false
+  hideExpand = false,
+  readOnly = false
 }: TaskCardProps) {
   const [expanded, setExpanded] = useState(defaultExpanded);
   const [isNew, setIsNew] = useState(task._isNew || false);
@@ -438,6 +451,14 @@ function TaskCard({
   // Copy feedback states
   const [showIdCopied, setShowIdCopied] = useState(false);
   const [showUrlCopied, setShowUrlCopied] = useState(false);
+  
+  // Command visibility state
+  const [commandsVisible, setCommandsVisible] = useState(true);
+  
+  // Create callback at component level, not inside renderStageActions
+  const handleCommandToggle = useCallback((isVisible: boolean) => {
+    setCommandsVisible(isVisible);
+  }, []);
   
   // Track which sections are being actively edited
   const [editingSections, setEditingSections] = useState({
@@ -484,6 +505,15 @@ function TaskCard({
   // Format project name for display
   const formatProjectName = (projectId: string) => {
     if (!projectId) return 'Unknown';
+    
+    // Extract just the label part if it contains numbers that look like an ID
+    if (projectId.match(/\d{8,}/)) {
+      // If there's a space or underscore before numbers, keep only what's before
+      const match = projectId.match(/^([a-zA-Z\s-]+)[\s_-]?\d+/);
+      if (match && match[1]) {
+        return match[1].replace(/-/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()).trim();
+      }
+    }
 
     return projectId.replace(/-/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
   };
@@ -665,8 +695,10 @@ function TaskCard({
       return; // Let interactive elements handle their own clicks
     }
 
-    // Toggle expanded state
-    setExpanded(!expanded);
+    // Only expand, never collapse on click
+    if (!expanded) {
+      setExpanded(true);
+    }
   };
 
   // Status change handlers with transition effects
@@ -2011,6 +2043,8 @@ function TaskCard({
         }}
       />
     );
+    
+    // We'll add the command toggle at the end after all other buttons
 
     // Always show delete button except for archived tasks (which have Delete Permanently)
     if (task.status !== 'archived') {
@@ -2035,14 +2069,31 @@ function TaskCard({
 
     // Get agent actions
     const agentActionButtons = renderAgentActions();
+    
+    // Add command toggle as the last button
+    actions.push(
+      <CommandToggle 
+        key="command-toggle"
+        initialVisible={commandsVisible}
+        onChange={handleCommandToggle}
+      />
+    );
+
+    // Filter actions to only show status selector and command toggle when commands are hidden
+    const visibleActions = commandsVisible 
+      ? actions 
+      : actions.filter(action => {
+          const key = action?.key;
+          return key === 'status-selector' || key === 'command-toggle';
+        });
 
     return (
       <>
         {expanded && renderCoachingMessage()}
         <div className="mt-3 flex flex-wrap gap-2 justify-end">
-          {actions}
+          {visibleActions}
           {/* Add agent actions after regular actions */}
-          {agentActionButtons.length > 0 && agentActionButtons}
+          {commandsVisible && agentActionButtons.length > 0 && agentActionButtons}
         </div>
 
         {/* Feedback form when expanded and show form is true */}
@@ -2086,32 +2137,6 @@ function TaskCard({
       >
         {/* Top row with controls */}
         <div className="flex justify-between mb-1">
-          {!hideExpand && (
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setExpanded(false);
-              }}
-              className={`text-gray-400 hover:text-gray-600 ${!expanded ? 'hidden' : ''}`}
-              aria-label="Close details"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-          )}
         </div>
 
         {/* Header row with initiative, title, badges */}
@@ -2356,23 +2381,6 @@ function TaskCard({
           {/* Project name and status badges */}
           <div className="flex items-center justify-between mt-1">
             <div className="flex items-center">
-              {task.project && (
-                <div className="text-xs text-gray-500 font-medium mr-2">
-                  {formatProjectName(task.project)}
-                </div>
-              )}
-              {task?.id ? (
-                <Link
-                  href={`/task/${task.id}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="text-xs text-primary-500 hover:underline"
-                  title="View task details"
-                >
-                  {task.id.substring(0, 8)}...
-                </Link>
-              ) : (
-                <span className="text-xs text-gray-400">ID unavailable</span>
-              )}
             </div>
 
             <div className="flex items-center space-x-1">
@@ -2380,6 +2388,13 @@ function TaskCard({
               <span data-testid="task-status" className={`badge ${getStatusColor(task.status)}`}>
                 {task.status}
               </span>
+              
+              {/* Project badge */}
+              {task.project && (
+                <span className="badge bg-purple-100 text-purple-800">
+                  {formatProjectName(task.project)}
+                </span>
+              )}
 
               {/* Tested badge with popover */}
               {task.tested && (
@@ -2401,7 +2416,7 @@ function TaskCard({
           </div>
 
           {/* Created date with edit button */}
-          <div className="mt-1 text-sm text-gray-500">
+          <div className="mt-1 text-xs text-gray-500">
             {isEditingDate ? (
               <div onClick={(e) => e.stopPropagation()}>
                 <form onSubmit={handleDateSubmit} className="inline-flex items-center">
@@ -2452,18 +2467,6 @@ function TaskCard({
           {expanded && (
             <div className="flex items-center justify-between mt-3">
               <div className="flex items-center space-x-2">
-                {/* Priority badge */}
-                <span
-                  className={`badge ${
-                    task.priority === 'high'
-                      ? 'bg-red-100 text-red-800'
-                      : task.priority === 'medium'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-blue-100 text-blue-800'
-                  }`}
-                >
-                  {task.priority}
-                </span>
               </div>
 
               {!hideExpand && (
@@ -2815,6 +2818,7 @@ function TaskCard({
                 <ApprovalItemList
                   label="Requirements"
                   items={task.requirementItems}
+                  readOnly={readOnly}
                   onUpdate={(newItems) => {
                     if (onUpdateRequirementItems) {
                       onUpdateRequirementItems(task.id, newItems);
@@ -2900,6 +2904,7 @@ function TaskCard({
                 <ApprovalItemList
                   label="Technical Plan"
                   items={task.technicalPlanItems}
+                  readOnly={readOnly}
                   onUpdate={(newItems) => {
                     if (onUpdateTechnicalPlanItems) {
                       onUpdateTechnicalPlanItems(task.id, newItems);
@@ -2985,6 +2990,7 @@ function TaskCard({
                 <ApprovalItemList
                   label="Next Steps"
                   items={task.nextStepItems}
+                  readOnly={readOnly}
                   onUpdate={(newItems) => {
                     if (onUpdateNextStepItems) {
                       onUpdateNextStepItems(task.id, newItems);
@@ -3101,33 +3107,13 @@ function TaskCard({
 
           {/* Creation details - all in relative time */}
           <div className="mt-4 text-xs text-gray-500">
-            <div className="flex items-center mb-1">
-              <p className="mr-2">
-                Task ID:{' '}
-                <Link
-                  href={`/task/${task.id}`}
-                  className="text-primary-500 hover:underline"
-                  title="View task details"
-                >
-                  {task.id}
-                </Link>
-              </p>
-
-              <button
-                onClick={copyTaskId}
-                className="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded hover:bg-gray-100"
-                title="Copy task ID"
-              >
-                <FaCopy size={12} />
-                {showIdCopied && <span className="ml-1 text-green-600">Copied!</span>}
-              </button>
-
+            <div className="flex items-center justify-end mb-1">
               <button
                 onClick={copyTaskUrl}
-                className="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded hover:bg-gray-100 ml-1"
-                title="Copy task URL"
+                className="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded hover:bg-gray-100"
+                title="Copy task link"
               >
-                <FaLink size={12} />
+                <FaListAlt size={12} />
                 {showUrlCopied && <span className="ml-1 text-green-600">Copied!</span>}
               </button>
             </div>

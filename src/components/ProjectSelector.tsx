@@ -85,14 +85,24 @@ export default function ProjectSelector({
   );
   
   // Handle individual project selection
-  const handleProjectSelection = (projectId: string) => {
+  const handleProjectSelection = (projectId: string, isMultiSelect = false) => {
     // Get valid project IDs
     const validProjectIds = projects.map(p => p.id);
     
-    // Build new selected projects list
-    const newSelectedProjects = selectedProjects.includes(projectId)
-      ? selectedProjects.filter(id => id !== projectId)
-      : [...selectedProjects, projectId];
+    // Build new selected projects list based on selection mode
+    let newSelectedProjects: string[];
+    
+    if (isMultiSelect) {
+      // Multi-select mode (adds to current selection)
+      newSelectedProjects = selectedProjects.includes(projectId)
+        ? selectedProjects.filter(id => id !== projectId) // Deselect if already selected
+        : [...selectedProjects, projectId]; // Add to selection
+    } else {
+      // Single-select mode (replaces current selection)
+      newSelectedProjects = selectedProjects.includes(projectId) && selectedProjects.length === 1
+        ? [] // Deselect if it's the only selected item
+        : [projectId]; // Replace selection with just this item
+    }
     
     // Filter to only valid projects
     const validSelectedProjects = newSelectedProjects.filter(id => validProjectIds.includes(id));
@@ -159,11 +169,11 @@ export default function ProjectSelector({
     <div ref={containerRef}>
       <div>
         <div className="flex items-center mb-1">
-          <label className="form-label mr-2 text-lg font-medium">Areas of Concern</label>
+          <label className="form-label">Areas of Concern</label>
           <ClickableId
             id="CO_9102"
             filePath="/src/components/ProjectSelector.tsx"
-            className="self-center ml-2 px-3"
+            className="self-center ml-2 px-1"
           />
         </div>
         
@@ -208,6 +218,14 @@ export default function ProjectSelector({
           </div>
           
           {/* Project checkboxes - no max height limit */}
+          <div className="text-xs text-gray-500 mb-2">
+            <span className="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Use Ctrl/Cmd+Click to select multiple projects
+            </span>
+          </div>
           <div className="overflow-visible space-y-1">
             {sortedProjects.map((project, index) => (
               <div 
@@ -219,7 +237,7 @@ export default function ProjectSelector({
                   type="checkbox"
                   id={`project-${project.id}`}
                   checked={selectedProjects.includes(project.id)}
-                  onChange={() => handleProjectSelection(project.id)}
+                  onChange={(e) => handleProjectSelection(project.id, e.nativeEvent.ctrlKey || e.nativeEvent.metaKey)}
                   className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <label htmlFor={`project-${project.id}`} className="text-sm text-gray-700">

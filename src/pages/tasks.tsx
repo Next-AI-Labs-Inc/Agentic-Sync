@@ -327,7 +327,7 @@ function TasksPage() {
         </p>
       </div>
 
-      {/* Subtle loading indicator at top of page */}
+      {/* Modern loading indicator at top of page */}
       {(loading || projectsLoading) && (
         <div className="h-1 bg-gradient-to-r from-blue-500 to-indigo-600 animate-pulse-bg rounded mb-4"></div>
       )}
@@ -376,31 +376,40 @@ function TasksPage() {
       <div className="tasks-list mt-4" data-testid="task-list">
         {filteredTasks.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">
-              
-            </h3>
-            <p className="text-gray-500 mb-6">
-              {searchTerm
-                ? `No tasks match the search term "${searchTerm}"`
-                : getEmptyStateMessage()}
-            </p>
-            {searchTerm ? (
-              <button
-                onClick={() => setSearchTerm("")}
-                className="btn btn-outline-primary mr-3"
-              >
-                Clear search
-              </button>
-            ) : null}
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="btn btn-primary relative overflow-hidden"
-            >
-              <span className="flex items-center">
-                <span className="mr-1">+</span> Create a Task
-                <span className="absolute inset-0 bg-white bg-opacity-30 transform scale-0 transition-transform duration-300 rounded-full hover:scale-0 active:scale-100 origin-center"></span>
-              </span>
-            </button>
+            {loading || projectsLoading ? (
+              <div className="flex flex-col items-center justify-center py-4">
+                <div className="spinner">
+                  <div className="w-16 h-16 border-t-4 border-b-4 border-blue-500 rounded-full animate-spin"></div>
+                </div>
+                <p className="mt-4 text-gray-600 font-medium">Loading tasks...</p>
+              </div>
+            ) : (
+              <>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2"></h3>
+                <p className="text-gray-500 mb-6">
+                  {searchTerm
+                    ? `No tasks match the search term "${searchTerm}"`
+                    : getEmptyStateMessage()}
+                </p>
+                {searchTerm ? (
+                  <button
+                    onClick={() => setSearchTerm("")}
+                    className="btn btn-outline-primary mr-3"
+                  >
+                    Clear search
+                  </button>
+                ) : null}
+                <button
+                  onClick={() => setShowAddForm(true)}
+                  className="btn btn-primary relative overflow-hidden"
+                >
+                  <span className="flex items-center">
+                    <span className="mr-1">+</span> Create a Task
+                    <span className="absolute inset-0 bg-white bg-opacity-30 transform scale-0 transition-transform duration-300 rounded-full hover:scale-0 active:scale-100 origin-center"></span>
+                  </span>
+                </button>
+              </>
+            )}
           </div>
         ) : (
           <>
@@ -526,7 +535,14 @@ function TasksPage() {
               </div>
             </div>
 
-            {viewMode === 'card' ? (
+            {loading || projectsLoading ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="spinner relative">
+                  <div className="w-12 h-12 border-t-4 border-blue-500 border-solid rounded-full animate-spin"></div>
+                  <div className="w-12 h-12 border-b-4 border-indigo-600 border-solid rounded-full animate-spin absolute top-0" style={{animationDirection: 'reverse', animationDuration: '1.5s'}}></div>
+                </div>
+              </div>
+            ) : viewMode === 'card' ? (
               // Card View - Original layout
               <div className="space-y-4">
                 {filteredTasks.map((task) => (
@@ -568,7 +584,15 @@ function TasksPage() {
                 
                 {/* Compact task list */}
                 <div className="compact-task-list">
-                  {filteredTasks.map((task) => (
+                  {loading || projectsLoading ? (
+                    <div className="flex justify-center items-center py-8">
+                      <div className="spinner relative">
+                        <div className="w-12 h-12 border-t-4 border-blue-500 border-solid rounded-full animate-spin"></div>
+                        <div className="w-12 h-12 border-b-4 border-indigo-600 border-solid rounded-full animate-spin absolute top-0" style={{animationDirection: 'reverse', animationDuration: '1.5s'}}></div>
+                      </div>
+                    </div>
+                  ) : (
+                    filteredTasks.map((task) => (
                     <div key={`${task.id}-${task.project}-compact-wrapper`}>
                       <CompactTaskItem
                         key={`${task.id}-${task.project}-compact`}
@@ -607,7 +631,7 @@ function TasksPage() {
                       }
                       />
                     </div>
-                  ))}
+                  )))}
                 </div>
               </div>
             )}
