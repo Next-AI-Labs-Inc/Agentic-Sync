@@ -503,6 +503,9 @@ function TaskCard({
       case 'userImpact':
         setIsEditingUserImpact(true);
         break;
+      case 'markdown':
+        setIsEditingMarkdown(true);
+        break;
     }
   };
 
@@ -532,6 +535,10 @@ function TaskCard({
         updates.userImpact = editedUserImpact; // Preserve whitespace
         setIsEditingUserImpact(false);
         break;
+      case 'markdown':
+        updates.markdown = editedMarkdown; // Preserve whitespace
+        setIsEditingMarkdown(false);
+        break;
     }
 
     if (Object.keys(updates).length > 0) {
@@ -560,12 +567,16 @@ function TaskCard({
           setEditedUserImpact(task.userImpact || '');
           setIsEditingUserImpact(false);
           break;
+        case 'markdown':
+          setEditedMarkdown(task.markdown || '');
+          setIsEditingMarkdown(false);
+          break;
       }
       e.preventDefault();
       e.stopPropagation();
     } else if (e.key === 'Enter' && !e.shiftKey) {
       // Submit on Enter but not with Shift (for multiline text areas)
-      if (field !== 'description' && field !== 'userImpact') {
+      if (field !== 'description' && field !== 'userImpact' && field !== 'markdown') {
         handleInlineSubmit(field)(e as unknown as React.FormEvent);
       }
     }
@@ -2480,6 +2491,59 @@ function TaskCard({
                   </span>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Markdown Content */}
+          {((task.markdown && task.markdown.length > 0) || isEditingMarkdown || expanded) && (
+            <div className="mt-4 text-base block" style={{display: 'block'}} onClick={(e) => e.stopPropagation()}>
+              <div className="flex justify-between items-center">
+                <h4 className="font-medium text-gray-700 mb-1 block" style={{display: 'block'}}>Details</h4>
+                {!isEditingMarkdown && !task.markdown && onUpdateTask && (
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setIsEditingMarkdown(true);
+                    }}
+                    className="text-sm text-blue-500 hover:text-blue-700"
+                  >
+                    + Add details
+                  </button>
+                )}
+              </div>
+              {isEditingMarkdown ? (
+                <div onClick={(e) => e.stopPropagation()} className="w-full">
+                  <textarea
+                    value={editedMarkdown}
+                    onChange={(e) => setEditedMarkdown(e.target.value)}
+                    onBlur={handleInlineSubmit('markdown')}
+                    onKeyDown={handleInlineKeyDown('markdown')}
+                    className="w-full px-2 py-1 text-base text-gray-600 border border-gray-200 rounded focus:outline-none focus:ring-0 focus:border-gray-300"
+                    rows={(editedMarkdown.match(/\n/g) || []).length + 3}
+                    style={{ minHeight: '100px', resize: 'vertical' }}
+                    autoFocus
+                  />
+                </div>
+              ) : (
+                <div
+                  className="text-gray-600 group cursor-pointer whitespace-pre-wrap break-words min-h-[48px]"
+                  onDoubleClick={(e) => onUpdateTask && handleInlineEdit('markdown')(e)}
+                >
+                  {task.markdown ? (
+                    <>
+                      <ReactMarkdown className="prose prose-sm max-w-none">{task.markdown}</ReactMarkdown>
+                      {onUpdateTask && (
+                        <span className="ml-2 text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                          edit
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-gray-400 italic">No details added yet. Double-click to add.</p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
