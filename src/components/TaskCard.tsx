@@ -2512,38 +2512,62 @@ function TaskCard({
                   </button>
                 )}
               </div>
-              {isEditingMarkdown ? (
-                <div onClick={(e) => e.stopPropagation()} className="w-full">
-                  <textarea
-                    value={editedMarkdown}
-                    onChange={(e) => setEditedMarkdown(e.target.value)}
-                    onBlur={handleInlineSubmit('markdown')}
-                    onKeyDown={handleInlineKeyDown('markdown')}
-                    className="w-full px-2 py-1 text-base text-gray-600 border border-gray-200 rounded focus:outline-none focus:ring-0 focus:border-gray-300"
-                    rows={(editedMarkdown.match(/\n/g) || []).length + 3}
-                    style={{ minHeight: '100px', resize: 'vertical' }}
-                    autoFocus
-                  />
-                </div>
-              ) : (
-                <div
-                  className="text-gray-600 group cursor-pointer whitespace-pre-wrap break-words min-h-[48px]"
-                  onDoubleClick={(e) => onUpdateTask && handleInlineEdit('markdown')(e)}
-                >
-                  {task.markdown ? (
-                    <>
-                      <ReactMarkdown className="prose prose-sm max-w-none">{task.markdown}</ReactMarkdown>
-                      {onUpdateTask && (
-                        <span className="ml-2 text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                          edit
-                        </span>
+              <div
+                className="prose prose-sm max-w-none text-gray-600 group cursor-pointer whitespace-pre-wrap break-words min-h-[48px]"
+                onClick={(e) => {
+                  if (onUpdateTask && !isEditingMarkdown) {
+                    e.stopPropagation();
+                    handleInlineEdit('markdown')(e);
+                  }
+                }}
+              >
+                {isEditingMarkdown ? (
+                  <div 
+                    className="relative w-full"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Semi-transparent textarea for editing */}
+                    <textarea
+                      value={editedMarkdown}
+                      onChange={(e) => setEditedMarkdown(e.target.value)}
+                      onBlur={handleInlineSubmit('markdown')}
+                      onKeyDown={handleInlineKeyDown('markdown')}
+                      className="absolute inset-0 w-full h-full opacity-25 z-10 resize-none cursor-text border-0 outline-none"
+                      style={{ minHeight: '100px' }}
+                      autoFocus
+                    />
+                    
+                    {/* Live preview that looks identical to the non-editing view */}
+                    <div className="relative z-0 pointer-events-none min-h-[48px]">
+                      {editedMarkdown ? (
+                        <ReactMarkdown className="prose prose-sm max-w-none">{editedMarkdown}</ReactMarkdown>
+                      ) : (
+                        <p className="text-gray-400 italic">Start typing to add markdown content...</p>
                       )}
-                    </>
-                  ) : (
-                    <p className="text-gray-400 italic">No details added yet. Double-click to add.</p>
-                  )}
-                </div>
-              )}
+                    </div>
+                    
+                    {/* Small indicator that we're in edit mode */}
+                    <div className="absolute top-0 right-0 bg-blue-100 text-blue-800 text-xs px-1 py-0.5 rounded-bl">
+                      editing
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {task.markdown ? (
+                      <>
+                        <ReactMarkdown className="prose prose-sm max-w-none">{task.markdown}</ReactMarkdown>
+                        {onUpdateTask && (
+                          <span className="ml-2 text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                            click to edit
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                    <p className="text-gray-400 italic">No details added yet. Click to add markdown details.</p>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           )}
 

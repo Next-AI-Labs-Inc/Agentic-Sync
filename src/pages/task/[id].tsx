@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
-import { getTask } from '@/services/taskApiService';
+import { getTask, updateTask } from '@/services/taskApiService';
 import TaskCard from '@/components/TaskCard';
 import BuildDocumentation from '@/components/BuildDocumentation';
 import { Task } from '@/types';
@@ -15,15 +15,47 @@ function TaskDetail({ task }: { task: Task }) {
   // Use the Tasks context at the component level
   const { addTaskFeedback, launchAgentForTask } = useTasks();
   
+  // Add state to manage task data locally
+  const [localTask, setLocalTask] = useState(task);
+  
+  // Update local task state if the task prop changes
+  useEffect(() => {
+    setLocalTask(task);
+  }, [task]);
+  
   return (
     <div className="task-single-view">
       <TaskCard 
-        task={task}
+        task={{
+          ...localTask,
+          // Ensure markdown is properly initialized even if it was empty
+          markdown: localTask.markdown || '' 
+        }}
         onStatusChange={() => Promise.resolve()} // Read-only view
         onMarkTested={() => Promise.resolve()}   // Read-only view
         onDelete={() => Promise.resolve()}       // Read-only view
         onUpdateDate={() => Promise.resolve()}   // Read-only view
-        onUpdateTask={() => Promise.resolve()}   // Read-only view
+        onUpdateTask={async (taskId, projectId, updates) => {
+          try {
+            // Update the local state immediately for a responsive UI
+            setLocalTask(prevTask => ({
+              ...prevTask,
+              ...updates
+            }));
+            
+            // Actually update the task through the API
+            console.log('Updating task:', taskId, updates);
+            const result = await updateTask(taskId, updates);
+            console.log('Update result:', result);
+            
+            return result;
+          } catch (err) {
+            console.error('Failed to update task:', err);
+            // If there was an error, revert the local state
+            setLocalTask(task);
+            return Promise.resolve();
+          }
+        }}
         onToggleStar={() => Promise.resolve()}   // Read-only view
         // Item approval functions (read-only)
         onApproveRequirementItem={() => Promise.resolve()}
@@ -49,7 +81,7 @@ function TaskDetail({ task }: { task: Task }) {
       {/* Build Documentation Section */}
       <div className="mt-6">
         <BuildDocumentation 
-          taskId={task.id} 
+          taskId={localTask.id} 
           className="bg-white"
         />
       </div>
