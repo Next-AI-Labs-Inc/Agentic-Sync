@@ -2532,8 +2532,13 @@ function TaskCard({
                       onChange={(e) => setEditedMarkdown(e.target.value)}
                       onBlur={handleInlineSubmit('markdown')}
                       onKeyDown={handleInlineKeyDown('markdown')}
-                      className="absolute inset-0 w-full h-full opacity-25 z-10 resize-none cursor-text border-0 outline-none"
-                      style={{ minHeight: '100px' }}
+                      className="absolute inset-0 w-full h-full opacity-100 z-10 resize-none cursor-text border-0 outline-none"
+                      style={{ 
+                        minHeight: '100px',
+                        caretColor: 'black', 
+                        color: 'black',
+                        backgroundColor: 'white'
+                      }}
                       autoFocus
                     />
                     
