@@ -10,7 +10,6 @@ import {
   AgentOptions
 } from '@/types';
 import { useTaskData, useTaskFilters, useTaskOperations } from '@/hooks/task';
-import { MemoryDisplay } from '@/utils/task';
 
 interface TaskContextValue {
   // Task state
@@ -78,12 +77,10 @@ const TaskContext = createContext<TaskContextValue | undefined>(undefined);
 
 export function TaskProvider({
   children,
-  initialTasks = [],
-  showMemoryMonitor = process.env.NODE_ENV === 'development'
+  initialTasks = []
 }: {
   children: ReactNode;
   initialTasks?: Task[];
-  showMemoryMonitor?: boolean;
 }) {
   // Use our custom hooks to manage task data, filtering, and operations
   const {
@@ -207,7 +204,7 @@ export function TaskProvider({
   return (
     <TaskContext.Provider value={value}>
       {children}
-      {showMemoryMonitor && <MemoryDisplay refreshInterval={2000} showDetails={false} />}
+      {/* Memory monitor removed as requested */}
     </TaskContext.Provider>
   );
 }
