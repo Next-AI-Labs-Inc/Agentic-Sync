@@ -419,6 +419,15 @@ function TasksPage() {
                 {filteredTasks.length === 1 ? "task" : "tasks"} found
               </div>
               <div className="flex items-center">
+                {/* Add Task Button */}
+                <button 
+                  onClick={() => setShowAddForm(true)}
+                  className="mr-3 px-3 py-1.5 rounded-md text-sm font-medium transition-colors bg-blue-100 text-blue-700 hover:bg-blue-200 flex items-center"
+                  aria-label="Add new task"
+                >
+                  <span className="mr-1">+</span> Add Task
+                </button>
+                
                 {/* View Mode Toggle */}
                 <div className="mr-3 flex items-center gap-2 bg-white p-1 rounded-md border border-gray-200">
                   <button

@@ -17,8 +17,8 @@ interface ApprovalItemListProps {
   items: ItemWithStatus[];          // List of items to display  
   label: string;                    // Section label (e.g., "Requirements")
   onUpdate: (newItems: ItemWithStatus[]) => void; // Handler to update the entire list
-  onApprove: (itemId: string) => void; // Handler to approve a specific item
-  onVeto: (itemId: string) => void;    // Handler to veto (remove) a specific item
+  onApprove?: (itemId: string) => void; // Handler to approve a specific item (optional for read-only mode)
+  onVeto?: (itemId: string) => void;    // Handler to veto (remove) a specific item (optional for read-only mode)
   readOnly?: boolean;               // Whether the component should be in read-only mode
 }
 
@@ -26,8 +26,8 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
   items = [],
   label,
   onUpdate,
-  onApprove,
-  onVeto,
+  onApprove = () => {}, // Default no-op function
+  onVeto = () => {},    // Default no-op function  
   readOnly = false
 }) => {
   const [editIndex, setEditIndex] = useState<number | null>(null);
@@ -118,8 +118,14 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
     try {
       console.log('APPROVE FLOW: Calling onApprove handler with itemId', itemId);
       console.log('APPROVE FLOW: onApprove handler type:', typeof onApprove);
-      await onApprove(itemId);
-      console.log('APPROVE FLOW: onApprove handler completed successfully');
+      
+      // Check if onApprove is actually a function before calling it
+      if (typeof onApprove === 'function') {
+        await onApprove(itemId);
+        console.log('APPROVE FLOW: onApprove handler completed successfully');
+      } else {
+        console.error('APPROVE FLOW: onApprove is not a function, type:', typeof onApprove);
+      }
     } catch (error) {
       // Log the error but don't crash
       console.error('APPROVE FLOW: Error approving item:', error);
@@ -143,8 +149,14 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
     try {
       console.log('VETO FLOW: Calling onVeto handler with itemId', itemId);
       console.log('VETO FLOW: onVeto handler type:', typeof onVeto);
-      await onVeto(itemId);
-      console.log('VETO FLOW: onVeto handler completed successfully');
+      
+      // Check if onVeto is actually a function before calling it
+      if (typeof onVeto === 'function') {
+        await onVeto(itemId);
+        console.log('VETO FLOW: onVeto handler completed successfully');
+      } else {
+        console.error('VETO FLOW: onVeto is not a function, type:', typeof onVeto);
+      }
     } catch (error) {
       // Log the error but don't crash
       console.error('VETO FLOW: Error vetoing item:', error);

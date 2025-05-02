@@ -1,6 +1,11 @@
 /**
  * Constants for UI elements and styles
  */
+// Local storage keys for UI state persistence
+export const UI_STORAGE_KEYS = {
+  COMMANDS_EXPANDED: 'taskCommandsExpanded',
+  TASK_EXPANDED: 'taskExpanded'
+};
 
 // Button style classes
 export const BUTTON_STYLES = {

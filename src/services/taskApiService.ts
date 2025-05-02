@@ -544,6 +544,8 @@ export async function addRequirementItem(taskId: string, content: string) {
  */
 export async function updateRequirementItem(taskId: string, itemId: string, status: 'proposed' | 'approved', content?: string) {
   try {
+    console.log(`📝 [API] updateRequirementItem: Starting request for task ${taskId}, item ${itemId}`);
+    
     const updateData: any = {
       status
     };
@@ -559,10 +561,23 @@ export async function updateRequirementItem(taskId: string, itemId: string, stat
     
     updateData.updatedAt = new Date().toISOString();
     
-    const response = await apiClient.put(`/api/developer/tasks/${taskId}/requirement-item/${itemId}`, updateData);
+    console.log(`📝 [API] updateRequirementItem: Sending payload:`, JSON.stringify(updateData, null, 2));
+    
+    const endpoint = `/api/developer/tasks/${taskId}/requirement-item/${itemId}`;
+    console.log(`📝 [API] updateRequirementItem: PUT ${endpoint}`);
+    
+    const startTime = performance.now();
+    const response = await apiClient.put(endpoint, updateData);
+    const endTime = performance.now();
+    
+    console.log(`✅ [API] updateRequirementItem: Request completed in ${(endTime - startTime).toFixed(2)}ms`);
+    console.log(`✅ [API] updateRequirementItem: Response status: ${response.status}`);
+    console.log(`✅ [API] updateRequirementItem: Response data:`, JSON.stringify(response.data, null, 2));
+    
     return response.data.data;
   } catch (error: any) {
-    console.error(`Error updating requirement item ${itemId} for task ${taskId}:`, error);
+    console.error(`❌ [API] updateRequirementItem: Error updating requirement item ${itemId} for task ${taskId}:`, error);
+    console.error(`❌ [API] updateRequirementItem: Error details:`, error.response?.data || error.message);
     throw error;
   }
 }
@@ -621,6 +636,8 @@ export async function addTechnicalPlanItem(taskId: string, content: string) {
  */
 export async function updateTechnicalPlanItem(taskId: string, itemId: string, status: 'proposed' | 'approved', content?: string) {
   try {
+    console.log(`📝 [API] updateTechnicalPlanItem: Starting request for task ${taskId}, item ${itemId}`);
+    
     const updateData: any = {
       status
     };
@@ -636,10 +653,23 @@ export async function updateTechnicalPlanItem(taskId: string, itemId: string, st
     
     updateData.updatedAt = new Date().toISOString();
     
-    const response = await apiClient.put(`/api/developer/tasks/${taskId}/technical-plan-item/${itemId}`, updateData);
+    console.log(`📝 [API] updateTechnicalPlanItem: Sending payload:`, JSON.stringify(updateData, null, 2));
+    
+    const endpoint = `/api/developer/tasks/${taskId}/technical-plan-item/${itemId}`;
+    console.log(`📝 [API] updateTechnicalPlanItem: PUT ${endpoint}`);
+    
+    const startTime = performance.now();
+    const response = await apiClient.put(endpoint, updateData);
+    const endTime = performance.now();
+    
+    console.log(`✅ [API] updateTechnicalPlanItem: Request completed in ${(endTime - startTime).toFixed(2)}ms`);
+    console.log(`✅ [API] updateTechnicalPlanItem: Response status: ${response.status}`);
+    console.log(`✅ [API] updateTechnicalPlanItem: Response data:`, JSON.stringify(response.data, null, 2));
+    
     return response.data.data;
   } catch (error: any) {
-    console.error(`Error updating technical plan item ${itemId} for task ${taskId}:`, error);
+    console.error(`❌ [API] updateTechnicalPlanItem: Error updating technical plan item ${itemId} for task ${taskId}:`, error);
+    console.error(`❌ [API] updateTechnicalPlanItem: Error details:`, error.response?.data || error.message);
     throw error;
   }
 }

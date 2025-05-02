@@ -42,7 +42,7 @@ const getActionHelp = (
   return STATUS_ACTION_HELP[statusKey as keyof typeof STATUS_ACTION_HELP];
 };
 import { parseListString, formatBulletedList, formatNumberedList } from '@/utils/listParser';
-import { POPOVER_POSITIONS } from '@/constants/ui';
+import { POPOVER_POSITIONS, UI_STORAGE_KEYS } from '@/constants/ui';
 import {
   TASK_STATUSES,
   STATUS_ACTION_HELP,
@@ -430,7 +430,24 @@ function TaskCard({
   hideExpand = false,
   readOnly = false
 }: TaskCardProps) {
-  const [expanded, setExpanded] = useState(defaultExpanded);
+  // Initialize expanded state from localStorage if available
+  const [expanded, setExpanded] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedState = localStorage.getItem(`task_expanded_${task.id}`);
+      if (savedState !== null) {
+        return savedState === 'true';
+      }
+    }
+    return defaultExpanded;
+  });
+  
+  // Save expanded state to localStorage when it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`task_expanded_${task.id}`, String(expanded));
+    }
+  }, [expanded, task.id]);
+  
   const [isNew, setIsNew] = useState(task._isNew || false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isEditingDate, setIsEditingDate] = useState(false);
@@ -447,6 +464,25 @@ function TaskCard({
   const [editedDescription, setEditedDescription] = useState(task.description || '');
   const [editedUserImpact, setEditedUserImpact] = useState(task.userImpact || '');
   const [editedMarkdown, setEditedMarkdown] = useState(task.markdown || '');
+  
+  // Commands expanded state (for action buttons)
+  const [commandsExpanded, setCommandsExpanded] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedState = localStorage.getItem(`${UI_STORAGE_KEYS.COMMANDS_EXPANDED}_${task.id}`);
+      if (savedState !== null) {
+        return savedState === 'true';
+      }
+    }
+    // Default to expanded for tasks in review status
+    return task.status === TASK_STATUSES.FOR_REVIEW;
+  });
+  
+  // Save commands expanded state to localStorage when it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`${UI_STORAGE_KEYS.COMMANDS_EXPANDED}_${task.id}`, String(commandsExpanded));
+    }
+  }, [commandsExpanded, task.id]);
 
   // Copy feedback states
   const [showIdCopied, setShowIdCopied] = useState(false);
@@ -873,14 +909,15 @@ function TaskCard({
   const renderStageActions = () => {
     const actions = [];
 
-    // Import coaching message from constants if expanded view
+    // Import coaching message from constants
     const renderCoachingMessage = () => {
-      if (expanded && STATUS_COACHING && STATUS_COACHING[task.status]) {
-        return (
+      if (STATUS_COACHING && STATUS_COACHING[task.status]) {
+        // Only show when expanded, but it's part of the expanded content
+        return expanded ? (
           <div className="mb-3 p-2 bg-blue-50 rounded border border-blue-100 text-sm text-blue-700">
             {STATUS_COACHING[task.status]}
           </div>
-        );
+        ) : null;
       }
       return null;
     };
@@ -2810,10 +2847,10 @@ function TaskCard({
           {/* Requirements - With Approval Status - Handled by centralized layout logic */}
           {determineTaskSectionVisibility('requirements', task, onUpdateTask, editingSections).visible && (
             <div id={`requirements-${task.id}`} className="mt-4 text-base block" style={{display: 'block'}} onClick={(e) => e.stopPropagation()}>
-              {onUpdateTask &&
-              onApproveRequirementItem &&
-              onVetoRequirementItem &&
-              onUpdateRequirementItems &&
+              {typeof onUpdateTask === 'function' &&
+              typeof onApproveRequirementItem === 'function' &&
+              typeof onVetoRequirementItem === 'function' &&
+              typeof onUpdateRequirementItems === 'function' &&
               task.requirementItems ? (
                 <ApprovalItemList
                   label="Requirements"
@@ -2833,13 +2870,25 @@ function TaskCard({
                     }
                   }}
                   onApprove={(itemId) => {
+                    console.log(`[TaskCard] Requirements - onApprove handler triggered for task ${task.id}, item ${itemId}`);
                     if (onApproveRequirementItem) {
-                      onApproveRequirementItem(task.id, itemId);
+                      console.log(`[TaskCard] Requirements - Calling onApproveRequirementItem handler`);
+                      onApproveRequirementItem(task.id, itemId)
+                        .then(() => console.log(`[TaskCard] Requirements - onApproveRequirementItem completed successfully for item ${itemId}`))
+                        .catch(error => console.error(`[TaskCard] Requirements - Error in onApproveRequirementItem:`, error));
+                    } else {
+                      console.log(`[TaskCard] Requirements - onApproveRequirementItem handler not available`);
                     }
                   }}
                   onVeto={(itemId) => {
+                    console.log(`[TaskCard] Requirements - onVeto handler triggered for task ${task.id}, item ${itemId}`);
                     if (onVetoRequirementItem) {
-                      onVetoRequirementItem(task.id, itemId);
+                      console.log(`[TaskCard] Requirements - Calling onVetoRequirementItem handler`);
+                      onVetoRequirementItem(task.id, itemId)
+                        .then(() => console.log(`[TaskCard] Requirements - onVetoRequirementItem completed successfully for item ${itemId}`))
+                        .catch(error => console.error(`[TaskCard] Requirements - Error in onVetoRequirementItem:`, error));
+                    } else {
+                      console.log(`[TaskCard] Requirements - onVetoRequirementItem handler not available`);
                     }
                   }}
                 />
@@ -2896,10 +2945,10 @@ function TaskCard({
           {/* Technical Plan - With Approval Status - Handled by centralized layout logic */}
           {determineTaskSectionVisibility('technicalPlan', task, onUpdateTask, editingSections).visible && (
             <div id={`technical-plan-${task.id}`} className="mt-4 text-base block" style={{display: 'block'}} onClick={(e) => e.stopPropagation()}>
-              {onUpdateTask &&
-              onApproveTechnicalPlanItem &&
-              onVetoTechnicalPlanItem &&
-              onUpdateTechnicalPlanItems &&
+              {typeof onUpdateTask === 'function' &&
+              typeof onApproveTechnicalPlanItem === 'function' &&
+              typeof onVetoTechnicalPlanItem === 'function' &&
+              typeof onUpdateTechnicalPlanItems === 'function' &&
               task.technicalPlanItems ? (
                 <ApprovalItemList
                   label="Technical Plan"
@@ -2919,13 +2968,25 @@ function TaskCard({
                     }
                   }}
                   onApprove={(itemId) => {
+                    console.log(`[TaskCard] TechnicalPlan - onApprove handler triggered for task ${task.id}, item ${itemId}`);
                     if (onApproveTechnicalPlanItem) {
-                      onApproveTechnicalPlanItem(task.id, itemId);
+                      console.log(`[TaskCard] TechnicalPlan - Calling onApproveTechnicalPlanItem handler`);
+                      onApproveTechnicalPlanItem(task.id, itemId)
+                        .then(() => console.log(`[TaskCard] TechnicalPlan - onApproveTechnicalPlanItem completed successfully for item ${itemId}`))
+                        .catch(error => console.error(`[TaskCard] TechnicalPlan - Error in onApproveTechnicalPlanItem:`, error));
+                    } else {
+                      console.log(`[TaskCard] TechnicalPlan - onApproveTechnicalPlanItem handler not available`);
                     }
                   }}
                   onVeto={(itemId) => {
+                    console.log(`[TaskCard] TechnicalPlan - onVeto handler triggered for task ${task.id}, item ${itemId}`);
                     if (onVetoTechnicalPlanItem) {
-                      onVetoTechnicalPlanItem(task.id, itemId);
+                      console.log(`[TaskCard] TechnicalPlan - Calling onVetoTechnicalPlanItem handler`);
+                      onVetoTechnicalPlanItem(task.id, itemId)
+                        .then(() => console.log(`[TaskCard] TechnicalPlan - onVetoTechnicalPlanItem completed successfully for item ${itemId}`))
+                        .catch(error => console.error(`[TaskCard] TechnicalPlan - Error in onVetoTechnicalPlanItem:`, error));
+                    } else {
+                      console.log(`[TaskCard] TechnicalPlan - onVetoTechnicalPlanItem handler not available`);
                     }
                   }}
                 />
@@ -2982,10 +3043,10 @@ function TaskCard({
           {/* Next Steps - With Approval Status - Handled by centralized layout logic */}
           {determineTaskSectionVisibility('nextSteps', task, onUpdateTask, editingSections).visible && (
             <div id={`next-steps-${task.id}`} className="mt-4 text-base block" style={{display: 'block'}} onClick={(e) => e.stopPropagation()}>
-              {onUpdateTask &&
-              onApproveNextStepItem &&
-              onVetoNextStepItem &&
-              onUpdateNextStepItems &&
+              {typeof onUpdateTask === 'function' &&
+              typeof onApproveNextStepItem === 'function' &&
+              typeof onVetoNextStepItem === 'function' &&
+              typeof onUpdateNextStepItems === 'function' &&
               task.nextStepItems ? (
                 <ApprovalItemList
                   label="Next Steps"
@@ -3005,13 +3066,25 @@ function TaskCard({
                     }
                   }}
                   onApprove={(itemId) => {
+                    console.log(`[TaskCard] NextSteps - onApprove handler triggered for task ${task.id}, item ${itemId}`);
                     if (onApproveNextStepItem) {
-                      onApproveNextStepItem(task.id, itemId);
+                      console.log(`[TaskCard] NextSteps - Calling onApproveNextStepItem handler`);
+                      onApproveNextStepItem(task.id, itemId)
+                        .then(() => console.log(`[TaskCard] NextSteps - onApproveNextStepItem completed successfully for item ${itemId}`))
+                        .catch(error => console.error(`[TaskCard] NextSteps - Error in onApproveNextStepItem:`, error));
+                    } else {
+                      console.log(`[TaskCard] NextSteps - onApproveNextStepItem handler not available`);
                     }
                   }}
                   onVeto={(itemId) => {
+                    console.log(`[TaskCard] NextSteps - onVeto handler triggered for task ${task.id}, item ${itemId}`);
                     if (onVetoNextStepItem) {
-                      onVetoNextStepItem(task.id, itemId);
+                      console.log(`[TaskCard] NextSteps - Calling onVetoNextStepItem handler`);
+                      onVetoNextStepItem(task.id, itemId)
+                        .then(() => console.log(`[TaskCard] NextSteps - onVetoNextStepItem completed successfully for item ${itemId}`))
+                        .catch(error => console.error(`[TaskCard] NextSteps - Error in onVetoNextStepItem:`, error));
+                    } else {
+                      console.log(`[TaskCard] NextSteps - onVetoNextStepItem handler not available`);
                     }
                   }}
                 />

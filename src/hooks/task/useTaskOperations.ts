@@ -122,8 +122,10 @@ export function useTaskOperations({
     // Add to tasks array optimistically - for adding new tasks
     // We need to sort because new tasks should appear at the top
     setTasks(prevTasks => {
+      // Make sure prevTasks is iterable before spreading
+      const prevTasksArray = Array.isArray(prevTasks) ? prevTasks : [];
       // Create a new array with the new task and sort
-      const newTasks = [...prevTasks, tempTask];
+      const newTasks = [...prevTasksArray, tempTask];
       return sortByNewestFirst(newTasks);
     });
 
@@ -154,17 +156,20 @@ export function useTaskOperations({
 
         // Replace temp task with real one from server with efficient updates
         setTasks((currentTasks) => {
+          // Ensure currentTasks is an array
+          const currentTasksArray = Array.isArray(currentTasks) ? currentTasks : [];
+          
           // Find the index of the temporary task
-          const tempIndex = currentTasks.findIndex((task) => task.id === tempId);
+          const tempIndex = currentTasksArray.findIndex((task) => task.id === tempId);
           
           // If temp task not found, just add the real one
           if (tempIndex === -1) {
-            const newTasks = [...currentTasks, realTask];
+            const newTasks = [...currentTasksArray, realTask];
             return sortByNewestFirst(deduplicateTasks(newTasks));
           }
           
           // Create a new array with just the temp task replaced
-          const newTasks = [...currentTasks];
+          const newTasks = [...currentTasksArray];
           newTasks[tempIndex] = realTask;
           
           // Apply deduplication and sorting
@@ -213,8 +218,10 @@ export function useTaskOperations({
       setLocalTaskCache(newCache);
       
       // Update React Query cache optimistically
-      queryClient.setQueryData(['tasks'], (oldTasks: Task[] = []) => {
-        return oldTasks.map(task => task.id === id ? updatedTask : task);
+      queryClient.setQueryData(['tasks'], (oldTasks: Task[] | undefined) => {
+        // Ensure oldTasks is an array
+        const oldTasksArray = Array.isArray(oldTasks) ? oldTasks : [];
+        return oldTasksArray.map(task => task.id === id ? updatedTask : task);
       });
       
       // Return context with previous tasks and updated task
@@ -314,12 +321,15 @@ export function useTaskOperations({
     // Instead of copying the entire array and then sorting, we use React's state updater pattern
     // to modify only the specific task that changed
     setTasks(prevTasks => {
+      // Ensure prevTasks is an array
+      const prevTasksArray = Array.isArray(prevTasks) ? prevTasks : [];
+      
       // Find the index of the task to update
-      const index = prevTasks.findIndex(t => t.id === taskId);
-      if (index === -1) return prevTasks; // Task not found, return unchanged
+      const index = prevTasksArray.findIndex(t => t.id === taskId);
+      if (index === -1) return prevTasksArray; // Task not found, return unchanged
       
       // Create a new array with just the one task replaced
-      const newTasks = [...prevTasks];
+      const newTasks = [...prevTasksArray];
       newTasks[index] = updatedTask;
       
       // Sort only when necessary - most operations shouldn't affect sort order
@@ -375,12 +385,15 @@ export function useTaskOperations({
     // Remove from tasks array using functional update
     // This avoids creating an intermediate array with all tasks
     setTasks(prevTasks => {
+      // Ensure prevTasks is an array
+      const prevTasksArray = Array.isArray(prevTasks) ? prevTasks : [];
+      
       // Find the index of the task to remove
-      const index = prevTasks.findIndex(t => t.id === taskId);
-      if (index === -1) return prevTasks; // Task not found, return unchanged
+      const index = prevTasksArray.findIndex(t => t.id === taskId);
+      if (index === -1) return prevTasksArray; // Task not found, return unchanged
       
       // Create a new array without the deleted task
-      const newTasks = [...prevTasks];
+      const newTasks = [...prevTasksArray];
       newTasks.splice(index, 1);
       return newTasks;
     });
@@ -441,12 +454,15 @@ export function useTaskOperations({
 
     // Update tasks array optimistically with efficient memory usage
     setTasks(prevTasks => {
+      // Ensure prevTasks is an array
+      const prevTasksArray = Array.isArray(prevTasks) ? prevTasks : [];
+      
       // Find the index of the task to update
-      const index = prevTasks.findIndex(t => t.id === taskId);
-      if (index === -1) return prevTasks; // Task not found, return unchanged
+      const index = prevTasksArray.findIndex(t => t.id === taskId);
+      if (index === -1) return prevTasksArray; // Task not found, return unchanged
       
       // Create a new array with just the one task replaced
-      const newTasks = [...prevTasks];
+      const newTasks = [...prevTasksArray];
       newTasks[index] = updatedTask;
       return newTasks;
     });
@@ -509,12 +525,15 @@ export function useTaskOperations({
 
     // Update tasks array optimistically with memory-efficient updates
     setTasks(prevTasks => {
+      // Ensure prevTasks is an array
+      const prevTasksArray = Array.isArray(prevTasks) ? prevTasks : [];
+      
       // Find the index of the task to update
-      const index = prevTasks.findIndex(t => t.id === taskId);
-      if (index === -1) return prevTasks; // Task not found, return unchanged
+      const index = prevTasksArray.findIndex(t => t.id === taskId);
+      if (index === -1) return prevTasksArray; // Task not found, return unchanged
       
       // Create a new array with just the one task replaced
-      const newTasks = [...prevTasks];
+      const newTasks = [...prevTasksArray];
       newTasks[index] = updatedTask;
       
       // Sort only when necessary (completion status affects sorting in some views)
@@ -584,12 +603,15 @@ export function useTaskOperations({
 
     // Update tasks array optimistically with minimal object creation
     setTasks(prevTasks => {
+      // Ensure prevTasks is an array
+      const prevTasksArray = Array.isArray(prevTasks) ? prevTasks : [];
+      
       // Find the index of the task to update
-      const index = prevTasks.findIndex(t => t.id === taskId);
-      if (index === -1) return prevTasks; // Task not found, return unchanged
+      const index = prevTasksArray.findIndex(t => t.id === taskId);
+      if (index === -1) return prevTasksArray; // Task not found, return unchanged
       
       // Create a new array with just the one task replaced
-      const newTasks = [...prevTasks];
+      const newTasks = [...prevTasksArray];
       newTasks[index] = updatedTask;
       
       // Sort only when necessary - most operations shouldn't affect sort order
@@ -661,12 +683,15 @@ export function useTaskOperations({
 
     // Update tasks array optimistically with memory-efficient update
     setTasks(prevTasks => {
+      // Ensure prevTasks is an array
+      const prevTasksArray = Array.isArray(prevTasks) ? prevTasks : [];
+      
       // Find the index of the task to update
-      const index = prevTasks.findIndex(t => t.id === taskId);
-      if (index === -1) return prevTasks; // Task not found, return unchanged
+      const index = prevTasksArray.findIndex(t => t.id === taskId);
+      if (index === -1) return prevTasksArray; // Task not found, return unchanged
       
       // Create a new array with just the one task replaced
-      const newTasks = [...prevTasks];
+      const newTasks = [...prevTasksArray];
       newTasks[index] = updatedTask;
       
       // Only resort in cases where the createdAt date changes
@@ -1366,12 +1391,15 @@ export function useTaskOperations({
         
         // Update tasks array with memory-efficient approach
         setTasks(prevTasks => {
+          // Ensure prevTasks is an array
+          const prevTasksArray = Array.isArray(prevTasks) ? prevTasks : [];
+          
           // Find the index of the task to update
-          const index = prevTasks.findIndex(t => t.id === taskId);
-          if (index === -1) return prevTasks; // Task not found, return unchanged
+          const index = prevTasksArray.findIndex(t => t.id === taskId);
+          if (index === -1) return prevTasksArray; // Task not found, return unchanged
           
           // Create a new array with just the one task replaced
-          const newTasks = [...prevTasks];
+          const newTasks = [...prevTasksArray];
           newTasks[index] = updatedTask;
           return newTasks;
         });

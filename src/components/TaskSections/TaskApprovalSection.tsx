@@ -21,8 +21,8 @@ interface TaskApprovalSectionProps {
   items: ItemWithStatus[] | undefined; // The list of items to display
   taskId: string;                   // ID of the parent task
   onUpdateItems: (taskId: string, newItems: ItemWithStatus[]) => void; // Handler to update all items
-  onApproveItem: (taskId: string, itemId: string) => void; // Handler to approve a specific item
-  onVetoItem: (taskId: string, itemId: string) => void;   // Handler to veto (remove) a specific item
+  onApproveItem?: (taskId: string, itemId: string) => void; // Optional handler to approve a specific item
+  onVetoItem?: (taskId: string, itemId: string) => void;   // Optional handler to veto (remove) a specific item
   isVisible: boolean;               // Whether this section should be displayed
   setEditingSections?: React.Dispatch<React.SetStateAction<Record<string, boolean>>>; // Optional state setter
   readOnly?: boolean;               // Whether the component should be in read-only mode
@@ -71,13 +71,23 @@ const TaskApprovalSection: React.FC<TaskApprovalSectionProps> = ({
           console.log('TASK_SECTION: onApprove called with itemId:', itemId);
           console.log('TASK_SECTION: calling onApproveItem with taskId:', taskId, 'and itemId:', itemId);
           console.log('TASK_SECTION: onApproveItem type:', typeof onApproveItem);
-          onApproveItem(taskId, itemId);
+          
+          if (typeof onApproveItem === 'function') {
+            onApproveItem(taskId, itemId);
+          } else {
+            console.error('TASK_SECTION: onApproveItem is not a function:', typeof onApproveItem);
+          }
         }}
         onVeto={(itemId) => {
           console.log('TASK_SECTION: onVeto called with itemId:', itemId);
           console.log('TASK_SECTION: calling onVetoItem with taskId:', taskId, 'and itemId:', itemId);
           console.log('TASK_SECTION: onVetoItem type:', typeof onVetoItem);
-          onVetoItem(taskId, itemId);
+          
+          if (typeof onVetoItem === 'function') {
+            onVetoItem(taskId, itemId);
+          } else {
+            console.error('TASK_SECTION: onVetoItem is not a function:', typeof onVetoItem);
+          }
         }}
       />
     </div>

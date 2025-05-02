@@ -316,13 +316,6 @@ export default function TaskFilters({
             items={getMenuItems()}
             label="Task actions"
           />
-          <button 
-            onClick={onAddNewClick}
-            className="px-3 py-1.5 rounded-md text-sm font-medium transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200 w-9 h-9 flex items-center justify-center"
-            aria-label="Add new task"
-          >
-            +
-          </button>
         </div>
       </div>
       
