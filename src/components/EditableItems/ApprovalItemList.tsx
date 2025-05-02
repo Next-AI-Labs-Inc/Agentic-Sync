@@ -123,6 +123,25 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
       if (typeof onApprove === 'function') {
         await onApprove(itemId);
         console.log('APPROVE FLOW: onApprove handler completed successfully');
+        
+        console.log('APPROVE DEBUG: Current items before update:', JSON.stringify(items));
+        console.log('APPROVE DEBUG: Item to approve:', JSON.stringify(items.find(item => item.id === itemId)));
+        
+        // Update the local items state to reflect the approved status immediately
+        // This ensures the UI updates even if the parent component doesn't update the state
+        const updatedItems = items.map(item => 
+          item.id === itemId 
+            ? { ...item, status: 'approved', approvedAt: new Date().toISOString() } 
+            : item
+        );
+        
+        console.log('APPROVE DEBUG: Updated items after mapping:', JSON.stringify(updatedItems));
+        console.log('APPROVE DEBUG: Approved item after update:', JSON.stringify(updatedItems.find(item => item.id === itemId)));
+        
+        // Call onUpdate to update the parent state with the new item status
+        console.log('APPROVE DEBUG: Calling onUpdate with updated items');
+        onUpdate(updatedItems);
+        console.log('APPROVE DEBUG: onUpdate called successfully');
       } else {
         console.error('APPROVE FLOW: onApprove is not a function, type:', typeof onApprove);
       }
@@ -134,7 +153,7 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
       console.log('APPROVE FLOW: Resetting processing state');
       setProcessingApprove(null);
     }
-  }, [onApprove]);
+  }, [onApprove, items, onUpdate]);
   
   // Handle veto (delete)
   const handleVeto = useCallback((itemId: string) => async (e: React.MouseEvent) => {
@@ -154,6 +173,20 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
       if (typeof onVeto === 'function') {
         await onVeto(itemId);
         console.log('VETO FLOW: onVeto handler completed successfully');
+        
+        console.log('VETO DEBUG: Current items before update:', JSON.stringify(items));
+        
+        // Update the local items state to remove the vetoed item immediately
+        // This ensures the UI updates even if the parent component doesn't update the state
+        const updatedItems = items.filter(item => item.id !== itemId);
+        
+        console.log('VETO DEBUG: Updated items after filter:', JSON.stringify(updatedItems));
+        console.log('VETO DEBUG: Items removed:', JSON.stringify(items.filter(item => item.id === itemId)));
+        
+        // Call onUpdate to update the parent state without the vetoed item
+        console.log('VETO DEBUG: Calling onUpdate with filtered items');
+        onUpdate(updatedItems);
+        console.log('VETO DEBUG: onUpdate called successfully');
       } else {
         console.error('VETO FLOW: onVeto is not a function, type:', typeof onVeto);
       }
@@ -165,7 +198,7 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
       console.log('VETO FLOW: Resetting processing state');
       setProcessingVeto(null);
     }
-  }, [onVeto]);
+  }, [onVeto, items, onUpdate]);
   
   // Handle adding new item
   const handleAddNew = useCallback((e: React.MouseEvent) => {
@@ -322,7 +355,23 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
                   {item.status === 'proposed' && (
                     <>
                       <button
-                        onClick={handleApprove(item.id)}
+                        onClick={(e) => {
+                          console.log('RAW CLICK HANDLER - APPROVE BUTTON');
+                          console.log('readOnly:', readOnly);
+                          console.log('itemId:', item.id);
+                          console.log('onApprove type:', typeof onApprove);
+                          console.log('onApprove value:', onApprove);
+                          
+                          if (typeof onApprove === 'function') {
+                            console.log('onApprove is a function, calling handleApprove');
+                            handleApprove(item.id)(e);
+                          } else {
+                            console.error('CANNOT CALL handleApprove - onApprove is not a function!');
+                            console.error('onApprove type:', typeof onApprove);
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }
+                        }}
                         className={`px-3 py-1 rounded-md text-sm font-medium ${
                           readOnly || processingApprove === item.id
                             ? 'bg-gray-50 border border-gray-300 text-gray-400 cursor-not-allowed'
@@ -335,7 +384,23 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
                         {processingApprove === item.id ? 'Processing...' : 'Approve'}
                       </button>
                       <button
-                        onClick={handleVeto(item.id)}
+                        onClick={(e) => {
+                          console.log('RAW CLICK HANDLER - VETO BUTTON');
+                          console.log('readOnly:', readOnly);
+                          console.log('itemId:', item.id);
+                          console.log('onVeto type:', typeof onVeto);
+                          console.log('onVeto value:', onVeto);
+                          
+                          if (typeof onVeto === 'function') {
+                            console.log('onVeto is a function, calling handleVeto');
+                            handleVeto(item.id)(e);
+                          } else {
+                            console.error('CANNOT CALL handleVeto - onVeto is not a function!');
+                            console.error('onVeto type:', typeof onVeto);
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }
+                        }}
                         className={`ml-2 px-3 py-1 rounded-md text-sm font-medium ${
                           readOnly || processingVeto === item.id
                             ? 'bg-gray-50 border border-gray-300 text-gray-400 cursor-not-allowed'

@@ -23,7 +23,7 @@
  * DETAILED CONTEXT FOR AGENTS:
  * 
  * The issue appears to be in the parent-child prop handling chain where approval actions
- * in EditableItemList don't propagate correctly to update both the UI and database.
+ * in ApprovalItemList don't propagate correctly to update both the UI and database.
  * While the component structure has been fixed to pass correct props, there seems to be
  * an architectural issue with how state is synchronized.
  * 
@@ -33,7 +33,7 @@
  * - The UI doesn't refresh with the updated item status after approval
  * 
  * To properly fix this issue would require:
- * 1. A full audit of the state management flow from TaskCard → ItemSection → EditableItemList
+ * 1. A full audit of the state management flow from TaskCard → ItemSection → ApprovalItemList
  * 2. Adding proper optimistic UI updates synchronized with actual database changes
  * 3. Creating a proper real-time sync mechanism for item status changes
  * 

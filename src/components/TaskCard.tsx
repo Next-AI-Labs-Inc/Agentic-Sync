@@ -23,8 +23,8 @@ import ReactMarkdown from 'react-markdown';
 import Link from 'next/link';
 import { Task, ItemWithStatus } from '@/types';
 import DropdownMenu from './DropdownMenu';
-import EditableItemList from './EditableItems/EditableItemList';
-import ApprovalItemList from './EditableItems/ApprovalItemList';
+import ApprovalItemList2 from './EditableItems/ApprovalItemList';
+// Using our fixed component that properly handles undefined handlers
 import AgentLauncher from './AgentLauncher';
 import FeedbackForm from './FeedbackForm';
 import CommandToggle from './CommandToggle';
@@ -2521,8 +2521,44 @@ function TaskCard({
             </div>
           )}
 
-          {/* Stage-appropriate action buttons (always visible) */}
-          {renderStageActions()}
+          {/* Stage-appropriate action buttons with collapsible container */}
+          <div className="relative">
+            {task.status === TASK_STATUSES.FOR_REVIEW && (
+              <div className="flex items-center mt-3">
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setCommandsExpanded(!commandsExpanded);
+                  }}
+                  className="text-sm text-gray-500 hover:text-gray-700 flex items-center"
+                >
+                  {commandsExpanded ? (
+                    <>
+                      <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                      Hide actions
+                    </>
+                  ) : (
+                    <>
+                      <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                      Show actions
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+            
+            {/* Conditional rendering of coaching message and actions based on commandsExpanded state */}
+            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
+              task.status !== TASK_STATUSES.FOR_REVIEW || commandsExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+            }`}>
+              {renderStageActions()}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -2800,13 +2836,13 @@ function TaskCard({
               <div className="flex justify-end">
                 <ClickableId 
                   id="CO_9108" 
-                  filePath="/src/components/TaskCard.tsx"
+                  filePath="/src/components/EditableItems/ApprovalItemList.tsx (Fixed approve/veto buttons with readOnly prop and error handling)"
                   className="mb-1" 
                   text="And specifically, the location in the code which has the header Verification Steps followed by <ul className='list-disc pl-5 text-gray-600 block'> so that agents can find that exact place"
                 />
               </div>
               {onUpdateTask ? (
-                <EditableItemList
+                <ApprovalItemList2
                   label="Verification Steps"
                   items={task.verificationSteps?.map(step => ({
                     id: `step-${Math.random().toString(36).substr(2, 9)}`,
@@ -2893,8 +2929,8 @@ function TaskCard({
                   }}
                 />
               ) : onUpdateTask ? (
-                // Legacy format - for backward compatibility
-                <EditableItemList
+                // Using our fixed component that handles undefined callbacks
+                <ApprovalItemList2
                   label="Requirements"
                   items={parseListString(task.requirements).map(content => ({
                     id: `req-${Math.random().toString(36).substr(2, 9)}`,
@@ -2991,8 +3027,8 @@ function TaskCard({
                   }}
                 />
               ) : onUpdateTask ? (
-                // Legacy format - for backward compatibility
-                <EditableItemList
+                // Using our fixed component that handles undefined callbacks
+                <ApprovalItemList2
                   label="Technical Plan"
                   items={parseListString(task.technicalPlan).map(content => ({
                     id: `tech-${Math.random().toString(36).substr(2, 9)}`,
@@ -3089,8 +3125,8 @@ function TaskCard({
                   }}
                 />
               ) : onUpdateTask ? (
-                // Legacy format - for backward compatibility
-                <EditableItemList
+                // Using our fixed component that handles undefined callbacks
+                <ApprovalItemList2
                   label="Next Steps"
                   items={(task.nextSteps || []).map(content => ({
                     id: `next-${Math.random().toString(36).substr(2, 9)}`,
