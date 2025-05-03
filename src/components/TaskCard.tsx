@@ -2452,54 +2452,7 @@ function TaskCard({
             </div>
           </div>
 
-          {/* Created date with edit button */}
-          <div className="mt-1 text-xs text-gray-500">
-            {isEditingDate ? (
-              <div onClick={(e) => e.stopPropagation()}>
-                <form onSubmit={handleDateSubmit} className="inline-flex items-center">
-                  <label className="mr-2">New date:</label>
-                  <input
-                    type="text"
-                    value={newDateValue}
-                    onChange={(e) => setNewDateValue(e.target.value)}
-                    placeholder="YYYY-MM-DDThh:mm:ss.sssZ"
-                    className="px-2 py-1 border border-blue-300 rounded text-xs w-64"
-                    autoFocus
-                  />
-                  <button
-                    type="submit"
-                    className="ml-1 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs"
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    className="ml-1 px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
-                    onClick={() => setIsEditingDate(false)}
-                  >
-                    Cancel
-                  </button>
-                </form>
-              </div>
-            ) : (
-              <div className="flex items-center">
-                <span>Created {formatTimeAgo(task.createdAt)}</span>
-                {expanded && onUpdateDate && (
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setIsEditingDate(true);
-                    }}
-                    className="ml-2 text-blue-500 hover:text-blue-700 text-xs"
-                    title="Edit creation date"
-                  >
-                    edit
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+          {/* Created date with edit button - moved to bottom left of card */}
 
           {expanded && (
             <div className="flex items-center justify-between mt-3">
@@ -3216,7 +3169,11 @@ function TaskCard({
 
           {/* Creation details - all in relative time */}
           <div className="mt-4 text-xs text-gray-500">
-            <div className="flex items-center justify-end mb-1">
+            <div className="flex justify-between items-center mb-1">
+              {/* Empty div to maintain layout */}
+              <div></div>
+              
+              {/* Copy link button on the right */}
               <button
                 onClick={copyTaskUrl}
                 className="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded hover:bg-gray-100"
@@ -3226,9 +3183,55 @@ function TaskCard({
                 {showUrlCopied && <span className="ml-1 text-green-600">Copied!</span>}
               </button>
             </div>
-            <p>Last updated {formatTimeAgo(task.updatedAt)}</p>
-            {task.completedAt && <p>Completed {formatTimeAgo(task.completedAt)}</p>}
-            {task.reviewedAt && <p>Reviewed {formatTimeAgo(task.reviewedAt)}</p>}
+            
+            {/* Date editing form */}
+            {isEditingDate && (
+              <div onClick={(e) => e.stopPropagation()} className="mb-2">
+                <form onSubmit={handleDateSubmit} className="inline-flex items-center">
+                  <label className="mr-2">New date:</label>
+                  <input
+                    type="text"
+                    value={newDateValue}
+                    onChange={(e) => setNewDateValue(e.target.value)}
+                    placeholder="YYYY-MM-DDThh:mm:ss.sssZ"
+                    className="px-2 py-1 border border-blue-300 rounded text-xs w-64"
+                    autoFocus
+                  />
+                  <button
+                    type="submit"
+                    className="ml-1 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs"
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    className="ml-1 px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
+                    onClick={() => setIsEditingDate(false)}
+                  >
+                    Cancel
+                  </button>
+                </form>
+              </div>
+            )}
+            
+            {/* Dates with creation date at the bottom left, now clickable for editing (without button) */}
+            <div className="flex justify-between">
+              {/* Creation date on the left - clickable for editing */}
+              <span 
+                onClick={!isEditingDate ? handleDateClick : undefined}
+                className={`${onUpdateDate ? 'cursor-pointer hover:text-blue-600 hover:underline' : ''} transition-colors`}
+                title={onUpdateDate ? "Click to edit creation date" : "Creation date"}
+              >
+                Created {formatTimeAgo(task.createdAt)}
+              </span>
+              
+              {/* Other timestamps on the right */}
+              <div className="text-right">
+                <p>Last updated {formatTimeAgo(task.updatedAt)}</p>
+                {task.completedAt && <p>Completed {formatTimeAgo(task.completedAt)}</p>}
+                {task.reviewedAt && <p>Reviewed {formatTimeAgo(task.reviewedAt)}</p>}
+              </div>
+            </div>
           </div>
         </div>
       )}
