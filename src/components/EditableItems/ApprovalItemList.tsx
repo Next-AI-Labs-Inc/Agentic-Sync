@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { FaEdit, FaPlus, FaTrash, FaCheck, FaTimes, FaCheckCircle, FaBan } from 'react-icons/fa';
 import { ItemWithStatus } from '@/types';
+import { handleApprove, handleVeto } from '@/utils/approvalFunctions';
 
 /**
  * ApprovalItemList Component
@@ -105,99 +106,36 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
     setEditValue('');
   }, []);
   
-  // Handle approve
-  const handleApprove = useCallback((itemId: string) => async (e: React.MouseEvent) => {
-    console.log('APPROVE FLOW: Button clicked for item', itemId);
+  // Handle approve - using the extracted handleApprove function
+  const handleApproveCallback = useCallback((itemId: string) => async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // Set processing state
-    console.log('APPROVE FLOW: Setting processing state', itemId);
-    setProcessingApprove(itemId);
-    
-    try {
-      console.log('APPROVE FLOW: Calling onApprove handler with itemId', itemId);
-      console.log('APPROVE FLOW: onApprove handler type:', typeof onApprove);
-      
-      // Check if onApprove is actually a function before calling it
-      if (typeof onApprove === 'function') {
-        await onApprove(itemId);
-        console.log('APPROVE FLOW: onApprove handler completed successfully');
-        
-        console.log('APPROVE DEBUG: Current items before update:', JSON.stringify(items));
-        console.log('APPROVE DEBUG: Item to approve:', JSON.stringify(items.find(item => item.id === itemId)));
-        
-        // Update the local items state to reflect the approved status immediately
-        // This ensures the UI updates even if the parent component doesn't update the state
-        const updatedItems = items.map(item => 
-          item.id === itemId 
-            ? { ...item, status: 'approved', approvedAt: new Date().toISOString() } 
-            : item
-        );
-        
-        console.log('APPROVE DEBUG: Updated items after mapping:', JSON.stringify(updatedItems));
-        console.log('APPROVE DEBUG: Approved item after update:', JSON.stringify(updatedItems.find(item => item.id === itemId)));
-        
-        // Call onUpdate to update the parent state with the new item status
-        console.log('APPROVE DEBUG: Calling onUpdate with updated items');
-        onUpdate(updatedItems);
-        console.log('APPROVE DEBUG: onUpdate called successfully');
-      } else {
-        console.error('APPROVE FLOW: onApprove is not a function, type:', typeof onApprove);
-      }
-    } catch (error) {
-      // Log the error but don't crash
-      console.error('APPROVE FLOW: Error approving item:', error);
-    } finally {
-      // Reset processing state
-      console.log('APPROVE FLOW: Resetting processing state');
-      setProcessingApprove(null);
-    }
+    // Call the extracted handleApprove function with all necessary parameters
+    await handleApprove(
+      itemId,
+      items,
+      // Cast to Promise<void> to match the expected type
+      (id: string) => onApprove(id) as unknown as Promise<void>,
+      onUpdate,
+      setProcessingApprove
+    );
   }, [onApprove, items, onUpdate]);
   
-  // Handle veto (delete)
-  const handleVeto = useCallback((itemId: string) => async (e: React.MouseEvent) => {
-    console.log('VETO FLOW: Button clicked for item', itemId);
+  // Handle veto - using the extracted handleVeto function
+  const handleVetoCallback = useCallback((itemId: string) => async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // Set processing state
-    console.log('VETO FLOW: Setting processing state', itemId);
-    setProcessingVeto(itemId);
-    
-    try {
-      console.log('VETO FLOW: Calling onVeto handler with itemId', itemId);
-      console.log('VETO FLOW: onVeto handler type:', typeof onVeto);
-      
-      // Check if onVeto is actually a function before calling it
-      if (typeof onVeto === 'function') {
-        await onVeto(itemId);
-        console.log('VETO FLOW: onVeto handler completed successfully');
-        
-        console.log('VETO DEBUG: Current items before update:', JSON.stringify(items));
-        
-        // Update the local items state to remove the vetoed item immediately
-        // This ensures the UI updates even if the parent component doesn't update the state
-        const updatedItems = items.filter(item => item.id !== itemId);
-        
-        console.log('VETO DEBUG: Updated items after filter:', JSON.stringify(updatedItems));
-        console.log('VETO DEBUG: Items removed:', JSON.stringify(items.filter(item => item.id === itemId)));
-        
-        // Call onUpdate to update the parent state without the vetoed item
-        console.log('VETO DEBUG: Calling onUpdate with filtered items');
-        onUpdate(updatedItems);
-        console.log('VETO DEBUG: onUpdate called successfully');
-      } else {
-        console.error('VETO FLOW: onVeto is not a function, type:', typeof onVeto);
-      }
-    } catch (error) {
-      // Log the error but don't crash
-      console.error('VETO FLOW: Error vetoing item:', error);
-    } finally {
-      // Reset processing state
-      console.log('VETO FLOW: Resetting processing state');
-      setProcessingVeto(null);
-    }
+    // Call the extracted handleVeto function with all necessary parameters
+    await handleVeto(
+      itemId,
+      items,
+      // Cast to Promise<void> to match the expected type
+      (id: string) => onVeto(id) as unknown as Promise<void>,
+      onUpdate,
+      setProcessingVeto
+    );
   }, [onVeto, items, onUpdate]);
   
   // Handle adding new item
@@ -363,10 +301,10 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
                           console.log('onApprove value:', onApprove);
                           
                           if (typeof onApprove === 'function') {
-                            console.log('onApprove is a function, calling handleApprove');
-                            handleApprove(item.id)(e);
+                            console.log('onApprove is a function, calling handleApproveCallback');
+                            handleApproveCallback(item.id)(e);
                           } else {
-                            console.error('CANNOT CALL handleApprove - onApprove is not a function!');
+                            console.error('CANNOT CALL handleApproveCallback - onApprove is not a function!');
                             console.error('onApprove type:', typeof onApprove);
                             e.preventDefault();
                             e.stopPropagation();
@@ -392,10 +330,10 @@ const ApprovalItemList: React.FC<ApprovalItemListProps> = ({
                           console.log('onVeto value:', onVeto);
                           
                           if (typeof onVeto === 'function') {
-                            console.log('onVeto is a function, calling handleVeto');
-                            handleVeto(item.id)(e);
+                            console.log('onVeto is a function, calling handleVetoCallback');
+                            handleVetoCallback(item.id)(e);
                           } else {
-                            console.error('CANNOT CALL handleVeto - onVeto is not a function!');
+                            console.error('CANNOT CALL handleVetoCallback - onVeto is not a function!');
                             console.error('onVeto type:', typeof onVeto);
                             e.preventDefault();
                             e.stopPropagation();
