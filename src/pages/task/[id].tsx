@@ -15,7 +15,16 @@ import ControlsToggle from '@/components/ControlsToggle';
  */
 function TaskDetail({ task }: { task: Task }) {
   // Use the Tasks context at the component level
-  const { addTaskFeedback, launchAgentForTask } = useTasks();
+  const { 
+    addTaskFeedback, 
+    launchAgentForTask,
+    approveRequirementItem,
+    vetoRequirementItem,
+    approveTechnicalPlanItem,
+    vetoTechnicalPlanItem,
+    approveNextStepItem,
+    vetoNextStepItem
+  } = useTasks();
   
   // Add state to manage task data locally
   const [localTask, setLocalTask] = useState(task);
@@ -59,17 +68,17 @@ function TaskDetail({ task }: { task: Task }) {
           }
         }}
         onToggleStar={() => Promise.resolve()}   // Read-only view
-        // Use readOnly mode instead of empty handlers
-        readOnly={true}
-        // Pass real handlers that will never be called due to readOnly mode
-        onApproveRequirementItem={addTaskFeedback} // These won't actually be called
-        onVetoRequirementItem={addTaskFeedback}    // due to readOnly=true, but
+        // Enable interactivity
+        readOnly={false}
+        // Pass the real handlers for item approval functionality
+        onApproveRequirementItem={approveRequirementItem} // These are now active
+        onVetoRequirementItem={vetoRequirementItem}       // since we disabled readOnly
         onUpdateRequirementItems={(id, items) => Promise.resolve()} // need to be passed
-        onApproveTechnicalPlanItem={addTaskFeedback} // to satisfy type requirements
-        onVetoTechnicalPlanItem={addTaskFeedback}
+        onApproveTechnicalPlanItem={approveTechnicalPlanItem} // to satisfy type requirements
+        onVetoTechnicalPlanItem={vetoTechnicalPlanItem}
         onUpdateTechnicalPlanItems={(id, items) => Promise.resolve()}
-        onApproveNextStepItem={addTaskFeedback}
-        onVetoNextStepItem={addTaskFeedback}
+        onApproveNextStepItem={approveNextStepItem}
+        onVetoNextStepItem={vetoNextStepItem}
         onUpdateNextStepItems={(id, items) => Promise.resolve()}
         // Agent integration functions - properly passed from context
         onAddFeedback={addTaskFeedback}
