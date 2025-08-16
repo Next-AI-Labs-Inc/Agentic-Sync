@@ -368,10 +368,14 @@ Tasks display their author/owner information. The system automatically detects:
 
 ## Documentation
 
+### 📚 Getting Started & Overview
+- [Documentation Index](./docs/index.md): Main documentation portal with comprehensive overview of the Agentic Sync system and user experience guidelines
+- [Using Tasks](./docs/using-tasks.md): Basic usage guide for navigating and managing tasks effectively in the GTD workflow
+- [Getting Started Tutorial](./docs/doc-test.md): Step-by-step verification guide for testing documentation navigation and system functionality
+
 ### 🎯 User Experience & Interface
 - [Enhanced UI Guide](./docs/ENHANCED_UI_GUIDE.md): Instant social media-like interactions with optimistic updates and smooth animations
 - [Social Media-Like Experience](./docs/SOCIAL_MEDIA_LIKE_EXPERIENCE.md): Transform task management into responsive, instant feedback workflows
-- [Using Tasks](./docs/using-tasks.md): Basic usage guide for navigating and managing tasks effectively
 - [Documentation Viewer](./docs/DOCUMENTATION_VIEWER.md): Built-in markdown documentation system with automatic file discovery
 
 ### 📋 Task Management & Features
@@ -398,6 +402,10 @@ Tasks display their author/owner information. The system automatically detects:
 - [Shared Components Migration Plan](./docs/SHARED_COMPONENTS_MIGRATION_PLAN.md): Strategic roadmap for component library modernization
 - [Migration Guide](./docs/migration/MIGRATION_GUIDE.md): Version upgrade procedures and compatibility guidelines
 - [Tauri Integration](./docs/migration/TAURI_INTEGRATION.md): Desktop application integration with native system capabilities
+- [Tauri Conversion Guide](./docs/tauri-conversion.md): Complete instructions for converting the web app to a native desktop application using Tauri
+
+### 🚀 Deployment & Infrastructure
+- [Vercel Configuration](./docs/vercel-config.md): Production deployment configuration and setup guide for Vercel hosting platform
 
 ### ✅ Completed Features & Achievements
 - [Task Completion](./docs/completed/TASK_COMPLETION.md): Finalized task management workflows and user interaction patterns
@@ -405,10 +413,30 @@ Tasks display their author/owner information. The system automatically detects:
 - [Build Summary](./docs/completed/build-summary.md): Optimization achievements and system performance improvements
 
 ### 🔧 Issues & Troubleshooting
+- [Issues Overview](./docs/issues/README.md): Comprehensive index of identified issues and their resolution status across the application
 - [Task Card Bug Fix](./docs/issues/TASK_CARD_BUG_FIX.md): Resolved display and interaction issues in TaskCard components
 - [Tauri Refresh Button Issue](./docs/issues/TAURI_REFRESH_BUTTON_ISSUE.md): Known desktop application refresh functionality limitations
 - [Next.js Routing Issues](./docs/issues/NEXT_JS_ROUTING_ISSUES.md): Route handling challenges and implementation solutions
+- [Next.js Routing Implementation Plan](./docs/issues/NEXT_JS_ROUTING_IMPLEMENTATION_PLAN.md): Detailed technical plan for resolving routing architecture issues
 - [TaskCard Approve/Veto Analysis](./docs/issues/TaskCard_Approve_Veto_Buttons_Analysis.md): Interactive task review functionality development
+- [TaskCard Markdown Support](./docs/issues/2025_05_02_TaskCard_Markdown_Field_Support.md): Enhancement analysis for rich text markdown rendering in task cards
+- [Filter Message Updates](./docs/issues/CO_9101_filter_message_update.md): Task filter system improvements and message handling optimizations
+
+### 🧩 Tasks Core Module
+- [Tasks Core Module](./tasks-core-module/README.md): Shared task implementation that can be customized for different business cases and use patterns
+- [Tasks Core Proposal](./tasks-core-module/TASKS_PROPOSAL.md): Strategic proposal and technical specification for modular task system architecture
+- [Tasks Core Workflow Guide](./tasks-core-module/WORKFLOW_GUIDE.md): Implementation workflow and integration patterns for the modular task core system
+
+### 🛠️ Developer Resources
+- [Testing Guide](./\_\_tests\_\_/TESTING.md): Comprehensive testing documentation focusing on real-time synchronization and EventBus components
+- [Editable Items Components](./src/components/EditableItems/README.md): Documentation for task requirements, technical plans, and next steps editing components
+- [Item Hooks](./src/hooks/items/README.md): Custom hooks for managing editable item lists with approval and veto functionality
+- [Filter Settings System](./src/utils/filterSettings/README.md): Centralized filter architecture with layered design for consistency and maintainability
+
+### 📋 Project Management
+- [Changelog](./CHANGELOG.md): Version history and feature additions tracking for the Agentic Sync application
+- [TODO List](./TODO.md): High-priority development tasks including Claude agent deployment and system enhancements
+- [Project Instructions](./CLAUDE.md): Detailed project-specific documentation and AI agent integration guidelines for development
 
 ## Getting Started
 
