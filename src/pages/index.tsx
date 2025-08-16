@@ -14,8 +14,8 @@ export default function HomePage() {
   return (
     <>
       <Head>
-        <title>IX Tasks</title>
-        <meta name="description" content="IX Tasks - AI-Native Task Management Platform" />
+        <title>Agentic Sync</title>
+        <meta name="description" content="Agentic Sync - AI-Native Task Management Platform by Next AI Labs" />
       </Head>
       
       <div className="flex flex-col items-center justify-center h-[70vh]">

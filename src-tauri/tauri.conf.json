@@ -7,7 +7,7 @@
     "withGlobalTauri": true
   },
   "package": {
-    "productName": "IXTasks",
+    "productName": "AgenticSync",
     "version": "1.1.1"
   },
   "tauri": {
@@ -17,7 +17,7 @@
     "bundle": {
       "active": true,
       "category": "DeveloperTool",
-      "copyright": "© 2025 IX Tasks Contributors",
+      "copyright": "© 2025 Next AI Labs",
       "deb": {
         "depends": []
       },
@@ -29,8 +29,8 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.ixtasks.app",
-      "longDescription": "IX Tasks - AI-Native Task Management Platform for Developers and AI Agents",
+      "identifier": "com.nextailabs.agenticsync",
+      "longDescription": "Agentic Sync - AI-Native Task Management Platform by Next AI Labs",
       "macOS": {
         "entitlements": null,
         "exceptionDomain": "",

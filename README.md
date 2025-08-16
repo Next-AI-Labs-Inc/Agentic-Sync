@@ -1,8 +1,8 @@
-# IX Tasks - AI-Native Task Management Platform
+# Agentic Sync - AI-Native Task Management Platform
 
 ## What This Does For You
 
-**IX Tasks** is a production-ready task management system specifically designed for developers and AI agents to collaborate effectively. This is not just another todo app - it's a sophisticated **Getting Things Done (GTD)** implementation with built-in AI agent integration.
+**Agentic Sync** is a production-ready task management system specifically designed for developers and AI agents to collaborate effectively. This is not just another todo app - it's a sophisticated **Getting Things Done (GTD)** implementation with built-in AI agent integration.
 
 ### 🎯 Core Value Proposition
 
@@ -69,7 +69,7 @@ The task automatically appears in your UI, follows GTD workflow, and waits for h
 
 ## Shared Components System
 
-The IX Tasks application uses a modular component architecture for shared components:
+The Agentic Sync application uses a modular component architecture for shared components:
 
 - **Modular Architecture**: Individual components are packaged separately instead of as a monolithic library
 - **Local Development**: Components are referenced via local file paths for seamless development
