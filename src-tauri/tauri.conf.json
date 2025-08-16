@@ -7,7 +7,7 @@
     "withGlobalTauri": true
   },
   "package": {
-    "productName": "IXAgentSync_1_1_1",
+    "productName": "IXTasks",
     "version": "1.1.1"
   },
   "tauri": {
@@ -17,7 +17,7 @@
     "bundle": {
       "active": true,
       "category": "DeveloperTool",
-      "copyright": "© 2025 Next AI Labs Inc.",
+      "copyright": "© 2025 IX Tasks Contributors",
       "deb": {
         "depends": []
       },
@@ -29,8 +29,8 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.nextailabs.ixagentsync",
-      "longDescription": "IX Agent Sync - Next AI Labs' AI Task Management and Tracking System",
+      "identifier": "com.ixtasks.app",
+      "longDescription": "IX Tasks - AI-Native Task Management Platform for Developers and AI Agents",
       "macOS": {
         "entitlements": null,
         "exceptionDomain": "",
