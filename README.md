@@ -2,11 +2,12 @@
 
 ## What This Does For You
 
-**Agentic Sync** is a production-ready task management system specifically designed for developers and AI agents to collaborate effectively. This is not just another todo app - it's a sophisticated **Getting Things Done (GTD)** implementation with built-in AI agent integration.
+**Agentic Sync** is a prototype-demo task management system specifically designed for developers and AI agents to collaborate effectively. This is not just another todo app - it's a sophisticated **Getting Things Done (GTD)** implementation with built-in AI agent integration.
 
 ### 🎯 Core Value Proposition
 
 **For Developers:**
+
 - **Instant, social media-like UI** with optimistic updates that make task management feel effortless
 - **Complete local deployment** - compiles to a native desktop app via Tauri with your own database
 - **AI agent direct communication** - code agents can create, update, and complete tasks programmatically
@@ -14,46 +15,38 @@
 - **Zero external dependencies** - runs entirely on your infrastructure
 
 **For AI Agents:**
+
 - **Direct task creation** - agents can log tasks without human intervention using the included client
 - **Status management** - agents mark tasks as 'for-review' when complete, requiring human approval
 - **Rich task context** - support for requirements, technical plans, verification steps, and dependencies
 - **Project organization** - automatic categorization and initiative linking
 
-### 🚀 What You Get
-
-```javascript
-// AI agents can directly create tasks like this:
-const { createTask } = require('../ixcoach-api/utils/agentTaskClient');
-
-await createTask({
-  title: 'Implement user authentication',
-  description: 'Add OAuth integration for Google and GitHub',
-  userImpact: 'Users can securely log in and access personalized features',
-  requirements: '- OAuth provider setup\n- User session management\n- Security audit',
-  technicalPlan: '1. Install auth libraries\n2. Set up OAuth flows\n3. Create user model',
-  status: 'proposed',
-  priority: 'high',
-  project: 'webapp'
-});
-```
-
-The task automatically appears in your UI, follows GTD workflow, and waits for human approval when AI completes work.
-
-## 🎬 Live Demo & Screenshots
+## 🎬 Live Demo
 
 **Enhancing AI Agent Communication with a User-Friendly Interface** 🚀  
 👉 [**Watch the demo on Loom**](https://www.loom.com/share/121fb242c0ba4c0c856abb31733342bb)
 
-<div align="center">
+### 🚀 What You Get
 
-[<img src="https://github.com/user-attachments/assets/7caca448-9d17-44cd-a6d5-1fa344fa6e41" width="300"/>](https://github.com/user-attachments/assets/7caca448-9d17-44cd-a6d5-1fa344fa6e41)
-[<img src="https://github.com/user-attachments/assets/78e6d33f-f443-41ed-b400-223f9cad7675" width="300"/>](https://github.com/user-attachments/assets/78e6d33f-f443-41ed-b400-223f9cad7675)
-[<img src="https://github.com/user-attachments/assets/c8766685-7cea-478f-bac5-68d8ed0796af" width="300"/>](https://github.com/user-attachments/assets/c8766685-7cea-478f-bac5-68d8ed0796af)
+```javascript
+// AI agents can directly create tasks like this:
+const { createTask } = require("../ixcoach-api/utils/agentTaskClient");
 
-[<img src="https://github.com/user-attachments/assets/9ea38dca-1edb-4964-9b5c-81e598cd30b9" width="300"/>](https://github.com/user-attachments/assets/9ea38dca-1edb-4964-9b5c-81e598cd30b9)
-[<img src="https://github.com/user-attachments/assets/b60ad38f-f7b4-4c6d-b824-05acca9a5308" width="300"/>](https://github.com/user-attachments/assets/b60ad38f-f7b4-4c6d-b824-05acca9a5308)
+await createTask({
+  title: "Implement user authentication",
+  description: "Add OAuth integration for Google and GitHub",
+  userImpact: "Users can securely log in and access personalized features",
+  requirements:
+    "- OAuth provider setup\n- User session management\n- Security audit",
+  technicalPlan:
+    "1. Install auth libraries\n2. Set up OAuth flows\n3. Create user model",
+  status: "proposed",
+  priority: "high",
+  project: "webapp",
+});
+```
 
-</div>
+The task automatically appears in your UI, follows GTD workflow, and waits for human approval when AI completes work.
 
 ### 📱 Deployment Options
 
@@ -65,6 +58,7 @@ The task automatically appears in your UI, follows GTD workflow, and waits for h
 ## Current Status & Development Roadmap
 
 ### ✅ Production Ready
+
 - **Core task management** - Create, update, track tasks with full GTD workflow
 - **AI agent integration** - Direct task creation and status management via API
 - **MongoDB backend** - Complete CRUD operations with optimistic UI updates
@@ -73,12 +67,14 @@ The task automatically appears in your UI, follows GTD workflow, and waits for h
 - **Instant UI feedback** - Social media-like responsiveness with animations
 
 ### 🚧 In Development
+
 - **Requirement approval system** - Human review interface for AI-generated requirements ([docs/issues/TaskCard_Approve_Veto_Buttons_Analysis.md](./docs/issues/TaskCard_Approve_Veto_Buttons_Analysis.md))
 - **Agent launcher UI** - Deploy AI agents directly from task cards to work on specific tasks
 - **Tauri desktop compilation** - Native app builds (basic structure ready, needs testing)
 - **SQLite local storage** - Offline-first database option for local deployments
 
 ### 🎯 Next Quarter
+
 - **Collaborative workflows** - Multi-user task assignment and approval chains
 - **Advanced integrations** - GitHub, Jira, and VS Code extensions
 - **Agent marketplace** - Pre-configured AI agents for common development tasks
@@ -114,55 +110,59 @@ This task management system implements GTD methodology with stages optimized for
 ### GTD Workflow Status Actions
 
 #### Collection Phase
+
 - **Inbox**: Initial collection point for new ideas and tasks
-  - *Primary Action*: Move to Brainstorm
-  - *Secondary Actions*: Mark Tested, Delete
+
+  - _Primary Action_: Move to Brainstorm
+  - _Secondary Actions_: Mark Tested, Delete
 
 - **Brainstorm**: Development phase for new ideas
-  - *Primary Action*: Move to Proposed for consideration
-  - *Secondary Actions*: Mark Tested, Delete
-  
+  - _Primary Action_: Move to Proposed for consideration
+  - _Secondary Actions_: Mark Tested, Delete
+
 #### Processing Phase
+
 - **Proposed**: Task has been proposed (often by AI) but not accepted
-  - *Primary Action*: Move to Todo 
-  - *Secondary Actions*: Mark Tested, Delete
+
+  - _Primary Action_: Move to Todo
+  - _Secondary Actions_: Mark Tested, Delete
 
 - **Backlog**: Task is in the backlog for future consideration
-  - *Primary Action*: Move to Todo
-  - *Secondary Actions*: Mark Tested, Delete
-  
+  - _Primary Action_: Move to Todo
+  - _Secondary Actions_: Mark Tested, Delete
+
 #### Organizing Phase
+
 - **Maybe** (Someday/Maybe): Items to consider later but not currently actionable
-  - *Primary Action*: Move to Backlog
-  - *Secondary Actions*: Mark Tested, Delete
-  
+  - _Primary Action_: Move to Backlog
+  - _Secondary Actions_: Mark Tested, Delete
 - **Todo**: Task is ready to be worked on
-  - *Primary Actions*: Start Progress, To Backlog
-  - *Secondary Actions*: Mark Tested, Delete
-  
+  - _Primary Actions_: Start Progress, To Backlog
+  - _Secondary Actions_: Mark Tested, Delete
+
 #### Engaging Phase
+
 - **In Progress**: Task is currently being worked on
-  - *Primary Actions*: Mark Done, Put On Hold
-  - *Secondary Actions*: Mark Tested, Delete
-  
+  - _Primary Actions_: Mark Done, Put On Hold
+  - _Secondary Actions_: Mark Tested, Delete
 - **On Hold**: Task is temporarily paused
-  - *Primary Action*: Resume Progress
-  - *Secondary Actions*: Mark Tested, Delete
-  
+  - _Primary Action_: Resume Progress
+  - _Secondary Actions_: Mark Tested, Delete
 - **Done**: Task has been completed and is ready for review
-  - *Primary Actions*: Mark Reviewed, Still Working
-  - *Secondary Actions*: Delete
-  
+  - _Primary Actions_: Mark Reviewed, Still Working
+  - _Secondary Actions_: Delete
+
 #### Reference Phase
+
 - **Reviewed**: Task has been completed and reviewed
-  - *Primary Actions*: Archive Task, Reopen Task
-  - *Secondary Actions*: Delete
-  
+  - _Primary Actions_: Archive Task, Reopen Task
+  - _Secondary Actions_: Delete
 - **Archived**: Task has been archived
-  - *Primary Actions*: Unarchive
-  - *Secondary Actions*: Delete
+  - _Primary Actions_: Unarchive
+  - _Secondary Actions_: Delete
 
 ### Special Filters
+
 - **All**: Shows all tasks (except archived)
 - **Pending**: All tasks that are not yet completed or reviewed
 
@@ -178,16 +178,19 @@ This task management system implements GTD methodology with stages optimized for
 ## Demo Mode vs Full Setup
 
 ### 🎬 **For Showcase/Demo Purposes**
+
 This repository demonstrates:
+
 - **Advanced React/Next.js architecture** with optimistic updates
-- **Sophisticated GTD workflow implementation** with complex state management  
+- **Sophisticated GTD workflow implementation** with complex state management
 - **AI agent integration patterns** for programmatic task management
 - **Social media-like UX** with instant feedback and animations
 - **Production-ready component structure** with memory optimization
 
 **You can explore the codebase, UI patterns, and architecture without any backend setup.**
 
-### 🔧 **For Full Functionality** 
+### 🔧 **For Full Functionality**
+
 To run the complete system, you'll need to set up a MongoDB backend. See the [Backend Reference Implementation](./docs/BACKEND_REFERENCE_IMPLEMENTATION.md) for complete setup guide.
 
 ## Backend Integration Requirements
@@ -201,6 +204,7 @@ To integrate this frontend with your backend system, implement the following API
 #### Tasks API (`/api/developer/tasks` or `/api/tasks/*`)
 
 **Tasks Collection API:**
+
 ```javascript
 // GET /api/developer/tasks - Fetch all tasks
 // Optional query parameters: ?project=projectName&status=status&priority=priority
@@ -213,6 +217,7 @@ To integrate this frontend with your backend system, implement the following API
 ```
 
 **Individual Task Operations:**
+
 ```javascript
 // GET /api/developer/tasks/:id - Get specific task by ID
 // Returns: { data: Task }
@@ -228,6 +233,7 @@ To integrate this frontend with your backend system, implement the following API
 #### Initiatives API (`/api/initiatives/*`)
 
 **Initiatives Collection API:**
+
 ```javascript
 // GET /api/initiatives - Fetch all initiatives with automatic deduplication
 // Returns: Array<Initiative> (automatically deduplicated by name+project)
@@ -239,6 +245,7 @@ To integrate this frontend with your backend system, implement the following API
 ```
 
 **Individual Initiative Operations:**
+
 ```javascript
 // GET /api/initiatives/:id - Get specific initiative by ID
 // Supports both numeric ID and MongoDB ObjectId
@@ -259,59 +266,70 @@ To integrate this frontend with your backend system, implement the following API
 ### Required Data Models
 
 #### Task Schema
+
 ```typescript
 interface Task {
-  _id: string;                    // MongoDB ObjectId
-  title: string;                  // Required: Task title
-  description?: string;           // Optional: Task description
-  userImpact?: string;           // Optional: How this affects users
+  _id: string; // MongoDB ObjectId
+  title: string; // Required: Task title
+  description?: string; // Optional: Task description
+  userImpact?: string; // Optional: How this affects users
   impactedFunctionality?: string; // Optional: What components/behaviors change
-  requirements?: string;          // Optional: List of requirements
-  technicalPlan?: string;         // Optional: Implementation steps
-  status: TaskStatus;             // Required: Current task status
-  priority: 'high' | 'medium' | 'low'; // Required: Task priority
-  project?: string;               // Optional: Project name
-  initiative?: string;            // Optional: Initiative name
-  branch?: string;                // Optional: Git branch
-  tags?: string[];                // Optional: Categorization tags
-  verificationSteps?: string[];   // Optional: Steps to verify completion
-  files?: string[];               // Optional: Related file paths
-  dependencies?: string[];        // Optional: Task IDs this depends on
-  nextSteps?: string[];           // Optional: Future work after completion
-  author?: string;                // Optional: Task creator
-  createdAt: Date;                // Required: Creation timestamp
-  updatedAt: Date;                // Required: Last update timestamp
-  markdown?: string;              // Optional: Rich text content
+  requirements?: string; // Optional: List of requirements
+  technicalPlan?: string; // Optional: Implementation steps
+  status: TaskStatus; // Required: Current task status
+  priority: "high" | "medium" | "low"; // Required: Task priority
+  project?: string; // Optional: Project name
+  initiative?: string; // Optional: Initiative name
+  branch?: string; // Optional: Git branch
+  tags?: string[]; // Optional: Categorization tags
+  verificationSteps?: string[]; // Optional: Steps to verify completion
+  files?: string[]; // Optional: Related file paths
+  dependencies?: string[]; // Optional: Task IDs this depends on
+  nextSteps?: string[]; // Optional: Future work after completion
+  author?: string; // Optional: Task creator
+  createdAt: Date; // Required: Creation timestamp
+  updatedAt: Date; // Required: Last update timestamp
+  markdown?: string; // Optional: Rich text content
 }
 
-type TaskStatus = 
-  | 'inbox' | 'brainstorm' | 'proposed' | 'backlog' | 'maybe' 
-  | 'todo' | 'in-progress' | 'on-hold' | 'for-review' | 'done' 
-  | 'reviewed' | 'archived';
+type TaskStatus =
+  | "inbox"
+  | "brainstorm"
+  | "proposed"
+  | "backlog"
+  | "maybe"
+  | "todo"
+  | "in-progress"
+  | "on-hold"
+  | "for-review"
+  | "done"
+  | "reviewed"
+  | "archived";
 ```
 
 #### Initiative Schema
+
 ```typescript
 interface Initiative {
-  _id: string;                    // MongoDB ObjectId (auto-generated)
-  id: number;                     // Numeric ID (auto-generated)
-  name: string;                   // Required: Initiative name
-  description?: string;           // Optional: Initiative description
-  status: 'not-started' | 'planning' | 'active' | 'completed' | 'archived'; // Default: 'not-started'
-  priority: 'high' | 'medium' | 'low'; // Default: 'medium'
-  startDate: string;              // ISO date string (auto-set to now if not provided)
-  targetDate?: string;            // Optional: Target completion date
-  owner?: string;                 // Optional: Initiative owner
-  budget?: number;                // Optional: Budget allocation
-  tags: string[];                 // Array of tags (default: [])
-  keyRisks: string[];             // Array of risk descriptions (default: [])
-  dependencies: string[];         // Array of dependency IDs (default: [])
-  linkedProjects: string[];       // Array of linked project names (default: [])
-  linkedKpis: string[];           // Array of linked KPI names (default: [])
-  createdAt: string;              // ISO date string (auto-generated)
-  updatedAt: string;              // ISO date string (auto-updated)
-  completedAt?: string;           // ISO date string (auto-set when status becomes 'completed')
-  project: string;                // Project name (default: 'tasks')
+  _id: string; // MongoDB ObjectId (auto-generated)
+  id: number; // Numeric ID (auto-generated)
+  name: string; // Required: Initiative name
+  description?: string; // Optional: Initiative description
+  status: "not-started" | "planning" | "active" | "completed" | "archived"; // Default: 'not-started'
+  priority: "high" | "medium" | "low"; // Default: 'medium'
+  startDate: string; // ISO date string (auto-set to now if not provided)
+  targetDate?: string; // Optional: Target completion date
+  owner?: string; // Optional: Initiative owner
+  budget?: number; // Optional: Budget allocation
+  tags: string[]; // Array of tags (default: [])
+  keyRisks: string[]; // Array of risk descriptions (default: [])
+  dependencies: string[]; // Array of dependency IDs (default: [])
+  linkedProjects: string[]; // Array of linked project names (default: [])
+  linkedKpis: string[]; // Array of linked KPI names (default: [])
+  createdAt: string; // ISO date string (auto-generated)
+  updatedAt: string; // ISO date string (auto-updated)
+  completedAt?: string; // ISO date string (auto-set when status becomes 'completed')
+  project: string; // Project name (default: 'tasks')
 }
 ```
 
@@ -332,13 +350,15 @@ SESSION_SECRET=your-session-secret
 ### Example Implementation Reference
 
 This repository includes reference implementations:
+
 - **Backend API**: Complete setup guide in [Backend Reference Implementation](./docs/BACKEND_REFERENCE_IMPLEMENTATION.md)
 - **Frontend API Integration**: `src/pages/api/initiatives/*` (working examples)
 - **AI Agent Client Pattern**: Demonstrated in documentation and README examples
 
 The reference implementation demonstrates:
+
 - MongoDB connection handling
-- CRUD operations for tasks and initiatives  
+- CRUD operations for tasks and initiatives
 - Error handling and validation
 - Network resilience with retry logic
 - AI agent integration patterns
@@ -385,22 +405,26 @@ Tasks display their author/owner information. The system automatically detects:
 ## Documentation
 
 ### 📚 Getting Started & Overview
+
 - [Documentation Index](./docs/index.md): Main documentation portal with comprehensive overview of the Agentic Sync system and user experience guidelines
 - [Using Tasks](./docs/using-tasks.md): Basic usage guide for navigating and managing tasks effectively in the GTD workflow
 - [Getting Started Tutorial](./docs/doc-test.md): Step-by-step verification guide for testing documentation navigation and system functionality
 
 ### 🎯 User Experience & Interface
+
 - [Enhanced UI Guide](./docs/ENHANCED_UI_GUIDE.md): Instant social media-like interactions with optimistic updates and smooth animations
 - [Social Media-Like Experience](./docs/SOCIAL_MEDIA_LIKE_EXPERIENCE.md): Transform task management into responsive, instant feedback workflows
 - [Documentation Viewer](./docs/DOCUMENTATION_VIEWER.md): Built-in markdown documentation system with automatic file discovery
 
 ### 📋 Task Management & Features
+
 - [Markdown Support](./docs/MARKDOWN_SUPPORT.md): Rich text formatting for task descriptions with full markdown rendering capabilities
 - [Tasks Core Integration](./docs/TASKS_CORE_INTEGRATION.md): Modular business-case-aware components for flexible task management implementations
 - [Initiatives Guide](./docs/initiatives-guide.md): Strategic initiative management with comprehensive API documentation and data models
 - [Backend Reference Implementation](./docs/BACKEND_REFERENCE_IMPLEMENTATION.md): Complete backend setup guide with copy-paste API endpoints and MongoDB schema
 
 ### 🏗️ Architecture & Design
+
 - [Component Documentation](./docs/architecture/TASK_COMPONENT_DOCUMENTATION.md): Comprehensive TaskCard architecture with GTD methodology integration and collaboration workflows
 - [Data Models](./docs/architecture/README-DATA-MODELS.md): Flexible framework for configurable data models with dynamic UI generation and backend code creation
 - [Dependency Paths](./docs/architecture/DEPENDENCY_PATHS.md): Module relationship mapping with circular dependency detection and refactoring guidance
@@ -408,12 +432,14 @@ Tasks display their author/owner information. The system automatically detects:
 - [Modular Tasks](./docs/architecture/modularizeTasks.md): Strategy for decomposing monolithic systems into maintainable modules
 
 ### ⚙️ Configuration & Setup
+
 - [Memory Optimization](./docs/configuration/MEMORY_OPTIMIZATION.md): Prevent memory leaks with efficient task operation optimization and EventBus patterns
 - [Multi-Instance Setup](./docs/configuration/MULTI_INSTANCE_README.md): Run multiple simultaneous instances for development and testing environments
 - [Remote Sync](./docs/configuration/REMOTE_SYNC.md): Automated git synchronization between personal and organization repositories
 - [Whitespace Preservation](./docs/configuration/PR_WHITESPACE_PRESERVATION.md): Maintain consistent code formatting across pull requests
 
 ### 🔄 Migration & Integration
+
 - [Shared Components Migration](./docs/SHARED_COMPONENTS_MIGRATION.md): Transition from local to modular component architecture with build failure prevention
 - [Shared Components Migration Plan](./docs/SHARED_COMPONENTS_MIGRATION_PLAN.md): Strategic roadmap for component library modernization
 - [Migration Guide](./docs/migration/MIGRATION_GUIDE.md): Version upgrade procedures and compatibility guidelines
@@ -421,14 +447,17 @@ Tasks display their author/owner information. The system automatically detects:
 - [Tauri Conversion Guide](./docs/tauri-conversion.md): Complete instructions for converting the web app to a native desktop application using Tauri
 
 ### 🚀 Deployment & Infrastructure
+
 - [Vercel Configuration](./docs/vercel-config.md): Production deployment configuration and setup guide for Vercel hosting platform
 
 ### ✅ Completed Features & Achievements
+
 - [Task Completion](./docs/completed/TASK_COMPLETION.md): Finalized task management workflows and user interaction patterns
 - [Task Documentation](./docs/completed/TASK_DOCUMENTATION.md): Complete feature set documentation for the task management system
 - [Build Summary](./docs/completed/build-summary.md): Optimization achievements and system performance improvements
 
 ### 🔧 Issues & Troubleshooting
+
 - [Issues Overview](./docs/issues/README.md): Comprehensive index of identified issues and their resolution status across the application
 - [Task Card Bug Fix](./docs/issues/TASK_CARD_BUG_FIX.md): Resolved display and interaction issues in TaskCard components
 - [Tauri Refresh Button Issue](./docs/issues/TAURI_REFRESH_BUTTON_ISSUE.md): Known desktop application refresh functionality limitations
@@ -439,17 +468,20 @@ Tasks display their author/owner information. The system automatically detects:
 - [Filter Message Updates](./docs/issues/CO_9101_filter_message_update.md): Task filter system improvements and message handling optimizations
 
 ### 🧩 Tasks Core Module
+
 - [Tasks Core Module](./tasks-core-module/README.md): Shared task implementation that can be customized for different business cases and use patterns
 - [Tasks Core Proposal](./tasks-core-module/TASKS_PROPOSAL.md): Strategic proposal and technical specification for modular task system architecture
 - [Tasks Core Workflow Guide](./tasks-core-module/WORKFLOW_GUIDE.md): Implementation workflow and integration patterns for the modular task core system
 
 ### 🛠️ Developer Resources
-- [Testing Guide](./\_\_tests\_\_/TESTING.md): Comprehensive testing documentation focusing on real-time synchronization and EventBus components
+
+- [Testing Guide](./__tests__/TESTING.md): Comprehensive testing documentation focusing on real-time synchronization and EventBus components
 - [Editable Items Components](./src/components/EditableItems/README.md): Documentation for task requirements, technical plans, and next steps editing components
 - [Item Hooks](./src/hooks/items/README.md): Custom hooks for managing editable item lists with approval and veto functionality
 - [Filter Settings System](./src/utils/filterSettings/README.md): Centralized filter architecture with layered design for consistency and maintainability
 
 ### 📋 Project Management
+
 - [Changelog](./CHANGELOG.md): Version history and feature additions tracking for the Agentic Sync application
 - [TODO List](./TODO.md): High-priority development tasks including Claude agent deployment and system enhancements
 - [Project Instructions](./CLAUDE.md): Detailed project-specific documentation and AI agent integration guidelines for development
