@@ -119,8 +119,8 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>IX Agent Sync - Next AI Labs</title>
-        <meta name="description" content="AI Task Management and Tracking System by Next AI Labs" />
+        <title>IX Tasks - AI-Native Task Management</title>
+        <meta name="description" content="AI-Native Task Management Platform for Developers and AI Agents" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>

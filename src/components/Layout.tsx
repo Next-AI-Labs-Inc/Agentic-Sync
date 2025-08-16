@@ -26,7 +26,7 @@ export default function Layout({ children }: LayoutProps) {
         <div className="container mx-auto px-4 py-3">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <Link href="/tasks" className="text-2xl font-bold text-gray-800 flex items-center">
-              <span className="align-middle">IX <span className="text-primary-600">Agent Sync</span></span>
+              <span className="align-middle">IX <span className="text-primary-600">Tasks</span></span>
             </Link>
             <div className="flex items-center space-x-6">
               <nav className="mt-2 md:mt-0">
@@ -81,7 +81,7 @@ export default function Layout({ children }: LayoutProps) {
       <footer className="bg-white border-t border-gray-200 py-4">
         <div className="container mx-auto px-4">
           <div className="text-center text-gray-500 text-sm">
-            Next AI Labs Inc. &copy; {new Date().getFullYear()}
+IX Tasks &copy; {new Date().getFullYear()}
           </div>
         </div>
       </footer>
