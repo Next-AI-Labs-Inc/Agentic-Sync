@@ -131,11 +131,32 @@ Tasks display their author/owner information. The system automatically detects:
 
 ## Documentation
 
-Key documentation includes:
+### Architecture & Design
+- [Data Models](./docs/architecture/README-DATA-MODELS.md): Core data structures and schema definitions for tasks and initiatives
+- [Component Documentation](./docs/architecture/TASK_COMPONENT_DOCUMENTATION.md): Detailed guide to TaskCard and related components architecture
+- [Dependency Paths](./docs/architecture/DEPENDENCY_PATHS.md): Module dependency mapping and import relationships
+- [Workflows](./docs/architecture/Workflows.md): Complete workflow definitions and status transitions for GTD methodology
+- [Modular Tasks](./docs/architecture/modularizeTasks.md): Strategy for breaking down the monolithic task system into smaller modules
 
-- [Enhanced UI Guide](./docs/ENHANCED_UI_GUIDE.md): Details of the instant UI updates and animations
-- [Initiatives Guide](./docs/initiatives-guide.md): API and usage documentation for Initiatives
-- [Social Media-like Experience](./docs/SOCIAL_MEDIA_LIKE_EXPERIENCE.md): Overview of the instant UI experience
+### Configuration & Setup
+- [Remote Sync](./docs/configuration/REMOTE_SYNC.md): Git repository synchronization setup between personal and organization repos
+- [Memory Optimization](./docs/configuration/MEMORY_OPTIMIZATION.md): Performance tuning and memory management configuration guidelines
+- [Multi-Instance Setup](./docs/configuration/MULTI_INSTANCE_README.md): Running multiple instances of the task system simultaneously
+- [Whitespace Preservation](./docs/configuration/PR_WHITESPACE_PRESERVATION.md): Git configuration for maintaining code formatting in pull requests
+
+### Migration Guides
+- [Migration Guide](./docs/migration/MIGRATION_GUIDE.md): Step-by-step guide for upgrading between major versions of the task system
+- [Shared Components Migration](./docs/migration/SHARED_COMPONENTS_MIGRATION.md): Transition from monolithic to modular component architecture
+- [Tauri Integration](./docs/migration/TAURI_INTEGRATION.md): Native desktop application integration using Tauri framework
+
+### Completed Features
+- [Task Completion](./docs/completed/TASK_COMPLETION.md): Documentation of completed task management functionality and user workflows
+- [Task Documentation](./docs/completed/TASK_DOCUMENTATION.md): Comprehensive guide to completed task system features and capabilities
+- [Build Summary](./docs/completed/build-summary.md): Summary of completed build system improvements and optimizations
+
+### Known Issues
+- [Task Card Bug Fix](./docs/issues/TASK_CARD_BUG_FIX.md): Resolution documentation for TaskCard component display issues
+- [Tauri Refresh Button Issue](./docs/issues/TAURI_REFRESH_BUTTON_ISSUE.md): Known issue with refresh functionality in desktop application
 
 ## Getting Started
 
