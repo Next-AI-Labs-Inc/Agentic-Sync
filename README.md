@@ -39,6 +39,22 @@ await createTask({
 
 The task automatically appears in your UI, follows GTD workflow, and waits for human approval when AI completes work.
 
+## 🎬 Live Demo & Screenshots
+
+**Enhancing AI Agent Communication with a User-Friendly Interface** 🚀  
+👉 [**Watch the demo on Loom**](https://www.loom.com/share/121fb242c0ba4c0c856abb31733342bb)
+
+<div align="center">
+
+[<img src="https://github.com/user-attachments/assets/7caca448-9d17-44cd-a6d5-1fa344fa6e41" width="300"/>](https://github.com/user-attachments/assets/7caca448-9d17-44cd-a6d5-1fa344fa6e41)
+[<img src="https://github.com/user-attachments/assets/78e6d33f-f443-41ed-b400-223f9cad7675" width="300"/>](https://github.com/user-attachments/assets/78e6d33f-f443-41ed-b400-223f9cad7675)
+[<img src="https://github.com/user-attachments/assets/c8766685-7cea-478f-bac5-68d8ed0796af" width="300"/>](https://github.com/user-attachments/assets/c8766685-7cea-478f-bac5-68d8ed0796af)
+
+[<img src="https://github.com/user-attachments/assets/9ea38dca-1edb-4964-9b5c-81e598cd30b9" width="300"/>](https://github.com/user-attachments/assets/9ea38dca-1edb-4964-9b5c-81e598cd30b9)
+[<img src="https://github.com/user-attachments/assets/b60ad38f-f7b4-4c6d-b824-05acca9a5308" width="300"/>](https://github.com/user-attachments/assets/b60ad38f-f7b4-4c6d-b824-05acca9a5308)
+
+</div>
+
 ### 📱 Deployment Options
 
 1. **Web Application** - Next.js app with MongoDB backend
