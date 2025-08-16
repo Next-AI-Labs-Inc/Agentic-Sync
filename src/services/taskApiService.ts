@@ -1165,7 +1165,7 @@ ${feedback ? `\nFeedback: ${feedback}` : ''}
   
   // Format the command
   // In a real implementation, this would launch a terminal with the claude command
-  return `cd /Users/jedi/react_projects/ix && claude "${systemPrompt}\n\nHere is the task you need to ${mode === 'implement' ? 'implement' : mode === 'demo' ? 'demonstrate' : 'address feedback for'}:\n\n${taskContext}"`;
+  return `cd $PROJECT_ROOT && claude "${systemPrompt}\n\nHere is the task you need to ${mode === 'implement' ? 'implement' : mode === 'demo' ? 'demonstrate' : 'address feedback for'}:\n\n${taskContext}"`;
 }
 
 // Export the API client for direct use

@@ -5,7 +5,7 @@ This file contains project-specific documentation for Claude to work with this p
 ## ⚠️ SINGLE SOURCE OF TRUTH - READ FIRST ⚠️
 
 The **MAIN CLAUDE.md** file in the root directory is the ONLY authoritative source for task management instructions:
-`/Users/jedi/react_projects/ix/CLAUDE.md`
+`../CLAUDE.md` (main repository root)
 
 Refer to the "Changelog and Task Management" section for OFFICIAL, DEFINITIVE task management instructions.
 
@@ -191,7 +191,7 @@ The following approaches are INCORRECT and should NEVER be used:
 
 **CORRECT APPROACH: Put task client code DIRECTLY in your response to the user. No scripts.**
 
-**⚠️ IMPLEMENTATION UPDATE [Mar 16, 2025 - 17:45 PDT] ⚠️**: The central MongoDB task client is implemented and available at `/Users/jedi/react_projects/ix/ixcoach-api/utils/agentTaskClient.js`. All projects MUST use this client for task tracking.
+**⚠️ IMPLEMENTATION UPDATE ⚠️**: The central MongoDB task client is implemented and available in the external API utilities. All projects MUST use this client for task tracking.
 
 ### STEP-BY-STEP: How to Log a Task Correctly
 
@@ -355,7 +355,7 @@ There is a pre-existing diagnostic tool for testing your MongoDB client configur
 ```bash
 # IMPORTANT: This is NOT an example to follow - this is ONLY for diagnosing connection issues
 # This is an EXISTING script solely for troubleshooting connection problems
-node /Users/jedi/react_projects/ix/scripts/test-task-client.js
+node ./scripts/test-task-client.js
 ```
 
 The existence of this diagnostic tool does NOT mean you should create your own scripts. This tool is ONLY for verifying client configuration when there are connection issues.
