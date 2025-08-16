@@ -68,7 +68,6 @@ export default function BuildDocumentation({
       setDocumentation(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Error fetching documentation:', err);
-      setError('Failed to load documentation. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -222,12 +221,6 @@ export default function BuildDocumentation({
           </button>
         )}
       </div>
-      
-      {error && (
-        <div className="p-4 bg-red-50 border-b border-red-200">
-          <p className="text-sm text-red-600">{error}</p>
-        </div>
-      )}
       
       {showAddForm && (
         <div className="p-4 bg-gray-50 border-b border-gray-200">
