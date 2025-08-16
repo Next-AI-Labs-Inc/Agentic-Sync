@@ -1,13 +1,71 @@
-# IX Tasks
+# IX Tasks - AI-Native Task Management Platform
 
-A comprehensive task management system aligned with the Getting Things Done (GTD) methodology and enhanced to support AI agent workflow integration.
+## What This Does For You
 
-## Project Status
+**IX Tasks** is a production-ready task management system specifically designed for developers and AI agents to collaborate effectively. This is not just another todo app - it's a sophisticated **Getting Things Done (GTD)** implementation with built-in AI agent integration.
 
-- **Active Development**: This project is currently under active development
-- **Tasks View**: Fully functional with inline editing, optimistic updates, and item approval workflow
-- **Initiatives View**: Functional but being updated to match Tasks UI pattern
-- **Documentation**: Currently only the home page is available. Sub-pages have been temporarily disabled due to routing issues and will be reimplemented in a future update.
+### 🎯 Core Value Proposition
+
+**For Developers:**
+- **Instant, social media-like UI** with optimistic updates that make task management feel effortless
+- **Complete local deployment** - compiles to a native desktop app via Tauri with your own database
+- **AI agent direct communication** - code agents can create, update, and complete tasks programmatically
+- **Production GTD workflow** - handles complex task states, dependencies, and approval processes
+- **Zero external dependencies** - runs entirely on your infrastructure
+
+**For AI Agents:**
+- **Direct task creation** - agents can log tasks without human intervention using the included client
+- **Status management** - agents mark tasks as 'for-review' when complete, requiring human approval
+- **Rich task context** - support for requirements, technical plans, verification steps, and dependencies
+- **Project organization** - automatic categorization and initiative linking
+
+### 🚀 What You Get
+
+```javascript
+// AI agents can directly create tasks like this:
+const { createTask } = require('../ixcoach-api/utils/agentTaskClient');
+
+await createTask({
+  title: 'Implement user authentication',
+  description: 'Add OAuth integration for Google and GitHub',
+  userImpact: 'Users can securely log in and access personalized features',
+  requirements: '- OAuth provider setup\n- User session management\n- Security audit',
+  technicalPlan: '1. Install auth libraries\n2. Set up OAuth flows\n3. Create user model',
+  status: 'proposed',
+  priority: 'high',
+  project: 'webapp'
+});
+```
+
+The task automatically appears in your UI, follows GTD workflow, and waits for human approval when AI completes work.
+
+### 📱 Deployment Options
+
+1. **Web Application** - Next.js app with MongoDB backend
+2. **Desktop Application** - Tauri compilation for native Windows/Mac/Linux
+3. **Local Database** - SQLite support for completely offline operation
+4. **Cloud Deployment** - Vercel/Netlify ready with environment configuration
+
+## Current Status & Development Roadmap
+
+### ✅ Production Ready
+- **Core task management** - Create, update, track tasks with full GTD workflow
+- **AI agent integration** - Direct task creation and status management via API
+- **MongoDB backend** - Complete CRUD operations with optimistic UI updates
+- **Initiative tracking** - Strategic project organization and KPI linking
+- **Memory optimized** - Efficient EventBus system prevents memory leaks
+- **Instant UI feedback** - Social media-like responsiveness with animations
+
+### 🚧 In Development
+- **Requirement approval system** - Human review interface for AI-generated requirements ([docs/issues/TaskCard_Approve_Veto_Buttons_Analysis.md](./docs/issues/TaskCard_Approve_Veto_Buttons_Analysis.md))
+- **Agent launcher UI** - Deploy AI agents directly from task cards to work on specific tasks
+- **Tauri desktop compilation** - Native app builds (basic structure ready, needs testing)
+- **SQLite local storage** - Offline-first database option for local deployments
+
+### 🎯 Next Quarter
+- **Collaborative workflows** - Multi-user task assignment and approval chains
+- **Advanced integrations** - GitHub, Jira, and VS Code extensions
+- **Agent marketplace** - Pre-configured AI agents for common development tasks
 
 ## Shared Components System
 
@@ -98,8 +156,187 @@ This task management system implements GTD methodology with stages optimized for
 - **Task Management**: Create, update, and track tasks across projects
 - **Initiative Tracking**: Organize work under strategic initiatives
 - **MongoDB Integration**: Seamless synchronization with the database
-- **Author/Owner Display**: Tasks show their creator/owner (automatically detects current user as "Jonathan")
+- **Author/Owner Display**: Tasks show their creator/owner (automatically detects current user)
 - **AI Agent Integration**: Special support for AI-generated tasks with deployment capabilities
+
+## Demo Mode vs Full Setup
+
+### 🎬 **For Showcase/Demo Purposes**
+This repository demonstrates:
+- **Advanced React/Next.js architecture** with optimistic updates
+- **Sophisticated GTD workflow implementation** with complex state management  
+- **AI agent integration patterns** for programmatic task management
+- **Social media-like UX** with instant feedback and animations
+- **Production-ready component structure** with memory optimization
+
+**You can explore the codebase, UI patterns, and architecture without any backend setup.**
+
+### 🔧 **For Full Functionality** 
+To run the complete system, you'll need to set up a MongoDB backend. See the [Backend Reference Implementation](./docs/BACKEND_REFERENCE_IMPLEMENTATION.md) for complete setup guide.
+
+## Backend Integration Requirements
+
+⚠️ **Note**: The frontend expects a compatible backend API for full functionality. For demo purposes, the UI will show loading states when backend is unavailable.
+
+### Required Backend API Endpoints
+
+To integrate this frontend with your backend system, implement the following API endpoints that match our reference implementation:
+
+#### Tasks API (`/api/developer/tasks` or `/api/tasks/*`)
+
+**Tasks Collection API:**
+```javascript
+// GET /api/developer/tasks - Fetch all tasks
+// Optional query parameters: ?project=projectName&status=status&priority=priority
+// Returns: { data: Array<Task>, count: number }
+
+// POST /api/developer/tasks - Create new task
+// Headers: { 'Content-Type': 'application/json', 'X-API-Key': 'your-api-key' }
+// Body: Task object (see schema below)
+// Returns: { data: Task, message: 'Task created successfully' }
+```
+
+**Individual Task Operations:**
+```javascript
+// GET /api/developer/tasks/:id - Get specific task by ID
+// Returns: { data: Task }
+
+// PUT /api/developer/tasks/:id - Update existing task
+// Body: Partial task object with updated fields
+// Returns: { data: Task, message: 'Task updated successfully' }
+
+// DELETE /api/developer/tasks/:id - Delete task
+// Returns: { message: 'Task deleted successfully' }
+```
+
+#### Initiatives API (`/api/initiatives/*`)
+
+**Initiatives Collection API:**
+```javascript
+// GET /api/initiatives - Fetch all initiatives with automatic deduplication
+// Returns: Array<Initiative> (automatically deduplicated by name+project)
+
+// POST /api/initiatives - Create new initiative
+// Body: Initiative object (see schema below)
+// Returns: Initiative object with generated _id and numeric id
+// Error 409: If initiative with same name+project already exists
+```
+
+**Individual Initiative Operations:**
+```javascript
+// GET /api/initiatives/:id - Get specific initiative by ID
+// Supports both numeric ID and MongoDB ObjectId
+// Returns: Initiative object
+// Error 404: If initiative not found
+
+// PUT /api/initiatives/:id - Update existing initiative
+// Body: Partial initiative object (automatically sets updatedAt and completedAt if status becomes 'completed')
+// Returns: Updated initiative object
+// Error 400: If trying to change ID
+// Error 404: If initiative not found
+
+// DELETE /api/initiatives/:id - Delete initiative
+// Returns: { message: 'Initiative deleted successfully' }
+// Error 404: If initiative not found
+```
+
+### Required Data Models
+
+#### Task Schema
+```typescript
+interface Task {
+  _id: string;                    // MongoDB ObjectId
+  title: string;                  // Required: Task title
+  description?: string;           // Optional: Task description
+  userImpact?: string;           // Optional: How this affects users
+  impactedFunctionality?: string; // Optional: What components/behaviors change
+  requirements?: string;          // Optional: List of requirements
+  technicalPlan?: string;         // Optional: Implementation steps
+  status: TaskStatus;             // Required: Current task status
+  priority: 'high' | 'medium' | 'low'; // Required: Task priority
+  project?: string;               // Optional: Project name
+  initiative?: string;            // Optional: Initiative name
+  branch?: string;                // Optional: Git branch
+  tags?: string[];                // Optional: Categorization tags
+  verificationSteps?: string[];   // Optional: Steps to verify completion
+  files?: string[];               // Optional: Related file paths
+  dependencies?: string[];        // Optional: Task IDs this depends on
+  nextSteps?: string[];           // Optional: Future work after completion
+  author?: string;                // Optional: Task creator
+  createdAt: Date;                // Required: Creation timestamp
+  updatedAt: Date;                // Required: Last update timestamp
+  markdown?: string;              // Optional: Rich text content
+}
+
+type TaskStatus = 
+  | 'inbox' | 'brainstorm' | 'proposed' | 'backlog' | 'maybe' 
+  | 'todo' | 'in-progress' | 'on-hold' | 'for-review' | 'done' 
+  | 'reviewed' | 'archived';
+```
+
+#### Initiative Schema
+```typescript
+interface Initiative {
+  _id: string;                    // MongoDB ObjectId (auto-generated)
+  id: number;                     // Numeric ID (auto-generated)
+  name: string;                   // Required: Initiative name
+  description?: string;           // Optional: Initiative description
+  status: 'not-started' | 'planning' | 'active' | 'completed' | 'archived'; // Default: 'not-started'
+  priority: 'high' | 'medium' | 'low'; // Default: 'medium'
+  startDate: string;              // ISO date string (auto-set to now if not provided)
+  targetDate?: string;            // Optional: Target completion date
+  owner?: string;                 // Optional: Initiative owner
+  budget?: number;                // Optional: Budget allocation
+  tags: string[];                 // Array of tags (default: [])
+  keyRisks: string[];             // Array of risk descriptions (default: [])
+  dependencies: string[];         // Array of dependency IDs (default: [])
+  linkedProjects: string[];       // Array of linked project names (default: [])
+  linkedKpis: string[];           // Array of linked KPI names (default: [])
+  createdAt: string;              // ISO date string (auto-generated)
+  updatedAt: string;              // ISO date string (auto-updated)
+  completedAt?: string;           // ISO date string (auto-set when status becomes 'completed')
+  project: string;                // Project name (default: 'tasks')
+}
+```
+
+### Environment Configuration
+
+Set the following environment variables in your backend:
+
+```bash
+# MongoDB Configuration
+MONGODB_URI=mongodb://localhost:27017  # Your MongoDB connection string
+MONGODB_DB=ix-tasks                    # Database name
+
+# Optional: Authentication (if implementing auth)
+JWT_SECRET=your-jwt-secret
+SESSION_SECRET=your-session-secret
+```
+
+### Example Implementation Reference
+
+This repository includes reference implementations:
+- **Backend API**: Complete setup guide in [Backend Reference Implementation](./docs/BACKEND_REFERENCE_IMPLEMENTATION.md)
+- **Frontend API Integration**: `src/pages/api/initiatives/*` (working examples)
+- **AI Agent Client Pattern**: Demonstrated in documentation and README examples
+
+The reference implementation demonstrates:
+- MongoDB connection handling
+- CRUD operations for tasks and initiatives  
+- Error handling and validation
+- Network resilience with retry logic
+- AI agent integration patterns
+
+### Integration Checklist
+
+- [ ] Implement all required API endpoints
+- [ ] Set up MongoDB database with correct schemas
+- [ ] Configure environment variables
+- [ ] Test API endpoints with frontend application
+- [ ] Verify real-time updates work correctly
+- [ ] Ensure optimistic UI updates sync properly with backend
+
+For detailed API documentation and examples, refer to the [Initiatives Guide](./docs/initiatives-guide.md).
 
 ## Recent Enhancements
 
@@ -125,38 +362,53 @@ This project has been enhanced with:
 
 Tasks display their author/owner information. The system automatically detects:
 
-- Current user (Jonathan) as the author for local tasks
+- Current user as the author for local tasks
 - Other users' names for tasks they create
 - Author information is visible in both compact and expanded views
 
 ## Documentation
 
-### Architecture & Design
-- [Data Models](./docs/architecture/README-DATA-MODELS.md): Core data structures and schema definitions for tasks and initiatives
-- [Component Documentation](./docs/architecture/TASK_COMPONENT_DOCUMENTATION.md): Detailed guide to TaskCard and related components architecture
-- [Dependency Paths](./docs/architecture/DEPENDENCY_PATHS.md): Module dependency mapping and import relationships
-- [Workflows](./docs/architecture/Workflows.md): Complete workflow definitions and status transitions for GTD methodology
-- [Modular Tasks](./docs/architecture/modularizeTasks.md): Strategy for breaking down the monolithic task system into smaller modules
+### 🎯 User Experience & Interface
+- [Enhanced UI Guide](./docs/ENHANCED_UI_GUIDE.md): Instant social media-like interactions with optimistic updates and smooth animations
+- [Social Media-Like Experience](./docs/SOCIAL_MEDIA_LIKE_EXPERIENCE.md): Transform task management into responsive, instant feedback workflows
+- [Using Tasks](./docs/using-tasks.md): Basic usage guide for navigating and managing tasks effectively
+- [Documentation Viewer](./docs/DOCUMENTATION_VIEWER.md): Built-in markdown documentation system with automatic file discovery
 
-### Configuration & Setup
-- [Remote Sync](./docs/configuration/REMOTE_SYNC.md): Git repository synchronization setup between personal and organization repos
-- [Memory Optimization](./docs/configuration/MEMORY_OPTIMIZATION.md): Performance tuning and memory management configuration guidelines
-- [Multi-Instance Setup](./docs/configuration/MULTI_INSTANCE_README.md): Running multiple instances of the task system simultaneously
-- [Whitespace Preservation](./docs/configuration/PR_WHITESPACE_PRESERVATION.md): Git configuration for maintaining code formatting in pull requests
+### 📋 Task Management & Features
+- [Markdown Support](./docs/MARKDOWN_SUPPORT.md): Rich text formatting for task descriptions with full markdown rendering capabilities
+- [Tasks Core Integration](./docs/TASKS_CORE_INTEGRATION.md): Modular business-case-aware components for flexible task management implementations
+- [Initiatives Guide](./docs/initiatives-guide.md): Strategic initiative management with comprehensive API documentation and data models
+- [Backend Reference Implementation](./docs/BACKEND_REFERENCE_IMPLEMENTATION.md): Complete backend setup guide with copy-paste API endpoints and MongoDB schema
 
-### Migration Guides
-- [Migration Guide](./docs/migration/MIGRATION_GUIDE.md): Step-by-step guide for upgrading between major versions of the task system
-- [Shared Components Migration](./docs/migration/SHARED_COMPONENTS_MIGRATION.md): Transition from monolithic to modular component architecture
-- [Tauri Integration](./docs/migration/TAURI_INTEGRATION.md): Native desktop application integration using Tauri framework
+### 🏗️ Architecture & Design
+- [Component Documentation](./docs/architecture/TASK_COMPONENT_DOCUMENTATION.md): Comprehensive TaskCard architecture with GTD methodology integration and collaboration workflows
+- [Data Models](./docs/architecture/README-DATA-MODELS.md): Flexible framework for configurable data models with dynamic UI generation and backend code creation
+- [Dependency Paths](./docs/architecture/DEPENDENCY_PATHS.md): Module relationship mapping with circular dependency detection and refactoring guidance
+- [Workflows](./docs/architecture/Workflows.md): Complete GTD status transitions and workflow definitions
+- [Modular Tasks](./docs/architecture/modularizeTasks.md): Strategy for decomposing monolithic systems into maintainable modules
 
-### Completed Features
-- [Task Completion](./docs/completed/TASK_COMPLETION.md): Documentation of completed task management functionality and user workflows
-- [Task Documentation](./docs/completed/TASK_DOCUMENTATION.md): Comprehensive guide to completed task system features and capabilities
-- [Build Summary](./docs/completed/build-summary.md): Summary of completed build system improvements and optimizations
+### ⚙️ Configuration & Setup
+- [Memory Optimization](./docs/configuration/MEMORY_OPTIMIZATION.md): Prevent memory leaks with efficient task operation optimization and EventBus patterns
+- [Multi-Instance Setup](./docs/configuration/MULTI_INSTANCE_README.md): Run multiple simultaneous instances for development and testing environments
+- [Remote Sync](./docs/configuration/REMOTE_SYNC.md): Automated git synchronization between personal and organization repositories
+- [Whitespace Preservation](./docs/configuration/PR_WHITESPACE_PRESERVATION.md): Maintain consistent code formatting across pull requests
 
-### Known Issues
-- [Task Card Bug Fix](./docs/issues/TASK_CARD_BUG_FIX.md): Resolution documentation for TaskCard component display issues
-- [Tauri Refresh Button Issue](./docs/issues/TAURI_REFRESH_BUTTON_ISSUE.md): Known issue with refresh functionality in desktop application
+### 🔄 Migration & Integration
+- [Shared Components Migration](./docs/SHARED_COMPONENTS_MIGRATION.md): Transition from local to modular component architecture with build failure prevention
+- [Shared Components Migration Plan](./docs/SHARED_COMPONENTS_MIGRATION_PLAN.md): Strategic roadmap for component library modernization
+- [Migration Guide](./docs/migration/MIGRATION_GUIDE.md): Version upgrade procedures and compatibility guidelines
+- [Tauri Integration](./docs/migration/TAURI_INTEGRATION.md): Desktop application integration with native system capabilities
+
+### ✅ Completed Features & Achievements
+- [Task Completion](./docs/completed/TASK_COMPLETION.md): Finalized task management workflows and user interaction patterns
+- [Task Documentation](./docs/completed/TASK_DOCUMENTATION.md): Complete feature set documentation for the task management system
+- [Build Summary](./docs/completed/build-summary.md): Optimization achievements and system performance improvements
+
+### 🔧 Issues & Troubleshooting
+- [Task Card Bug Fix](./docs/issues/TASK_CARD_BUG_FIX.md): Resolved display and interaction issues in TaskCard components
+- [Tauri Refresh Button Issue](./docs/issues/TAURI_REFRESH_BUTTON_ISSUE.md): Known desktop application refresh functionality limitations
+- [Next.js Routing Issues](./docs/issues/NEXT_JS_ROUTING_ISSUES.md): Route handling challenges and implementation solutions
+- [TaskCard Approve/Veto Analysis](./docs/issues/TaskCard_Approve_Veto_Buttons_Analysis.md): Interactive task review functionality development
 
 ## Getting Started
 
@@ -201,10 +453,10 @@ The application features a sophisticated memory management system:
 - **Memory Debug Tools**: UI components that show subscription counts and memory usage
 - **Development Mode**: Special debug features available in development only
 
-## License
+## License Overview
 
-This project is licensed under the [Next AI Labs Inc Proprietary License](../LICENSE.md). All rights reserved. This codebase is proprietary and confidential, and usage is strictly governed by the terms outlined in the license agreement.
+This project is free to use for noncommercial purposes (personal projects, research, nonprofits, education, tinkering, contributing plugins).
 
----
+Commercial use is not allowed without prior written permission from Next AI Labs. If you're a company, startup, or enterprise and want to use this code in a product or service, contact us to discuss licensing.
 
-© 2025 Next AI Labs Inc. All rights reserved.
+For the full legal details, see the [LICENSE](./LICENSE) file.
